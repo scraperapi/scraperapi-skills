@@ -1,0 +1,5 @@
+.claude-plugin/
+.claude/
+*.skill
+.git/
+.DS_Store

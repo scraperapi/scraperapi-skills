@@ -59,10 +59,15 @@ Scrapes a URL and returns its content. Handles proxy rotation, CAPTCHAs, and ant
 
 Always start minimal and escalate only as needed:
 
-1. **First attempt**: `scrape` with just `url` (cheapest)
-2. **Empty/minimal content?** → Add `render: true` (significantly more expensive)
-3. **403/429 error?** → Add `premium: true` (more expensive still)
-4. **Still blocked?** → Switch to `ultraPremium: true` (most expensive)
+1. Call `scrape` with just `url` (cheapest).
+2. If response is empty or minimal content: add `render: true` (significantly more expensive).
+3. If the page shows a consent/interstitial:
+   - Retry with `deviceType: "desktop"`
+   - Then try `deviceType: "mobile"` if needed
+4. If geo issues / repeated errors: retry with `countryCode` matching the target market (e.g., `us`, `gb`).
+5. If 403/429 or blocking persists: add `premium: true` (more expensive still).
+6. If still blocked: switch to `ultraPremium: true` (most expensive).
+   - **NEVER** combine `premium` and `ultraPremium`.
 
 ## Session Stickiness
 
