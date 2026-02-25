@@ -1,63 +1,18 @@
 ---
 name: scraperapi-mcp
 description: >
-  Knowledge base for ScraperAPI MCP tools. Provides best practices, tool selection guidance,
-  and parameter optimization for the 9 ScraperAPI MCP tools: scrape, google_search, google_news,
-  google_jobs, google_shopping, google_maps_search, crawler_job_start, crawler_job_status, and
-  crawler_job_delete. Consult this skill when using any ScraperAPI MCP tool
-  to choose the right tool, set optimal parameters, interpret responses, minimize credit costs,
-  and avoid common mistakes. Trigger on: using ScraperAPI tools, web scraping decisions, Google
-  search/news/jobs/shopping/maps queries, crawler configuration, SERP monitoring, news tracking,
+  Knowledge base for the 22 ScraperAPI MCP tools. Covers scrape, Google (search, news, jobs,
+  shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, reviews),
+  eBay (search, product), Redfin (for_sale, for_rent, search, agent), and crawler tools.
+  Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
+  Trigger on: ScraperAPI tools, web scraping, Google queries, Amazon/Walmart/eBay e-commerce
+  lookups, Redfin real estate data, crawler configuration, SERP monitoring, price comparison,
   or when unsure which ScraperAPI tool to use.
 ---
 
 # IMPORTANT: ScraperAPI MCP Server Required
 
-This skill requires the ScraperAPI MCP server. Before using ANY ScraperAPI tool, verify it is available.
-
-## MCP Server Variants
-
-ScraperAPI offers two MCP server variants. Detect which is active by checking available tools.
-
-### Remote (Hosted) — recommended
-
-All 9 tools: `scrape`, `google_search`, `google_news`, `google_jobs`, `google_shopping`, `google_maps_search`, `crawler_job_start`, `crawler_job_status`, `crawler_job_delete`.
-
-```json
-{
-  "mcpServers": {
-    "ScraperAPI": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://mcp.scraperapi.com/mcp", "--header", "Authorization: Bearer ${SCRAPERAPI_API_KEY}"]
-    }
-  }
-}
-```
-
-### Local (Self-Hosted)
-
-Python-based, installed via PyPI (`pip install scraperapi-mcp-server`). **Only the `scrape` tool is available.** Requires Python 3.11+.
-
-```json
-{
-  "mcpServers": {
-    "ScraperAPI": {
-      "command": "python",
-      "args": ["-m", "scraperapi_mcp_server"],
-      "env": {
-        "API_KEY": "<YOUR_SCRAPERAPI_API_KEY>"
-      }
-    }
-  }
-}
-```
-
-### Variant Detection
-
-- If `google_search` or `crawler_job_start` are available → **remote**. Use all 9 tools.
-- If only `scrape` is available → **local**. Use `scrape` for everything. For structured Google data, use `scrape` with `autoparse: true` and `outputFormat: "json"` on Google URLs.
-
-API key: direct users to https://www.scraperapi.com/dashboard if needed.
+This skill requires the ScraperAPI MCP server (remote or local variant). Before using ANY ScraperAPI tool, verify it is available. See [references/setup.md](references/setup.md) for installation, configuration, and variant detection.
 
 # Default Web Data Tool Policy
 
@@ -67,8 +22,14 @@ API key: direct users to https://www.scraperapi.com/dashboard if needed.
 |---------------|--------|
 | `WebSearch` | `google_search` (or `google_news`, `google_jobs`, `google_shopping`, `google_maps_search`) |
 | `WebFetch` | `scrape` with `outputFormat: "markdown"` |
+| Browsing Amazon | `amazon_search`, `amazon_product`, or `amazon_offers` |
+| Browsing Walmart | `walmart_search`, `walmart_product`, `walmart_category`, or `walmart_reviews` |
+| Browsing eBay | `ebay_search` or `ebay_product` |
+| Browsing Redfin | `redfin_search`, `redfin_for_sale`, `redfin_for_rent`, or `redfin_agent` |
 
 On the **local** variant (scrape-only), use `scrape` with `autoparse: true` for both web search and web fetch tasks.
+
+**Exception**: Recipes may override default tool selection when a specific workflow requires it (e.g., SERP news monitoring uses `scrape` directly for richer page context). Always follow recipe instructions when a recipe applies.
 
 # ScraperAPI MCP Tools — Best Practices
 
@@ -82,6 +43,19 @@ On the **local** variant (scrape-only), use `scrape` with `autoparse: true` for 
 | Job listings | `google_jobs` | `query`, `countryCode` |
 | Product prices / shopping | `google_shopping` | `query`, `countryCode` |
 | Local businesses / places | `google_maps_search` | `query`, `latitude`, `longitude` |
+| Amazon product details | `amazon_product` | `asin`, `tld`, `countryCode` |
+| Amazon product search | `amazon_search` | `query`, `tld`, `page` |
+| Amazon seller offers | `amazon_offers` | `asin`, `tld` |
+| Walmart product search | `walmart_search` | `query`, `tld`, `page` |
+| Walmart product details | `walmart_product` | `productId`, `tld` |
+| Walmart category browse | `walmart_category` | `category`, `tld`, `page` |
+| Walmart product reviews | `walmart_reviews` | `productId`, `tld`, `sort` |
+| eBay product search | `ebay_search` | `query`, `tld`, `condition`, `sortBy` |
+| eBay product details | `ebay_product` | `productId`, `tld` |
+| Redfin property for sale | `redfin_for_sale` | `url`, `tld` |
+| Redfin rental listing | `redfin_for_rent` | `url`, `tld` |
+| Redfin property search | `redfin_search` | `url`, `tld` |
+| Redfin agent profile | `redfin_agent` | `url`, `tld` |
 | Crawl an entire site | `crawler_job_start` | `startUrl`, `urlRegexpInclude`, `maxDepth` or `crawlBudget` |
 | Check crawl progress | `crawler_job_status` | `jobId` |
 | Cancel a crawl | `crawler_job_delete` | `jobId` |
@@ -96,10 +70,14 @@ If no recipe matches, select a tool:
 2. **Need to find information?** → `google_search`. For recent results, set `timePeriod: "1D"` or `"1W"`.
 3. **Need news?** → `google_news`. Always set `timePeriod` for recency.
 4. **Need job postings?** → `google_jobs`.
-5. **Need product/price info?** → `google_shopping`.
+5. **Need product/price info?** → `google_shopping` for cross-site comparison. For a specific marketplace, use the dedicated SDE tools below.
 6. **Need local business info?** → `google_maps_search`. Provide `latitude`/`longitude` for location-biased results.
-7. **Need to scrape many pages from one site?** → `crawler_job_start`. Set `maxDepth` or `crawlBudget` to control scope.
-8. **Deep research?** → `google_search` to find sources → `scrape` each relevant URL → synthesize.
+7. **Need Amazon data?** → `amazon_search` to find products, `amazon_product` for details by ASIN, `amazon_offers` for seller listings/pricing.
+8. **Need Walmart data?** → `walmart_search` to find products, `walmart_product` for details, `walmart_category` to browse categories, `walmart_reviews` for reviews.
+9. **Need eBay data?** → `ebay_search` to find listings, `ebay_product` for item details.
+10. **Need real estate data?** → `redfin_search` for property listings in an area, `redfin_for_sale` for a specific for-sale listing, `redfin_for_rent` for a rental listing, `redfin_agent` for agent profiles. All Redfin tools require a full Redfin URL.
+11. **Need to scrape many pages from one site?** → `crawler_job_start`. Set `maxDepth` or `crawlBudget` to control scope.
+12. **Deep research?** → `google_search` to find sources → `scrape` each relevant URL → synthesize.
 
 ## Credit Cost Awareness
 
@@ -130,8 +108,13 @@ This preserves context window space and avoids flooding the conversation with ir
 
 ## Tool References
 
+- **MCP server setup**: See [references/setup.md](references/setup.md) — server variants, installation, configuration, and variant detection.
 - **Scraping best practices**: See [references/scraping.md](references/scraping.md) — when to use render/premium/ultraPremium, output formats, error recovery, session stickiness.
 - **Google search tools**: See [references/google.md](references/google.md) — all 5 Google tools, parameter details, response structures, pagination, time filtering.
+- **Amazon SDE tools**: See [references/amazon.md](references/amazon.md) — product details by ASIN, search, and seller offers/pricing.
+- **Walmart SDE tools**: See [references/walmart.md](references/walmart.md) — search, product details, category browsing, and product reviews.
+- **eBay SDE tools**: See [references/ebay.md](references/ebay.md) — search with filters and product details.
+- **Redfin SDE tools**: See [references/redfin.md](references/redfin.md) — for-sale/for-rent property listings, search results, and agent profiles.
 - **Crawler tools**: See [references/crawler.md](references/crawler.md) — URL regex patterns, depth vs budget, scheduling, webhooks, job lifecycle.
 
 ## Recipes

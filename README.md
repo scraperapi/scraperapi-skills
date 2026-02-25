@@ -35,8 +35,13 @@ npx clawhub install scraperapi-mcp
 
 | Guide | Description |
 |-------|-------------|
+| [MCP Server Setup](skills/scraperapi-mcp/references/setup.md) | Server variants, installation, configuration, variant detection |
 | [Scraping](skills/scraperapi-mcp/references/scraping.md) | `scrape` tool parameters, escalation strategy, error patterns |
 | [Google Search Tools](skills/scraperapi-mcp/references/google.md) | All 5 Google tools, response structures, pagination, time filtering |
+| [Amazon SDE Tools](skills/scraperapi-mcp/references/amazon.md) | Product details by ASIN, search, and seller offers/pricing |
+| [Walmart SDE Tools](skills/scraperapi-mcp/references/walmart.md) | Search, product details, category browsing, and product reviews |
+| [eBay SDE Tools](skills/scraperapi-mcp/references/ebay.md) | Search with filters and product details |
+| [Redfin SDE Tools](skills/scraperapi-mcp/references/redfin.md) | For-sale/for-rent property listings, search results, agent profiles |
 | [Crawler Tools](skills/scraperapi-mcp/references/crawler.md) | URL regex patterns, depth vs budget, scheduling, webhooks |
 
 ## Recipes

@@ -2,6 +2,13 @@
 
 Three MCP tools for managing site-wide crawl jobs.
 
+## Contents
+- [crawler_job_start](#tool-crawler_job_start) — initiate a crawl (URL regex, depth, budget, schedule)
+- [crawler_job_status](#tool-crawler_job_status) — check crawl progress
+- [crawler_job_delete](#tool-crawler_job_delete) — cancel and delete a crawl
+- [Typical Workflow](#typical-workflow)
+- [Best Practices](#best-practices)
+
 ## Tool: `crawler_job_start`
 
 Initiates a crawl that discovers and scrapes pages starting from a base URL.

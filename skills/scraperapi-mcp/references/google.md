@@ -2,6 +2,17 @@
 
 Five MCP tools for structured Google data extraction. All return JSON.
 
+## Contents
+- [Common Parameters](#common-parameters-shared-by-all-google-tools)
+- [google_search](#tool-google_search) — web search with organic results, knowledge graph
+- [google_news](#tool-google_news) — news articles with dates and sources
+- [google_jobs](#tool-google_jobs) — job listings from Google Jobs
+- [google_shopping](#tool-google_shopping) — product results with pricing
+- [google_maps_search](#tool-google_maps_search) — local business results
+- [Pagination](#pagination)
+- [Time Filtering](#time-filtering)
+- [Localization](#localization)
+
 ## Common Parameters (shared by all Google tools)
 
 | Parameter | Type | Description |
