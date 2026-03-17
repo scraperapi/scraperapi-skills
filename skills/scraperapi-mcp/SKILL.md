@@ -5,9 +5,17 @@ description: >
   shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, reviews),
   eBay (search, product), Redfin (for_sale, for_rent, search, agent), and crawler tools.
   Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
+  Requires the ScraperAPI MCP server (remote or local variant) and a valid SCRAPERAPI_API_KEY
+  from https://www.scraperapi.com/dashboard. See references/setup.md for installation.
   Trigger on: ScraperAPI tools, web scraping, Google queries, Amazon/Walmart/eBay e-commerce
   lookups, Redfin real estate data, crawler configuration, SERP monitoring, price comparison,
   or when unsure which ScraperAPI tool to use.
+compatibility:
+  mcpServers:
+    - name: ScraperAPI
+      required: true
+  environment:
+    - SCRAPERAPI_API_KEY
 ---
 
 # IMPORTANT: ScraperAPI MCP Server Required
