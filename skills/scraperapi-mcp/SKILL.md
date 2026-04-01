@@ -5,14 +5,13 @@ description: >
   shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, reviews),
   eBay (search, product), Redfin (for_sale, for_rent, search, agent), and crawler tools.
   Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
-  Requires the ScraperAPI MCP server (remote or local variant) and a valid SCRAPERAPI_API_KEY
-  from https://www.scraperapi.com/dashboard. See references/setup.md for installation.
+  Requires the ScraperAPI MCP server and a valid SCRAPERAPI_API_KEY.
   Trigger on: web scraping, scraping a URL, reading a webpage behind bot protection, Google
   search queries, finding information online, current events and news lookup, job listings,
   product price comparison, shopping research, Amazon/Walmart/eBay product lookup or search,
   e-commerce data extraction, Redfin real estate listings, property search, rental search,
-  agent lookup, site crawling, crawl a website, SERP monitoring, SEO tracking, competitive
-  intelligence, market research, or when unsure which ScraperAPI tool to use.
+  site crawling, SERP monitoring, SEO tracking, competitive intelligence, market research,
+  or when unsure which ScraperAPI tool to use.
 metadata:
   openclaw:
     requires:
