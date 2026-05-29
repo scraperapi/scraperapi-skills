@@ -1,6 +1,6 @@
 # ScraperAPI Skills
 
-[ScraperAPI](https://www.scraperapi.com)'s Agent Skills.
+[ScraperAPI](https://www.scraperapi.com)'s official Claude Code plugin — a growing library of skills that cover the full ScraperAPI surface: onboarding, product primitives, MCP tool usage, and end-to-end data workflows.
 
 [Learn more about agent skills](https://agentskills.io/).
 

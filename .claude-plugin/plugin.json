@@ -1,0 +1,28 @@
+{
+  "name": "scraperapi",
+  "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ScraperAPI",
+    "email": "support@scraperapi.com"
+  },
+  "homepage": "https://www.scraperapi.com",
+  "repository": "https://github.com/scraperapi/scraperapi-skills",
+  "license": "MIT",
+  "keywords": [
+    "scraperapi",
+    "web-scraping",
+    "mcp",
+    "sdk",
+    "ai-parser",
+    "crawler",
+    "async",
+    "data-pipeline",
+    "sde",
+    "market-research",
+    "seo-audit",
+    "lead-enrichment",
+    "price-monitoring",
+    "sentiment-analysis"
+  ]
+}
