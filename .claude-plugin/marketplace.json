@@ -1,0 +1,38 @@
+{
+  "name": "scraperapi-skills",
+  "description": "ScraperAPI's Claude Code plugin marketplace.",
+  "owner": {
+    "name": "ScraperAPI",
+    "email": "support@scraperapi.com"
+  },
+  "plugins": [
+    {
+      "name": "scraperapi",
+      "source": "./",
+      "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
+      "category": "web-scraping",
+      "keywords": [
+        "scraperapi",
+        "web-scraping",
+        "mcp",
+        "sdk",
+        "ai-parser",
+        "crawler",
+        "async",
+        "data-pipeline",
+        "sde",
+        "google-serp",
+        "amazon",
+        "walmart",
+        "ebay",
+        "redfin",
+        "market-research",
+        "seo-audit",
+        "lead-enrichment",
+        "price-monitoring",
+        "sentiment-analysis",
+        "n8n"
+      ]
+    }
+  ]
+}
