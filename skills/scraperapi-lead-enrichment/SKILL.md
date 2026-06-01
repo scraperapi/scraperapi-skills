@@ -8,13 +8,7 @@ description: >-
 
 Given any seed information about a person or company, call ScraperAPI directly to search the web and fetch relevant pages, then synthesize everything into a structured contact card.
 
-**You — Claude — execute the API calls** using the `Bash` tool. Do not generate code for the user; run the searches yourself and report findings as you go.
-
-**Prerequisite:** `SCRAPERAPI_API_KEY` must be set. Check first:
-```bash
-echo "Key: $([ -n "$SCRAPERAPI_API_KEY" ] && echo "set ✓" || echo "NOT SET — ask user to export SCRAPERAPI_API_KEY=...")"
-```
-If the key is not set, stop and ask the user to set it before continuing.
+**You — Claude — execute the API calls** using the ScraperAPI MCP tools. Do not generate code for the user; run the searches yourself and report findings as you go.
 
 ---
 
@@ -38,11 +32,7 @@ Announce before searching: *"Starting with: [what I have]. Will search for: [wha
 
 Run searches by *what you're looking for*, not by which site to target. Google will surface whatever sources exist — company website, Crunchbase, Wikipedia, news, directories, LinkedIn, G2, etc. Collect all promising URLs from `organic_results[].link` and carry them into Phase 3.
 
-**Search endpoint:**
-```bash
-curl -s "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_API_KEY&query=QUERY&country=us&num=10"
-```
-URL-encode queries: replace spaces with `+`. Read snippets carefully — they often contain the data you need without an extra fetch.
+**Search tool:** Call `mcp__ScraperAPI__google_search` with `query`, `num: 10`, and `countryCode: "us"`. Read snippets carefully — they often contain the data you need without an extra fetch.
 
 ### 2a. Person name as seed
 
@@ -71,9 +61,7 @@ Then run 2b with the company name.
    Surfaces: contact pages, email formats, phone directories.
 
 4. **Recent news**
-   ```bash
-   curl -s "https://api.scraperapi.com/structured/google/news?api_key=$SCRAPERAPI_API_KEY&query=COMPANY_NAME&num=5"
-   ```
+   Call `mcp__ScraperAPI__google_news` with `query: "COMPANY_NAME"` and `num: 5`.
    Extract `news_results[].title`, `news_results[].date`, `news_results[].link`. Keep the 3 most recent.
 
 ### 2c. Email address as seed
@@ -112,15 +100,10 @@ Prefer cheap standard fetches (1 credit) over JS-rendered ones (10 credits) when
 
 ### 3b. Fetch pages
 
-For each selected URL, use the appropriate fetch:
+For each selected URL, call `mcp__ScraperAPI__scrape` with the appropriate options:
 
-```bash
-# Standard HTML page (news, Wikipedia, company sites, G2, GitHub)
-curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=URL"
-
-# JS-rendered page (LinkedIn, Crunchbase, React/SPA sites)
-curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=URL&render=true&premium=true"
-```
+- **Standard HTML page** (news, Wikipedia, company sites, G2, GitHub): `url`, `outputFormat: "markdown"`
+- **JS-rendered page** (LinkedIn, Crunchbase, React/SPA sites): `url`, `outputFormat: "markdown"`, `render: true`, `premium: true`
 
 For a company website, always fetch homepage + `/about` + `/contact` as three separate calls — they frequently contain different data. Extract every relevant field before moving to the next URL.
 
@@ -156,7 +139,7 @@ After the contact card, list any high-priority fields still empty and explain br
 Stop searching when any of the following is true:
 - All high-priority fields are filled (name, title, company, and at least two of: email, phone, location, profile URL)
 - You have made **8 or more API calls** without finding new data
-- 3 or more consecutive requests returned non-200 responses
+- 3 or more consecutive tool calls returned errors or empty results
 
 Do not loop past these limits. Announce when you've hit a stop condition.
 
@@ -164,12 +147,10 @@ Do not loop past these limits. Announce when you've hit a stop condition.
 
 ## Error Handling
 
-| HTTP status | What to do |
-|-------------|-----------|
-| 401 | Stop. Tell the user: "SCRAPERAPI_API_KEY is invalid. Run `echo $SCRAPERAPI_API_KEY` to check." |
-| 403 | Retry once with `&premium=true` appended. Skip if still 403. |
-| 404 | Skip this URL. Do not retry. |
-| 429 | Run `sleep 5` then retry once. If still 429, stop and note the rate limit. |
-| 500 / 503 | Wait 3 seconds (`sleep 3`) and retry once. Skip on second failure. |
+| Error type | What to do |
+|------------|-----------|
+| MCP tool returns an error or empty result | Retry once with `premium: true` added (for scrape calls). Skip on second failure. |
+| "No results" or empty `organic_results` | Try a slightly rephrased query. Count as one call. |
+| Tool call fails entirely | Note the failure, skip the URL, and continue with remaining sources. |
 
-Count failed requests against the 8-call stop condition.
+Count failed tool calls against the 8-call stop condition.
