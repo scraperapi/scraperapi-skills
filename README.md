@@ -8,7 +8,7 @@ ScraperAPI's official Claude Code plugin — a growing library of agent skills t
 - **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/making-async-requests), [Crawler](https://docs.scraperapi.com/crawler), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](skills/scraperapi-mcp/SKILL.md) tools.
 - **SDK best practices** — language-specific guides for Python, Node.js, Ruby, PHP, and Java.
 - **Tools** — official ScraperAPI [CLI](skills/scraperapi-cli/SKILL.md) and [n8n](https://n8n.io/integrations/scraperapi/) community node.
-- **Workflows** — opinionated, ready-to-run recipes for building scrapers and enriching leads.
+- **Workflows** — opinionated, ready-to-run recipes for building scrapers, enriching leads, and running autonomous web research.
 
 [Learn more about agent skills](https://agentskills.io/).
 
@@ -64,6 +64,7 @@ Once installed, the skills load automatically — start a Claude Code session an
 | **[`scraperapi-n8n`](skills/scraperapi-n8n/SKILL.md)** | Generate n8n workflows that use the official ScraperAPI community node (`n8n-nodes-scraperapi-official`). Produces importable workflow JSON or step-by-step build guides. |
 | **[`scraperapi-scraper-builder`](skills/scraperapi-scraper-builder/SKILL.md)** | Build a runnable scraper end-to-end: picks structured endpoint vs raw HTML, JS rendering, proxy tier, sync vs async, then generates a complete Python or Node.js script with retries, pagination, and credit estimation. |
 | **[`scraperapi-lead-enrichment`](skills/scraperapi-lead-enrichment/SKILL.md)** | Enrich a contact or company from any seed (name, domain, LinkedIn URL, email) and produce a structured contact card with person and company fields. |
+| **[`scraperapi-research-agent`](skills/scraperapi-research-agent/SKILL.md)** | Autonomous research agent: takes a question, uses ScraperAPI to search and scrape relevant pages, uploads content as file artifacts to the Anthropic Files API, then feeds everything to Claude for a cited markdown report. |
 
 
 ## Usage
@@ -90,6 +91,8 @@ Each skill triggers from natural-language prompts in Claude Code. A few starting
 # Workflows
 "Build me a scraper for this e-commerce site that extracts title, price, and stock"
 "Enrich this contact: jane@example.com — find her LinkedIn, company, and role"
+"Research the top Python web scraping frameworks and give me a cited report"
+"Investigate how competitors are pricing their SaaS plans — scrape real pages and summarise"
 ```
 
 Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
@@ -119,6 +122,10 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 │   ├── scraperapi-nodejs-sdk/
 │   ├── scraperapi-php-sdk/
 │   ├── scraperapi-python-sdk/
+│   ├── scraperapi-research-agent/
+│   │   ├── SKILL.md
+│   │   ├── scripts/             # research_agent.py — runnable CLI
+│   │   └── assets/              # report_template.md
 │   ├── scraperapi-ruby-sdk/
 │   └── scraperapi-scraper-builder/
 ├── dist/                        # packaged .skill artifacts (for distribution)
