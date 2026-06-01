@@ -14,6 +14,8 @@
     "web-scraping",
     "mcp",
     "sdk",
+    "cli",
+    "n8n",
     "ai-parser",
     "crawler",
     "async",
