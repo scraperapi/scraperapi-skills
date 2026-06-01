@@ -10,9 +10,9 @@ Given any seed information about a person or company, call ScraperAPI directly t
 
 **You — Claude — execute the API calls** using the `Bash` tool. Do not generate code for the user; run the searches yourself and report findings as you go.
 
-**Prerequisite:** `SCRAPERAPI_KEY` must be set. Check first:
+**Prerequisite:** `SCRAPERAPI_API_KEY` must be set. Check first:
 ```bash
-echo "Key: $([ -n "$SCRAPERAPI_KEY" ] && echo "set ✓" || echo "NOT SET — ask user to export SCRAPERAPI_KEY=...")"
+echo "Key: $([ -n "$SCRAPERAPI_API_KEY" ] && echo "set ✓" || echo "NOT SET — ask user to export SCRAPERAPI_API_KEY=...")"
 ```
 If the key is not set, stop and ask the user to set it before continuing.
 
@@ -40,7 +40,7 @@ Run searches by *what you're looking for*, not by which site to target. Google w
 
 **Search endpoint:**
 ```bash
-curl -s "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_KEY&query=QUERY&country=us&num=10"
+curl -s "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_API_KEY&query=QUERY&country=us&num=10"
 ```
 URL-encode queries: replace spaces with `+`. Read snippets carefully — they often contain the data you need without an extra fetch.
 
@@ -72,7 +72,7 @@ Then run 2b with the company name.
 
 4. **Recent news**
    ```bash
-   curl -s "https://api.scraperapi.com/structured/google/news?api_key=$SCRAPERAPI_KEY&query=COMPANY_NAME&num=5"
+   curl -s "https://api.scraperapi.com/structured/google/news?api_key=$SCRAPERAPI_API_KEY&query=COMPANY_NAME&num=5"
    ```
    Extract `news_results[].title`, `news_results[].date`, `news_results[].link`. Keep the 3 most recent.
 
@@ -116,10 +116,10 @@ For each selected URL, use the appropriate fetch:
 
 ```bash
 # Standard HTML page (news, Wikipedia, company sites, G2, GitHub)
-curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_KEY&url=URL"
+curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=URL"
 
 # JS-rendered page (LinkedIn, Crunchbase, React/SPA sites)
-curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_KEY&url=URL&render=true&premium=true"
+curl -s "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=URL&render=true&premium=true"
 ```
 
 For a company website, always fetch homepage + `/about` + `/contact` as three separate calls — they frequently contain different data. Extract every relevant field before moving to the next URL.
@@ -166,7 +166,7 @@ Do not loop past these limits. Announce when you've hit a stop condition.
 
 | HTTP status | What to do |
 |-------------|-----------|
-| 401 | Stop. Tell the user: "SCRAPERAPI_KEY is invalid. Run `echo $SCRAPERAPI_KEY` to check." |
+| 401 | Stop. Tell the user: "SCRAPERAPI_API_KEY is invalid. Run `echo $SCRAPERAPI_API_KEY` to check." |
 | 403 | Retry once with `&premium=true` appended. Skip if still 403. |
 | 404 | Skip this URL. Do not retry. |
 | 429 | Run `sleep 5` then retry once. If still 429, stop and note the rate limit. |

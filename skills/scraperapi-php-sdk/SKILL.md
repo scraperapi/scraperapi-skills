@@ -11,14 +11,14 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🐘"
     homepage: https://docs.scraperapi.com/php
 ---
 
 # ScraperAPI — PHP SDK Best Practices
 
-**Requires:** PHP 7.0+, Composer, `composer require scraperapi/sdk`, `SCRAPERAPI_KEY` environment variable.
+**Requires:** PHP 7.0+, Composer, `composer require scraperapi/sdk`, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
@@ -27,7 +27,7 @@ metadata:
 require __DIR__ . '/vendor/autoload.php';
 use ScraperAPI\Client;
 
-$client = new Client(getenv('SCRAPERAPI_KEY'));
+$client = new Client(getenv('SCRAPERAPI_API_KEY'));
 ```
 
 Never hardcode the API key. Read it from the environment every time.
@@ -183,7 +183,7 @@ function scrapeWithEscalation(Client $client, string $url): ?string
 The SDK is synchronous — each `->get()` call blocks until the response (up to 70 seconds). For 20+ URLs, use the async REST endpoint.
 
 ```php
-$apiKey = getenv('SCRAPERAPI_KEY');
+$apiKey = getenv('SCRAPERAPI_API_KEY');
 
 function submitJob(string $url, array $apiParams = []): array
 {
@@ -255,7 +255,7 @@ function safeScrape(Client $client, string $url, array $params = []): ?string
     } catch (\Exception $e) {
         $status = method_exists($e, 'getCode') ? (int) $e->getCode() : 0;
         switch ($status) {
-            case 401: throw new \RuntimeException('Invalid API key — check SCRAPERAPI_KEY');
+            case 401: throw new \RuntimeException('Invalid API key — check SCRAPERAPI_API_KEY');
             case 403: throw new \RuntimeException('Blocked or out of credits — try premium or ultra_premium');
             case 429: throw new \RuntimeException('Rate limit — reduce concurrency or switch to async');
             case 500:

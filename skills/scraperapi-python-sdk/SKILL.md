@@ -13,14 +13,14 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🐍"
     homepage: https://docs.scraperapi.com/python/getting-started
 ---
 
 # ScraperAPI — Python SDK Best Practices
 
-**Requires:** Python 3.7+, `pip install scraperapi-sdk`, `SCRAPERAPI_KEY` environment variable.
+**Requires:** Python 3.7+, `pip install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
@@ -28,7 +28,7 @@ metadata:
 import os
 from scraperapi_sdk import ScraperAPIClient
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_KEY"])
+client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
 ```
 
 Never hardcode the API key. Read it from the environment every time.
@@ -177,7 +177,7 @@ The sync SDK blocks on each call (up to 70 seconds per URL). For 20+ URLs, use t
 ```python
 import os, requests, time
 
-API_KEY = os.environ["SCRAPERAPI_KEY"]
+API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 
 def submit_job(url, extra_params=None):
     payload = {"apiKey": API_KEY, "url": url, "apiParams": extra_params or {}}
@@ -214,7 +214,7 @@ Use these instead of scraping raw HTML when the target platform is supported. Th
 ```python
 import os, requests
 
-API_KEY = os.environ["SCRAPERAPI_KEY"]
+API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 
 def structured_get(vertical, params):
     """Call a structured data endpoint synchronously."""
@@ -246,7 +246,7 @@ See [structured data docs](https://docs.scraperapi.com/python/making-requests/st
 import os, requests
 from scraperapi_sdk import ScraperAPIClient
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_KEY"])
+client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
 
 def scrape(url, params=None):
     try:
@@ -255,7 +255,7 @@ def scrape(url, params=None):
     except requests.exceptions.HTTPError as e:
         status = e.response.status_code
         if status == 401:
-            raise ValueError("Invalid API key — check SCRAPERAPI_KEY") from e
+            raise ValueError("Invalid API key — check SCRAPERAPI_API_KEY") from e
         if status == 403:
             # Blocked or credits exhausted — try escalating proxy tier
             raise RuntimeError("Blocked or out of credits") from e

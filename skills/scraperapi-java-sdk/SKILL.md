@@ -12,14 +12,14 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "☕"
     homepage: https://docs.scraperapi.com/java
 ---
 
 # ScraperAPI — Java SDK Best Practices
 
-**Requires:** Java 8+, Maven or Gradle, `SCRAPERAPI_KEY` environment variable.
+**Requires:** Java 8+, Maven or Gradle, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
@@ -44,7 +44,7 @@ implementation 'com.scraperapi:sdk:1.2'
 ```java
 import com.scraperapi.ScraperApiClient;
 
-ScraperApiClient client = new ScraperApiClient(System.getenv("SCRAPERAPI_KEY"));
+ScraperApiClient client = new ScraperApiClient(System.getenv("SCRAPERAPI_API_KEY"));
 ```
 
 Never hardcode the API key. Read it from the environment every time.
@@ -197,7 +197,7 @@ import java.net.http.*;
 import java.net.URI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-private static final String API_KEY = System.getenv("SCRAPERAPI_KEY");
+private static final String API_KEY = System.getenv("SCRAPERAPI_API_KEY");
 private static final HttpClient HTTP = HttpClient.newHttpClient();
 private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -264,7 +264,7 @@ public static String safeScrape(ScraperApiClient client, String url) {
         return client.get(url).retry(3).result();
     } catch (Exception e) {
         String msg = e.getMessage() != null ? e.getMessage() : "";
-        if (msg.contains("401")) throw new RuntimeException("Invalid API key — check SCRAPERAPI_KEY", e);
+        if (msg.contains("401")) throw new RuntimeException("Invalid API key — check SCRAPERAPI_API_KEY", e);
         if (msg.contains("403")) throw new RuntimeException("Blocked or out of credits — try premium/ultraPremium", e);
         if (msg.contains("429")) throw new RuntimeException("Rate limit — reduce concurrency or use async", e);
         if (msg.contains("500") || msg.contains("503"))

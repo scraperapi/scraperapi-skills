@@ -13,24 +13,24 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🟩"
     homepage: https://docs.scraperapi.com/nodejs
 ---
 
 # ScraperAPI — Node.js SDK Best Practices
 
-**Requires:** Node.js 14+, `npm install scraperapi-sdk`, `SCRAPERAPI_KEY` environment variable.
+**Requires:** Node.js 14+, `npm install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
 ```js
 // CommonJS
-const scraperapiClient = require('scraperapi-sdk')(process.env.SCRAPERAPI_KEY);
+const scraperapiClient = require('scraperapi-sdk')(process.env.SCRAPERAPI_API_KEY);
 
 // ES Modules / TypeScript
 import ScraperAPIClient from 'scraperapi-sdk';
-const scraperapiClient = new ScraperAPIClient(process.env.SCRAPERAPI_KEY);
+const scraperapiClient = new ScraperAPIClient(process.env.SCRAPERAPI_API_KEY);
 ```
 
 Never hardcode the API key. Read it from the environment every time.
@@ -191,7 +191,7 @@ async function scrapeWithEscalation(url) {
 The sync SDK blocks on each call. For 20+ URLs, use the async endpoint directly to fan out jobs.
 
 ```js
-const API_KEY = process.env.SCRAPERAPI_KEY;
+const API_KEY = process.env.SCRAPERAPI_API_KEY;
 
 async function submitJob(url, apiParams = {}) {
   const res = await fetch('https://async.scraperapi.com/jobs', {
@@ -253,7 +253,7 @@ async function safeScrape(url, params = {}) {
     return await scraperapiClient.get(url, params);
   } catch (err) {
     const status = err?.response?.status ?? err?.status;
-    if (status === 401) throw new Error('Invalid API key — check SCRAPERAPI_KEY');
+    if (status === 401) throw new Error('Invalid API key — check SCRAPERAPI_API_KEY');
     if (status === 403) throw new Error('Blocked or out of credits — try premium or ultra_premium');
     if (status === 429) throw new Error('Rate limit — reduce concurrency or switch to async');
     if (status === 500 || status === 503) throw new Error('Transient error — retry with backoff');

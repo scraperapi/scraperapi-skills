@@ -11,21 +11,21 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "💎"
     homepage: https://docs.scraperapi.com/ruby
 ---
 
 # ScraperAPI — Ruby SDK Best Practices
 
-**Requires:** Ruby >= 2.0, `gem install scraperapi` (or `gem 'scraperapi'` in Gemfile), `SCRAPERAPI_KEY` environment variable.
+**Requires:** Ruby >= 2.0, `gem install scraperapi` (or `gem 'scraperapi'` in Gemfile), `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
 ```ruby
 require "scraper_api"
 
-client = ScraperAPI::Client.new(ENV["SCRAPERAPI_KEY"])
+client = ScraperAPI::Client.new(ENV["SCRAPERAPI_API_KEY"])
 ```
 
 Never hardcode the API key. Read it from the environment every time.
@@ -165,7 +165,7 @@ For 20+ URLs, submit async jobs via the REST endpoint.
 require "net/http"
 require "json"
 
-API_KEY = ENV["SCRAPERAPI_KEY"]
+API_KEY = ENV["SCRAPERAPI_API_KEY"]
 
 def submit_job(url, api_params = {})
   uri = URI("https://async.scraperapi.com/jobs")
@@ -228,7 +228,7 @@ def safe_scrape(client, url, params = {})
 rescue => e
   status = e.respond_to?(:response) ? e.response&.code&.to_i : nil
   case status
-  when 401 then raise "Invalid API key — check SCRAPERAPI_KEY"
+  when 401 then raise "Invalid API key — check SCRAPERAPI_API_KEY"
   when 403 then raise "Blocked or out of credits — try premium: true or ultra_premium: true"
   when 429 then raise "Rate limit hit — reduce concurrency or switch to async"
   when 500, 503 then raise "Transient error — retry with exponential backoff"
