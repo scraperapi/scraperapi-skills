@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ScraperAPI": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.scraperapi.com/mcp",
+        "--header",
+        "Authorization: Bearer ${SCRAPERAPI_API_KEY}"
+      ]
+    }
+  }
+}
