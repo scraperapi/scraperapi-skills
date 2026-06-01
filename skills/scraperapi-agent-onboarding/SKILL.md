@@ -12,7 +12,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🌐"
     homepage: https://www.scraperapi.com
 ---
@@ -37,19 +37,19 @@ All paths require a ScraperAPI key. If you don't have one:
 
 ```bash
 # macOS / Linux
-export SCRAPERAPI_KEY=<your-key>
+export SCRAPERAPI_API_KEY=<your-key>
 
 # Windows PowerShell
-$env:SCRAPERAPI_KEY = "<your-key>"
+$env:SCRAPERAPI_API_KEY = "<your-key>"
 
 # .env file
-SCRAPERAPI_KEY=...
+SCRAPERAPI_API_KEY=...
 ```
 
 Verify the key works before doing real work:
 
 ```bash
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_KEY&url=https://httpbin.org/ip"
+curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://httpbin.org/ip"
 ```
 
 A JSON response with an `origin` IP confirms the key is valid. A `401` means the key is wrong or
@@ -148,7 +148,7 @@ import os, requests
 
 r = requests.get(
     "https://api.scraperapi.com/",
-    params={"api_key": os.environ["SCRAPERAPI_KEY"], "url": "https://httpbin.org/ip"}
+    params={"api_key": os.environ["SCRAPERAPI_API_KEY"], "url": "https://httpbin.org/ip"}
 )
 print(r.status_code, r.text[:200])
 ```
@@ -175,7 +175,7 @@ pip install scraperapi-sdk
 import os
 from scraperapi_sdk import ScraperAPIClient
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_KEY"])
+client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
 result = client.get("https://example.com", render=True, country_code="us")
 print(result)
 ```
@@ -187,7 +187,7 @@ npm install scraperapi-sdk
 ```
 
 ```js
-const scraperapi = require('scraperapi-sdk')(process.env.SCRAPERAPI_KEY);
+const scraperapi = require('scraperapi-sdk')(process.env.SCRAPERAPI_API_KEY);
 const result = await scraperapi.get('https://example.com', { render: true, country_code: 'us' });
 console.log(result);
 ```
@@ -206,24 +206,24 @@ Use this when the environment can't run `pip` or `npm`, or when you only need a 
 
 ```bash
 # Basic scrape
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_KEY&url=https://example.com"
+curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://example.com"
 
 # With JS rendering
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_KEY&url=https://example.com&render=true"
+curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://example.com&render=true"
 
 # Structured data — Google SERP
-curl "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_KEY&query=web+scraping"
+curl "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_API_KEY&query=web+scraping"
 
 # Structured data — Amazon product
-curl "https://api.scraperapi.com/structured/amazon/product?api_key=$SCRAPERAPI_KEY&asin=B09V3KXJPB"
+curl "https://api.scraperapi.com/structured/amazon/product?api_key=$SCRAPERAPI_API_KEY&asin=B09V3KXJPB"
 
 # Submit an async job
 curl -X POST "https://async.scraperapi.com/jobs" \
   -H "Content-Type: application/json" \
-  -d "{\"apiKey\": \"$SCRAPERAPI_KEY\", \"url\": \"https://example.com\"}"
+  -d "{\"apiKey\": \"$SCRAPERAPI_API_KEY\", \"url\": \"https://example.com\"}"
 
 # Poll async job status
-curl "https://async.scraperapi.com/jobs/<jobId>?apiKey=$SCRAPERAPI_KEY"
+curl "https://async.scraperapi.com/jobs/<jobId>?apiKey=$SCRAPERAPI_API_KEY"
 ```
 
 For the full parameter surface (premium proxies, country targeting, session stickiness, binary

@@ -14,7 +14,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🕷️"
     homepage: https://docs.scraperapi.com/crawler
 ---
@@ -47,7 +47,7 @@ Auth: include `api_key` in the JSON body (POST) or as a query parameter (GET/DEL
 ```python
 import os, requests
 
-API_KEY = os.environ["SCRAPERAPI_KEY"]
+API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 
 job = requests.post(
     "https://crawler.scraperapi.com/job",
@@ -222,7 +222,7 @@ calibrate `crawl_budget` for future runs.
 |------|---------|--------|
 | 200 | Job created or status returned | Continue |
 | 400 | Malformed request | Check required fields and regex syntax |
-| 401 | Invalid API key | Check `SCRAPERAPI_KEY` |
+| 401 | Invalid API key | Check `SCRAPERAPI_API_KEY` |
 | 403 | Credits exhausted or free plan depth limit | Upgrade or reduce `max_depth`/`crawl_budget` |
 | 429 | Too many concurrent jobs | Wait and retry |
 | 500 | Transient failure | Retry with backoff |

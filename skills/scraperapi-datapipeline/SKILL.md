@@ -14,7 +14,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "🔄"
     homepage: https://docs.scraperapi.com/data-pipeline
 ---
@@ -75,7 +75,7 @@ Set `projectType` in the create request to choose what to scrape:
 ```python
 import os, requests
 
-API_KEY = os.environ["SCRAPERAPI_KEY"]
+API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 BASE    = "https://datapipeline.scraperapi.com/api"
 
 project = requests.post(

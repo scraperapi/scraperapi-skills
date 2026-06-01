@@ -14,7 +14,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
         - ANTHROPIC_API_KEY
     emoji: "🔬"
     homepage: https://docs.scraperapi.com/
@@ -32,7 +32,7 @@ ingests them as cited documents → Claude synthesizes a report.
 pip install requests anthropic
 
 # Set env vars
-export SCRAPERAPI_KEY=your-key
+export SCRAPERAPI_API_KEY=your-key
 export ANTHROPIC_API_KEY=your-key
 
 # Run

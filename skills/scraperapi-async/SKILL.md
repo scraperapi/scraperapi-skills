@@ -13,7 +13,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "⚡"
     homepage: https://docs.scraperapi.com/making-async-requests
 ---
@@ -49,7 +49,7 @@ Auth: `apiKey` in the JSON request body (note: `apiKey` camelCase, unlike the St
 ```python
 import os, requests, time
 
-API_KEY = os.environ["SCRAPERAPI_KEY"]
+API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 
 # Submit
 r = requests.post(
@@ -252,7 +252,7 @@ results are pushed to your system immediately upon completion.
 | Job `finished`, `statusCode: 200` | Success | Use `response.body` |
 | Job `finished`, `statusCode: 403` | Target blocked the scrape | Retry with `premium: true` in `apiParams` |
 | Job `failed`, `failReason: failed_due_to_timeout` | Timed out after 24h retries | Check if target is reachable; try `render: false` |
-| HTTP 401 on submission | Bad API key | Check `SCRAPERAPI_KEY` |
+| HTTP 401 on submission | Bad API key | Check `SCRAPERAPI_API_KEY` |
 | HTTP 403 on submission | Out of credits or plan limit | Check dashboard |
 | HTTP 429 on submission | Too many concurrent submissions | Back off and re-submit in batches |
 

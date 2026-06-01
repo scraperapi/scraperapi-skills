@@ -7,7 +7,7 @@ Anthropic Files API ingests them as cited document artifacts,
 Claude synthesizes a structured report with inline citations.
 
 Usage:
-    export SCRAPERAPI_KEY=your-key
+    export SCRAPERAPI_API_KEY=your-key
     export ANTHROPIC_API_KEY=your-key
     python research_agent.py --question "..." --max-sources 5 --output report.md
 """
@@ -23,7 +23,7 @@ from typing import Optional
 import requests
 import anthropic
 
-SCRAPERAPI_KEY = os.environ.get("SCRAPERAPI_KEY")
+SCRAPERAPI_API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 
@@ -66,7 +66,7 @@ def search_web(query: str, num_results: int = 10, country: str = "us") -> list[d
         resp = requests.get(
             "https://api.scraperapi.com/structured/google/search",
             params={
-                "api_key": SCRAPERAPI_KEY,
+                "api_key": SCRAPERAPI_API_KEY,
                 "query": query,
                 "num": num_results,
                 "country_code": country,
@@ -114,7 +114,7 @@ def scrape_page(url: str, country: str = "us") -> Optional[str]:
         resp = requests.get(
             "https://api.scraperapi.com/",
             params={
-                "api_key": SCRAPERAPI_KEY,
+                "api_key": SCRAPERAPI_API_KEY,
                 "url": url,
                 "output_format": "markdown",
                 "country_code": country,
@@ -289,7 +289,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Validate env vars
-    missing = [k for k in ("SCRAPERAPI_KEY", "ANTHROPIC_API_KEY") if not os.environ.get(k)]
+    missing = [k for k in ("SCRAPERAPI_API_KEY", "ANTHROPIC_API_KEY") if not os.environ.get(k)]
     if missing:
         print(f"Error: missing environment variables: {', '.join(missing)}", file=sys.stderr)
         sys.exit(1)

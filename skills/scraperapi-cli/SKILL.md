@@ -16,7 +16,7 @@ metadata:
   openclaw:
     requires:
       env:
-        - SCRAPERAPI_KEY
+        - SCRAPERAPI_API_KEY
     emoji: "⌨️"
     homepage: https://www.scraperapi.com/
 ---
@@ -42,7 +42,7 @@ sapi init                        # interactive: prompts for the key and validate
 Non-interactive setup (for CI / Dockerfiles):
 
 ```bash
-sapi init --api-key "$SCRAPERAPI_KEY"
+sapi init --api-key "$SCRAPERAPI_API_KEY"
 ```
 
 ### Key resolution order
@@ -50,7 +50,7 @@ sapi init --api-key "$SCRAPERAPI_KEY"
 `sapi` looks for the API key in this order, stopping at the first hit:
 
 1. `--api-key <key>` flag on the command
-2. `SCRAPERAPI_KEY` environment variable
+2. `SCRAPERAPI_API_KEY` environment variable
 3. `~/.config/scraperapi/config.json` (written by `sapi init`)
 
 In CI, prefer the env var — it keeps the key out of shell history and config files.
@@ -227,7 +227,7 @@ sapi config set default_output_format markdown
 sapi config set default_timeout 90
 ```
 
-Settable keys: `api_key`, `default_country`, `default_output_format`, `default_timeout`. Use `SCRAPERAPI_KEY` env var instead of `config set api_key` when the machine is shared.
+Settable keys: `api_key`, `default_country`, `default_output_format`, `default_timeout`. Use `SCRAPERAPI_API_KEY` env var instead of `config set api_key` when the machine is shared.
 
 ## Shell recipes
 
