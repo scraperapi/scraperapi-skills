@@ -2,16 +2,16 @@
 name: scraperapi-cli
 description: >
   Product-usage reference for the official ScraperAPI command-line tool (`sapi`, distributed as
-  `@scraperapi/cli`). Use this skill whenever the user wants to scrape, run async jobs, fetch
+  `scraperapi-cli`). Use this skill whenever the user wants to scrape, run async jobs, fetch
   structured data, manage crawls, check account credits, or drive DataPipeline projects from a
   terminal or shell script — anywhere a one-liner is more convenient than writing SDK code.
   Trigger on: "scrape this URL from the terminal", "use sapi to fetch X", "ScraperAPI CLI",
-  "ScraperAPI from bash", "sapi scrape", "sapi jobs", "sapi structured amazon", "pipe ScraperAPI
-  into jq", "shell one-liner to scrape Y", "scrape from a Makefile / cron / CI", "check my
-  ScraperAPI credits from the command line", "submit 10000 URLs as a batch from a file". Covers
-  install, auth resolution order, every top-level command (`scrape`, `jobs`, `structured`,
-  `crawler`, `pipeline`, `account`, `config`, `init`), JSON / piping behaviour, credit-cost
-  confirmation, and common shell recipes.
+  "ScraperAPI from bash", "sapi scrape", "sapi cost", "sapi jobs", "sapi structured amazon",
+  "pipe ScraperAPI into jq", "shell one-liner to scrape Y", "scrape from a Makefile / cron / CI",
+  "check my ScraperAPI credits from the command line", "submit 10000 URLs as a batch from a file".
+  Covers install, auth resolution order, every top-level command (`scrape`, `cost`, `jobs`,
+  `structured`, `crawler`, `pipeline`, `account`, `config`, `init`), JSON / piping behaviour,
+  pre-flight cost checks, and common shell recipes.
 metadata:
   openclaw:
     requires:
@@ -35,7 +35,7 @@ If the user is writing application code in Python, Node, PHP, Ruby, or Java, poi
 ## Install and authenticate
 
 ```bash
-npm install -g @scraperapi/cli   # requires Node.js 18+
+npm install -g scraperapi-cli    # requires Node.js 18+
 sapi init                        # interactive: prompts for the key and validates it
 ```
 
@@ -60,17 +60,19 @@ In CI, prefer the env var — it keeps the key out of shell history and config f
 | Stream | What goes there |
 |--------|-----------------|
 | stdout | The data (page body, JSON, table rows) |
-| stderr | Spinners, warnings, prompts, errors |
+| stderr | Spinners, warnings, errors |
 
-When stdout is a pipe or redirect, `sapi` automatically switches to JSON mode and skips the credit-cost confirmation. That means:
+When stdout is not a TTY (a pipe or redirect), `sapi` automatically switches to JSON mode:
 
 ```bash
-sapi scrape https://example.com | jq .body            # works, no prompt
-sapi scrape https://example.com > out.json            # works, no prompt
-sapi scrape https://example.com                        # human output, prompts for >1-credit calls
+sapi scrape https://example.com | jq .body            # auto-JSON
+sapi scrape https://example.com > out.json            # auto-JSON
+sapi scrape https://example.com                       # human output (page body to stdout)
 ```
 
-Force JSON mode in a TTY with `--json`. Force a specific body format with `--output html|markdown|text|json|csv`.
+Force JSON mode in a TTY with `--json`. Force a specific body format with `--output html|markdown|text|json|csv` — `--output` overrides the non-TTY auto-JSON rule, so you can pipe raw HTML or markdown into another tool without it being wrapped in JSON.
+
+`sapi` does not prompt for confirmation on expensive calls. If you want to check what a request will cost before running it, use [`sapi cost`](#sapi-cost-url--preview-credit-cost).
 
 ## `sapi scrape <url>` — synchronous fetch
 
@@ -84,7 +86,7 @@ sapi scrape https://example.com --country gb                   # geotarget UK
 sapi scrape https://example.com --premium                      # +10 credits, residential proxies
 sapi scrape https://example.com --ultra-premium                # +30 credits, hardest sites
 sapi scrape https://example.com --autoparse --json             # structured JSON for supported sites
-sapi scrape https://example.com --screenshot --output json     # PNG (+10 credits) returned as base64
+sapi scrape https://example.com --screenshot --json            # PNG (+10 credits) returned as base64 in JSON
 sapi scrape https://example.com --async                        # submit as async job, prints jobId
 ```
 
@@ -115,10 +117,21 @@ Combining flags adds credits — `--render --premium` is ~20 credits per success
 | `--wait-for <sel>` | CSS selector to wait for (needs `--render`) | — |
 | `--timeout <sec>` | Request timeout (default 70) | — |
 | `--async` | Submit as async job, print job ID, exit | — |
-| `-y, --yes` | Skip the credit-cost confirmation prompt | — |
 | `--json` | Force JSON output mode | — |
+| `--api-key <key>` | Override the configured API key for one call | — |
 
-`sapi` prompts before any request that costs more than 1 credit. In pipes / non-TTY contexts the prompt is skipped automatically; in scripts you don't control, pass `-y`.
+There is no interactive confirmation step — `sapi scrape` runs the request immediately. Use `sapi cost <url>` (below) to preview credit cost without spending credits.
+
+## `sapi cost <url>` — preview credit cost
+
+```bash
+sapi cost https://example.com                   # base cost
+sapi cost https://example.com --render          # with JS rendering
+sapi cost https://example.com --render --premium
+sapi cost https://example.com --render --json   # machine-readable
+```
+
+Accepts the same parameter flags as `sapi scrape` (everything except `--async` and `--timeout`) and prints something like `25 credits`. Useful as a pre-flight check before running an expensive batch — wire it into a script when you want to fail fast if a chosen flag combination is more expensive than expected.
 
 ## `sapi jobs` — async scraping
 
@@ -137,15 +150,19 @@ sapi jobs batch urls.txt                              # submit up to 50,000 URLs
 
 ### Idiomatic batch pipeline
 
-```bash
-# 1. Submit a batch and grab the parent job id.
-PARENT=$(sapi jobs batch urls.txt --json | jq -r .id)
+`sapi jobs batch` returns a JSON array — one entry per submitted job, each with its own `id`. Poll each child with `sapi jobs get`:
 
-# 2. Wait for it (jobs get polls automatically).
-sapi jobs get "$PARENT" > batch-results.json
+```bash
+# 1. Submit a batch, grab every child job id.
+sapi jobs batch urls.txt --json | jq -r '.[].id' > job-ids.txt
+
+# 2. Wait for each one (`jobs get` polls automatically until finished).
+while read -r ID; do
+  sapi jobs get "$ID" --json >> batch-results.ndjson
+done < job-ids.txt
 
 # 3. Extract bodies that succeeded.
-jq '[.children[] | select(.status=="finished") | .response.body]' batch-results.json
+jq -s '[.[] | select(.status=="finished") | .response.body]' batch-results.ndjson
 ```
 
 ## `sapi structured` — pre-parsed JSON for supported sites
@@ -182,13 +199,13 @@ All structured commands accept `--json` for raw output (auto-on when piped). See
 sapi crawler start example.com           # kick off a crawl, prints jobId
 sapi crawler status <jobId>              # progress
 sapi crawler results <jobId>             # list discovered URLs (human table)
-sapi crawler results <jobId> --json      # JSON array, suitable for piping
+sapi crawler results <jobId> --json      # JSON object: { jobId, urls: [...] }
 ```
 
 The crawler is for discovering URLs across a domain. To then scrape each one, feed the result into `sapi jobs batch`:
 
 ```bash
-sapi crawler results "$CRAWL" --json | jq -r '.[]' > urls.txt
+sapi crawler results "$CRAWL" --json | jq -r '.urls[]' > urls.txt
 sapi jobs batch urls.txt
 ```
 
@@ -198,9 +215,9 @@ Projects are configured in the [ScraperAPI dashboard](https://dashboard.scrapera
 
 ```bash
 sapi pipeline list                  # list your projects
-sapi pipeline run <projectId>       # trigger a run, prints runId
-sapi pipeline status <runId>        # check status
-sapi pipeline results <runId>       # fetch results
+sapi pipeline run <projectId>       # trigger a run, prints jobId
+sapi pipeline status <jobId>        # check run status
+sapi pipeline results <jobId>       # fetch results
 ```
 
 If the user wants recurring scraping but has no project yet, point them at the dashboard — `sapi` does not create projects.
@@ -250,8 +267,8 @@ echo "$URL,$TITLE" >> titles.csv
 ### Parallel scrape with `xargs`
 
 ```bash
-# Run 5 in parallel, skip the credit prompt.
-cat urls.txt | xargs -n1 -P5 sapi scrape -y --render --json > out.ndjson
+# Run 5 in parallel; --json puts one record per line (no prompts to worry about).
+cat urls.txt | xargs -n1 -P5 sapi scrape --render --json > out.ndjson
 ```
 
 Above ~100 URLs prefer `sapi jobs batch` over this — it sidesteps the concurrent request limit.
@@ -262,19 +279,19 @@ Above ~100 URLs prefer `sapi jobs batch` over this — it sidesteps the concurre
 
 ```bash
 set -euo pipefail
-sapi account --json | jq -e '.credits_remaining > 1000'   # fails the build if low
+sapi account --json | jq -e '.credits > 1000'             # fails the build if low
 sapi scrape "$URL" --output markdown > page.md
 ```
 
 ### Escalate on block
 
 ```bash
-sapi scrape "$URL" > out.html \
-  || sapi scrape "$URL" --render -y > out.html \
-  || sapi scrape "$URL" --premium -y > out.html
+sapi scrape "$URL" --output html > out.html \
+  || sapi scrape "$URL" --render --output html > out.html \
+  || sapi scrape "$URL" --premium --output html > out.html
 ```
 
-Cheap → expensive, only paying for the next tier when the previous one fails.
+Cheap → expensive, only paying for the next tier when the previous one fails. `--output html` keeps raw HTML in each redirect — without it the non-TTY rule would wrap the body in JSON.
 
 ## When NOT to reach for `sapi`
 
@@ -286,7 +303,7 @@ Cheap → expensive, only paying for the next tier when the previous one fails.
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `command not found: sapi` | Not installed, or `npm` global bin not on `$PATH` | `npm install -g @scraperapi/cli`; check `npm config get prefix` |
+| `command not found: sapi` | Not installed, or `npm` global bin not on `$PATH` | `npm install -g scraperapi-cli`; check `npm config get prefix` |
 | `401 Invalid API key` | Key missing or wrong | Run `sapi account` to confirm; re-run `sapi init` |
 | `403` on a public page | Datacenter IP blocked | Retry with `--premium`, then `--ultra-premium` |
 | `429` from `sapi` | Hit concurrent request limit | Switch to `sapi jobs batch` or add `xargs -P` cap |
