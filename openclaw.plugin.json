@@ -1,0 +1,12 @@
+{
+  "id": "scraperapi-skills",
+  "name": "ScraperAPI Skills",
+  "description": "ScraperAPI's official Claude/OpenClaw plugin: a growing library of skills covering the full ScraperAPI surface — onboarding, product primitives, SDK best practices, CLI and workflow tooling, and end-to-end data pipelines.",
+  "version": "1.0.0",
+  "skills": ["./skills"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

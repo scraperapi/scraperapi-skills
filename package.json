@@ -1,0 +1,44 @@
+{
+  "name": "@scraperapitech/scraperapi-skills",
+  "version": "1.0.0",
+  "description": "ScraperAPI's official Claude/OpenClaw plugin: a growing library of skills covering the full ScraperAPI surface.",
+  "license": "MIT",
+  "author": {
+    "name": "ScraperAPI",
+    "email": "support@scraperapi.com",
+    "url": "https://www.scraperapi.com"
+  },
+  "homepage": "https://www.scraperapi.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scraperapi/scraperapi-skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/scraperapi/scraperapi-skills/issues"
+  },
+  "keywords": [
+    "scraperapi",
+    "web-scraping",
+    "claude",
+    "claude-code",
+    "openclaw",
+    "clawhub",
+    "skills",
+    "mcp",
+    "sdk",
+    "cli",
+    "n8n",
+    "crawler",
+    "async",
+    "data-pipeline",
+    "google-serp",
+    "amazon",
+    "walmart",
+    "ebay",
+    "redfin",
+    "market-research",
+    "seo-audit",
+    "lead-enrichment",
+    "price-monitoring"
+  ]
+}

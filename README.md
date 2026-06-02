@@ -8,7 +8,7 @@ ScraperAPI's official Claude Code plugin — a growing library of agent skills t
 - **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/making-async-requests), [Crawler](https://docs.scraperapi.com/crawler), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](skills/scraperapi-mcp/SKILL.md) tools.
 - **SDK best practices** — language-specific guides for Python, Node.js, Ruby, PHP, and Java.
 - **Tools** — official ScraperAPI [CLI](skills/scraperapi-cli/SKILL.md) and [n8n](https://n8n.io/integrations/scraperapi/) community node.
-- **Workflows** — opinionated, ready-to-run recipes for building scrapers, enriching leads, and running autonomous web research.
+- **Workflows** — opinionated, ready-to-run recipes: scraper building, lead enrichment, autonomous research, market research, SEO audits, SERP intelligence, and price monitoring.
 
 [Learn more about agent skills](https://agentskills.io/).
 
@@ -28,21 +28,24 @@ export SCRAPERAPI_API_KEY="your-key-here"
 
 ### 3. Install the plugin
 
-The plugin bundles ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) — once installed, all 22 MCP tools are wired up automatically using your `SCRAPERAPI_API_KEY` as a Bearer token.
+The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 22 MCP tools become available to the agent, authed via your `SCRAPERAPI_API_KEY`.
 
-**From GitHub:**
+**Claude Code (from GitHub):**
 
 ```bash
 npx skills add scraperapi/scraperapi-skills
 ```
 
-**From [ClawHub](https://clawhub.ai):**
+The bundled `.mcp.json` wires the MCP server up automatically on first session.
+
+**OpenClaw (from [ClawHub](https://clawhub.ai)):**
 
 ```bash
-npx clawhub install scraperapi-skills
+openclaw plugins install clawhub:@scraperapitech/scraperapi-skills
 ```
 
-Once installed, the skills load automatically — start a Claude Code session and try one of the [Usage](#usage) prompts below.
+
+Once installed, the skills load automatically — start an agent session and try one of the [Usage](#usage) prompts below.
 
 ---
 
@@ -65,6 +68,10 @@ Once installed, the skills load automatically — start a Claude Code session an
 | **[`scraperapi-scraper-builder`](skills/scraperapi-scraper-builder/SKILL.md)** | Build a runnable scraper end-to-end: picks structured endpoint vs raw HTML, JS rendering, proxy tier, sync vs async, then generates a complete Python or Node.js script with retries, pagination, and credit estimation. |
 | **[`scraperapi-lead-enrichment`](skills/scraperapi-lead-enrichment/SKILL.md)** | Enrich a contact or company from any seed (name, domain, LinkedIn URL, email) and produce a structured contact card with person and company fields. |
 | **[`scraperapi-research-agent`](skills/scraperapi-research-agent/SKILL.md)** | Autonomous research agent: takes a question, uses ScraperAPI to search and scrape relevant pages, uploads content as file artifacts to the Anthropic Files API, then feeds everything to Claude for a cited markdown report. |
+| **[`scraperapi-market-research`](skills/scraperapi-market-research/SKILL.md)** | Market research from live web data: consumer sentiment, demand and trend signals, price and category structure, and competitive landscape — for product, pricing, positioning, or investment decisions. |
+| **[`scraperapi-seo-audit`](skills/scraperapi-seo-audit/SKILL.md)** | Comprehensive SEO audit using live SERPs and on-page scraping: keyword rankings, titles/meta/headings/schema, content gaps, indexation, and prioritized recommendations. Runs out of the box via the bundled MCP tools. |
+| **[`scraperapi-serp-intelligence`](skills/scraperapi-serp-intelligence/SKILL.md)** | SERP landscape analysis for SEO strategy: AI Overview presence and attribution, SERP feature composition, query intent, competitor visibility, and where rankings translate to traffic. |
+| **[`scraperapi-price-monitoring`](skills/scraperapi-price-monitoring/SKILL.md)** | Track Amazon, Walmart, and Google Shopping prices from ASINs, URLs, or product queries. Detects increases, decreases, restocks, and out-of-stock transitions against an optional baseline. |
 
 
 ## Usage
@@ -103,9 +110,11 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 ```
 .
 ├── .claude-plugin/
-│   ├── plugin.json              # plugin manifest (name, version, keywords)
-│   └── marketplace.json         # marketplace listing
-├── .mcp.json                    # hosted MCP server config (bundled)
+│   ├── plugin.json              # Claude Code plugin manifest
+│   └── marketplace.json         # Claude Code marketplace listing
+├── openclaw.plugin.json         # OpenClaw / ClawHub plugin manifest
+├── package.json                 # scoped package name for ClawHub publishing
+├── .mcp.json                    # hosted MCP server config (bundled for Claude Code)
 ├── skills/
 │   ├── scraperapi-agent-onboarding/
 │   ├── scraperapi-async/
@@ -114,6 +123,7 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 │   ├── scraperapi-datapipeline/
 │   ├── scraperapi-java-sdk/
 │   ├── scraperapi-lead-enrichment/
+│   ├── scraperapi-market-research/
 │   ├── scraperapi-mcp/
 │   │   ├── SKILL.md
 │   │   ├── references/          # per-tool deep dives
@@ -121,13 +131,16 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 │   ├── scraperapi-n8n/
 │   ├── scraperapi-nodejs-sdk/
 │   ├── scraperapi-php-sdk/
+│   ├── scraperapi-price-monitoring/
 │   ├── scraperapi-python-sdk/
 │   ├── scraperapi-research-agent/
 │   │   ├── SKILL.md
 │   │   ├── scripts/             # research_agent.py — runnable CLI
 │   │   └── assets/              # report_template.md
 │   ├── scraperapi-ruby-sdk/
-│   └── scraperapi-scraper-builder/
+│   ├── scraperapi-scraper-builder/
+│   ├── scraperapi-seo-audit/
+│   └── scraperapi-serp-intelligence/
 ├── dist/                        # packaged .skill artifacts (for distribution)
 ├── LICENSE
 └── README.md
