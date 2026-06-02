@@ -40,5 +40,13 @@
     "seo-audit",
     "lead-enrichment",
     "price-monitoring"
-  ]
+  ],
+  "openclaw": {
+    "compat": {
+      "pluginApi": ">=2026.5.28"
+    },
+    "build": {
+      "openclawVersion": "2026.5.28"
+    }
+  }
 }
