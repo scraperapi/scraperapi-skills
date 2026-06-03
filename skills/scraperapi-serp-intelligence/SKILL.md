@@ -1,5 +1,5 @@
 ---
-name: serp-intelligence
+name: scraperapi-serp-intelligence
 description: >
   SERP landscape analysis for SEO strategy decisions. Use this skill when the
   user wants to understand what a search results page actually looks like for
@@ -12,6 +12,13 @@ description: >
   dominated by AI Overviews," "who owns the SERP for [topic]," "SERP analysis,"
   "keyword landscape," or any request to understand what's happening on a search
   results page before making a content or SEO strategy decision.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - SCRAPERAPI_API_KEY
+    emoji: "🎯"
+    homepage: https://docs.scraperapi.com/
 ---
 
 # SERP Intelligence

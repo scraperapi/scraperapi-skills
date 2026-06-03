@@ -1,5 +1,5 @@
 ---
-name: seo-audit
+name: scraperapi-seo-audit
 description: >
   Run a comprehensive SEO audit using ScraperAPI's live SERP and scraping tools — no setup required.
   Use this skill whenever the user wants to: audit SEO for a website, understand why a page isn't
@@ -9,6 +9,13 @@ description: >
   "why am I not showing up on Google," "my traffic dropped," "how do I rank for X," "what's wrong
   with my SEO," "SEO check," or "SEO review." This skill works out of the box — it uses the
   ScraperAPI MCP tools already connected to this session, with no CLI or API key setup needed.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - SCRAPERAPI_API_KEY
+    emoji: "📈"
+    homepage: https://docs.scraperapi.com/
 ---
 
 # ScraperAPI SEO Audit

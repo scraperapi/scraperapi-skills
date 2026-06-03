@@ -30,17 +30,25 @@ export SCRAPERAPI_API_KEY="your-key-here"
 
 The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 22 MCP tools become available to the agent, authed via your `SCRAPERAPI_API_KEY`.
 
-**Claude Code (from GitHub):**
+**Claude Code community marketplace:**
 
-```bash
-npx skills add scraperapi/scraperapi-skills
+```
+/plugin marketplace add scraperapi/scraperapi-skills
+/plugin install scraperapi@scraperapi-skills
 ```
 
-The bundled `.mcp.json` wires the MCP server up automatically on first session.
+
+**Claude Plugin Hub:**
+
+```bash
+export SCRAPERAPI_API_KEY="your-key-here"
+npx claudepluginhub scraperapi/scraperapi-skills --plugin scraperapi
+```
 
 **OpenClaw (from [ClawHub](https://clawhub.ai)):**
 
 ```bash
+export SCRAPERAPI_API_KEY="your-key-here"
 openclaw plugins install clawhub:@scraperapitech/scraperapi-skills
 ```
 

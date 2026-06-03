@@ -1,5 +1,5 @@
 ---
-name: market-research
+name: scraperapi-market-research
 description: >
   Market research powered by live web data. Use this skill when the user wants
   to understand a market, category, or customer segment — including consumer
@@ -9,6 +9,13 @@ description: >
   "what trends are shaping [industry]," "who are the players in [space],"
   or any request to understand a market before making a product, pricing,
   positioning, or investment decision.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - SCRAPERAPI_API_KEY
+    emoji: "📊"
+    homepage: https://docs.scraperapi.com/
 ---
 
 # Market Research

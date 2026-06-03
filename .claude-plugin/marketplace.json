@@ -10,6 +10,13 @@
       "name": "scraperapi",
       "source": "./",
       "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ScraperAPI",
+        "email": "support@scraperapi.com"
+      },
+      "homepage": "https://www.scraperapi.com",
+      "license": "MIT",
       "category": "web-scraping",
       "keywords": [
         "scraperapi",
@@ -21,7 +28,6 @@
         "crawler",
         "async",
         "data-pipeline",
-        "sde",
         "google-serp",
         "amazon",
         "walmart",

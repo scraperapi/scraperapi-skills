@@ -1,7 +1,9 @@
 {
   "name": "scraperapi",
-  "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
+  "displayName": "ScraperAPI",
   "version": "1.0.0",
+  "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
+  "defaultEnabled": false,
   "author": {
     "name": "ScraperAPI",
     "email": "support@scraperapi.com"
@@ -20,7 +22,6 @@
     "crawler",
     "async",
     "data-pipeline",
-    "sde",
     "market-research",
     "seo-audit",
     "lead-enrichment",

@@ -10,12 +10,16 @@ description: >
   scraper for [URL]". Guides architectural decisions (structured endpoint vs. raw HTML, JS
   rendering, proxy tier, sync vs. async batch), then generates a complete runnable Python or
   Node.js script with retry logic, error handling, pagination, and credit estimation.
-requirements:
-  env:
-    - SCRAPERAPI_API_KEY
-  bins:
-    - python
-    - node
+metadata:
+  openclaw:
+    requires:
+      env:
+        - SCRAPERAPI_API_KEY
+      anyBins:
+        - python
+        - node
+    emoji: "🛠️"
+    homepage: https://docs.scraperapi.com/
 ---
 
 # ScraperAPI Scraper Builder
