@@ -7,11 +7,10 @@ description: >
   Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
   Requires the ScraperAPI MCP server and a valid SCRAPERAPI_API_KEY.
   Trigger on: web scraping, scraping a URL, reading a webpage behind bot protection, Google
-  search queries, finding information online, current events and news lookup, job listings,
+  search queries, current events and news lookup, job listings,
   product price comparison, shopping research, Amazon/Walmart/eBay product lookup or search,
   e-commerce data extraction, Redfin real estate listings, property search, rental search,
-  site crawling, SERP monitoring, SEO tracking, competitive intelligence, market research,
-  or when unsure which ScraperAPI tool to use.
+  site crawling, SERP monitoring, SEO tracking, competitive intelligence, or market research.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

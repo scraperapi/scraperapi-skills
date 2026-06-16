@@ -6,9 +6,7 @@ description: >
   sentiment, demand and trend signals, price and category structure, or the
   competitive landscape. Trigger on requests like "research the [X] market,"
   "what do customers think about [category]," "how is [category] priced,"
-  "what trends are shaping [industry]," "who are the players in [space],"
-  or any request to understand a market before making a product, pricing,
-  positioning, or investment decision.
+  "what trends are shaping [industry]," or "who are the players in [space]."
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
