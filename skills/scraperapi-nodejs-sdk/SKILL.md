@@ -9,6 +9,8 @@ description: >
   "Node.js ScraperAPI render", "ScraperAPI account info Node". Covers both CommonJS and ESM import
   styles, Promises and async/await, all request parameters, POST/PUT requests, account info,
   error handling, and credit costs.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

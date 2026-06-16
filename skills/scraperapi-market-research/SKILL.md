@@ -9,6 +9,8 @@ description: >
   "what trends are shaping [industry]," "who are the players in [space],"
   or any request to understand a market before making a product, pricing,
   positioning, or investment decision.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

@@ -12,6 +12,8 @@ description: >
   e-commerce data extraction, Redfin real estate listings, property search, rental search,
   site crawling, SERP monitoring, SEO tracking, competitive intelligence, market research,
   or when unsure which ScraperAPI tool to use.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

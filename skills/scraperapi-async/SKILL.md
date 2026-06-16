@@ -9,6 +9,8 @@ description: >
   "ScraperAPI webhook callback", "scrape URLs in the background", "ScraperAPI batchjobs endpoint".
   Covers single jobs, batch jobs (up to 50k URLs), webhook callbacks, all apiParams,
   async-exclusive parameters, binary response decoding, retention policy, and error handling.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

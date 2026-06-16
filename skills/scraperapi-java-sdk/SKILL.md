@@ -8,6 +8,8 @@ description: >
   "ScraperAPI Java premium proxy", "ScraperAPI Java error handling", "ScraperAPI Java retry".
   Covers Maven/Gradle setup, the fluent builder API, all request parameters, the escalation ladder,
   async jobs, structured data calls, error handling, and credit costs.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

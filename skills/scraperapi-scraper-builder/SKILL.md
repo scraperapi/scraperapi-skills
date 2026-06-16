@@ -10,6 +10,8 @@ description: >
   scraper for [URL]". Guides architectural decisions (structured endpoint vs. raw HTML, JS
   rendering, proxy tier, sync vs. async batch), then generates a complete runnable Python or
   Node.js script with retry logic, error handling, pagination, and credit estimation.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

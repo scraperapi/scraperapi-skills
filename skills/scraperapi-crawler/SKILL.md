@@ -10,6 +10,8 @@ description: >
   "ScraperAPI crawler job API". Covers job creation, URL regex patterns, depth vs budget,
   per-page scraping parameters, status polling, webhooks, scheduling, and credit costs.
   Also invoke when the user is building a site-wide scraper and asks which ScraperAPI product to use.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

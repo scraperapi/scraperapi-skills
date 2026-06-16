@@ -8,6 +8,8 @@ description: >
   "which ScraperAPI product should I use", "get web data for my agent", "scrape a website in my
   app", "add web scraping to my project", "ScraperAPI getting started".
   After reading, route to the narrower skill that owns the selected path.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

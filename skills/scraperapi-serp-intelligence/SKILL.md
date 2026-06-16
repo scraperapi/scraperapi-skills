@@ -12,6 +12,8 @@ description: >
   dominated by AI Overviews," "who owns the SERP for [topic]," "SERP analysis,"
   "keyword landscape," or any request to understand what's happening on a search
   results page before making a content or SEO strategy decision.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

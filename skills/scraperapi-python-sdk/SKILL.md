@@ -9,6 +9,8 @@ description: >
   "ScraperAPI structured data Python". Covers client setup, all request parameters,
   the escalation ladder (standard → render → premium → ultra_premium), async jobs for batches,
   structured data endpoints, error handling, and credit budgeting.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

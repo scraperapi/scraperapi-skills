@@ -7,6 +7,8 @@ description: >
   "how do I use the ScraperAPI gem", "Ruby ScraperAPI render", "ScraperAPI Ruby premium proxy",
   "ScraperAPI gem sessions", "ScraperAPI Ruby error handling". Covers gem setup, all request
   parameters, the escalation ladder, error handling by status code, and credit costs.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

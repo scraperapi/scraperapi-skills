@@ -10,6 +10,8 @@ description: >
   "run the scraperapi research agent on this topic". Produces a structured markdown report with
   inline citations and a numbered source list. Invoke whenever the user wants multi-source web
   research that requires scraping real pages, not just answering from memory.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI; uploads scraped content to the Anthropic Files API.
 metadata:
   openclaw:
     requires:

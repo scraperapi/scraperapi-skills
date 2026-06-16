@@ -13,6 +13,8 @@ description: >
   via ScraperAPI", "add ScraperAPI as a tool to my n8n agent". Produces
   either importable workflow JSON or a step-by-step build guide in the n8n
   editor, picking the format based on how the user phrased the request.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     emoji: "🟧"

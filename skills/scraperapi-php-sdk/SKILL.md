@@ -7,6 +7,8 @@ description: >
   "how do I use the ScraperAPI PHP SDK", "PHP ScraperAPI render", "ScraperAPI PHP premium proxy",
   "ScraperAPI PHP Composer install", "ScraperAPI PHP error handling". Covers Composer setup,
   all request parameters, the escalation ladder, POST requests, error handling, and credit costs.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

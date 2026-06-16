@@ -12,6 +12,8 @@ description: >
   Covers install, auth resolution order, every top-level command (`scrape`, `cost`, `jobs`,
   `structured`, `crawler`, `pipeline`, `account`, `config`, `init`), JSON / piping behaviour,
   pre-flight cost checks, and common shell recipes.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:

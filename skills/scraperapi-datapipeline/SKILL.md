@@ -10,6 +10,8 @@ description: >
   "ScraperAPI managed scraping project", "set up a ScraperAPI pipeline",
   "deliver scraping results to a webhook automatically". Covers project types, input methods,
   scheduling, output delivery, the DataPipeline API, job management, and credit costs.
+
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
   openclaw:
     requires:
