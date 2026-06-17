@@ -13,7 +13,7 @@
         "repo": "scraperapi/scraperapi-skills"
       },
       "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "ScraperAPI",
         "email": "support@scraperapi.com"
