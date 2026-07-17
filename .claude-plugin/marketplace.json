@@ -41,7 +41,8 @@
         "lead-enrichment",
         "price-monitoring",
         "sentiment-analysis",
-        "n8n"
+        "n8n",
+        "zapier"
       ]
     }
   ]

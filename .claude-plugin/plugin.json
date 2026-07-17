@@ -17,6 +17,7 @@
     "sdk",
     "cli",
     "n8n",
+    "zapier",
     "ai-parser",
     "crawler",
     "async",

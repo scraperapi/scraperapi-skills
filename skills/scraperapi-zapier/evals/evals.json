@@ -1,0 +1,23 @@
+{
+  "skill_name": "scraperapi-zapier",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want a Zap that checks the price of an Amazon product every morning and emails me if it drops. The ASIN is B08N5WRWNW. Walk me through building it.",
+      "expected_output": "A step-by-step Zap build guide. Starts with a non-ScraperAPI trigger (Schedule by Zapier), then Get Structured Data (Amazon Product details, ASIN field), a Filter for price drop, then Gmail. Notes ScraperAPI is action-only and that output fields appear after a test run.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "How do I connect ScraperAPI to Zapier and use it to crawl my whole blog at https://example.com/blog and save every page somewhere?",
+      "expected_output": "Explains connecting the ScraperAPI account with an API key, then the two-Zap crawler callback pattern: Zap A Create Crawler Job (Start URL, Include regex ^/blog/, Max Depth or Crawl Budget, callback URL) and a separate Zap B with Webhooks by Zapier Catch Hook to receive each page. Warns results don't return to the same Zap.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "In Zapier, when a new row is added to my Google Sheet with a URL, I want to scrape that page and put the text back in the row. The pages are JavaScript-heavy React sites.",
+      "expected_output": "A build guide: Google Sheets New/Updated Row trigger, ScraperAPI Extract Data From URL with URL mapped from the row and Render JavaScript enabled, output_format markdown/text to keep the body small, then Google Sheets update-row mapping body back. Mentions credit cost of render.",
+      "files": []
+    }
+  ]
+}
