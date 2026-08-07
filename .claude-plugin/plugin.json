@@ -1,7 +1,7 @@
 {
   "name": "scraperapi",
   "displayName": "ScraperAPI",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
   "author": {
     "name": "ScraperAPI",
@@ -17,6 +17,7 @@
     "sdk",
     "cli",
     "n8n",
+    "zapier",
     "ai-parser",
     "crawler",
     "async",

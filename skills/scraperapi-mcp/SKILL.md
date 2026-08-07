@@ -1,16 +1,18 @@
 ---
 name: scraperapi-mcp
 description: >
-  Knowledge base for the 22 ScraperAPI MCP tools. Covers scrape, Google (search, news, jobs,
-  shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, reviews),
-  eBay (search, product), Redfin (for_sale, for_rent, search, agent), and crawler tools.
+  Knowledge base for the 28 ScraperAPI MCP tools. Covers scrape, Google (search, news, jobs,
+  shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, review),
+  eBay (search, product), Redfin (for_sale, for_rent, search, agent), crawler tools, and the
+  AI Parser (create, get_details, parse_url, list, update, delete) for reusable custom extraction.
   Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
   Requires the ScraperAPI MCP server and a valid SCRAPERAPI_API_KEY.
   Trigger on: web scraping, scraping a URL, reading a webpage behind bot protection, Google
   search queries, current events and news lookup, job listings,
   product price comparison, shopping research, Amazon/Walmart/eBay product lookup or search,
   e-commerce data extraction, Redfin real estate listings, property search, rental search,
-  site crawling, SERP monitoring, SEO tracking, competitive intelligence, or market research.
+  site crawling, custom structured extraction, building a reusable parser, extracting fields
+  from any site, SERP monitoring, SEO tracking, competitive intelligence, or market research.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
@@ -40,11 +42,12 @@ This skill requires the ScraperAPI MCP server (remote or local variant). Before 
 | `WebSearch` | `google_search` (or `google_news`, `google_jobs`, `google_shopping`, `google_maps_search`) |
 | `WebFetch` | `scrape` with `outputFormat: "markdown"` |
 | Browsing Amazon | `amazon_search`, `amazon_product`, or `amazon_offers` |
-| Browsing Walmart | `walmart_search`, `walmart_product`, `walmart_category`, or `walmart_reviews` |
+| Browsing Walmart | `walmart_search`, `walmart_product`, `walmart_category`, or `walmart_review` |
 | Browsing eBay | `ebay_search` or `ebay_product` |
 | Browsing Redfin | `redfin_search`, `redfin_for_sale`, `redfin_for_rent`, or `redfin_agent` |
+| Custom structured extraction from an unsupported site | `ai_parser_create` then `ai_parser_parse_url` |
 
-On the **local** variant (scrape-only), use `scrape` with `autoparse: true` for both web search and web fetch tasks.
+Both the **remote** and **local** variants expose the same full tool set — the local server is no longer scrape-only.
 
 **Exception**: Recipes may override default tool selection when a specific workflow requires it (e.g., SERP news monitoring uses `scrape` directly for richer page context). Always follow recipe instructions when a recipe applies.
 
@@ -66,7 +69,7 @@ On the **local** variant (scrape-only), use `scrape` with `autoparse: true` for 
 | Walmart product search | `walmart_search` | `query`, `tld`, `page` |
 | Walmart product details | `walmart_product` | `productId`, `tld` |
 | Walmart category browse | `walmart_category` | `category`, `tld`, `page` |
-| Walmart product reviews | `walmart_reviews` | `productId`, `tld`, `sort` |
+| Walmart product reviews | `walmart_review` | `productId`, `tld`, `sort` |
 | eBay product search | `ebay_search` | `query`, `tld`, `condition`, `sortBy` |
 | eBay product details | `ebay_product` | `productId`, `tld` |
 | Redfin property for sale | `redfin_for_sale` | `url`, `tld` |
@@ -76,6 +79,12 @@ On the **local** variant (scrape-only), use `scrape` with `autoparse: true` for 
 | Crawl an entire site | `crawler_job_start` | `startUrl`, `urlRegexpInclude`, `maxDepth` or `crawlBudget` |
 | Check crawl progress | `crawler_job_status` | `jobId` |
 | Cancel a crawl | `crawler_job_delete` | `jobId` |
+| Build a reusable custom parser | `ai_parser_create` | `name`, `urls` (1–3 examples) |
+| Check parser generation status | `ai_parser_get_details` | `parserId`, `version` |
+| Extract structured data with a parser | `ai_parser_parse_url` | `parserId`, `url` |
+| List your parsers | `ai_parser_list` | *(none)* |
+| Edit a parser's fields | `ai_parser_update` | `parserId`, `addFields`/`modifyFields`/`renameFields`/`removeFields` |
+| Delete a parser | `ai_parser_delete` | `parserId` |
 
 ## Decision Tree
 
@@ -90,11 +99,12 @@ If no recipe matches, select a tool:
 5. **Need product/price info?** → `google_shopping` for cross-site comparison. For a specific marketplace, use the dedicated SDE tools below.
 6. **Need local business info?** → `google_maps_search`. Provide `latitude`/`longitude` for location-biased results.
 7. **Need Amazon data?** → `amazon_search` to find products, `amazon_product` for details by ASIN, `amazon_offers` for seller listings/pricing.
-8. **Need Walmart data?** → `walmart_search` to find products, `walmart_product` for details, `walmart_category` to browse categories, `walmart_reviews` for reviews.
+8. **Need Walmart data?** → `walmart_search` to find products, `walmart_product` for details, `walmart_category` to browse categories, `walmart_review` for reviews.
 9. **Need eBay data?** → `ebay_search` to find listings, `ebay_product` for item details.
 10. **Need real estate data?** → `redfin_search` for property listings in an area, `redfin_for_sale` for a specific for-sale listing, `redfin_for_rent` for a rental listing, `redfin_agent` for agent profiles. All Redfin tools require a full Redfin URL.
 11. **Need to scrape many pages from one site?** → `crawler_job_start`. Set `maxDepth` or `crawlBudget` to control scope.
-12. **Deep research?** → `google_search` to find sources → `scrape` each relevant URL → synthesize.
+12. **Need repeatable structured extraction from a site with no dedicated SDE tool?** → `ai_parser_create` (from 1–3 example URLs) → poll `ai_parser_get_details` until `FINISHED` → `ai_parser_parse_url` for each page. See [references/ai-parser.md](references/ai-parser.md).
+13. **Deep research?** → `google_search` to find sources → `scrape` each relevant URL → synthesize.
 
 ## Credit Cost Awareness
 
@@ -110,7 +120,7 @@ If no recipe matches, select a tool:
 - **Set `countryCode`** when results should be localized (e.g., `"us"`, `"gb"`, `"de"`).
 - **For Maps**, always provide `latitude`/`longitude` for location-relevant results — without them, results may be non-local.
 - **Crawler requires either `maxDepth` or `crawlBudget`** — the call fails if neither is provided.
-- **`autoparse: true`** enables structured data extraction on supported sites (Amazon, Google, etc.). Required when using `outputFormat: "json"` or `"csv"`. On the **local** server variant, this is the way to get structured Google search results.
+- **`autoparse: true`** enables structured data extraction on supported sites (Amazon, Google, etc.). Required when using `outputFormat: "json"` or `"csv"`. For a supported marketplace/SERP, prefer the dedicated SDE tool (e.g. `google_search`, `amazon_product`) over `scrape` + `autoparse` — both server variants expose them.
 
 ## Handling Large Outputs
 
@@ -137,6 +147,7 @@ If a ScraperAPI tool call fails or returns unexpected results, see [references/s
 - **eBay SDE tools**: See [references/ebay.md](references/ebay.md) — search with filters and product details.
 - **Redfin SDE tools**: See [references/redfin.md](references/redfin.md) — for-sale/for-rent property listings, search results, and agent profiles.
 - **Crawler tools**: See [references/crawler.md](references/crawler.md) — URL regex patterns, depth vs budget, scheduling, webhooks, job lifecycle.
+- **AI Parser tools**: See [references/ai-parser.md](references/ai-parser.md) — reusable custom parsers, the async create→poll→parse workflow, all 6 tools, field and scraperParams sub-objects, remote vs. local param naming.
 
 ## Recipes
 

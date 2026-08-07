@@ -1,6 +1,6 @@
 # Example Workflows
 
-Two end-to-end patterns to adapt. Both import cleanly into n8n once
+Three end-to-end patterns to adapt. All import cleanly into n8n once
 `n8n-nodes-scraperapi-official` is installed and a credential named
 "ScraperAPI API" exists.
 
@@ -206,6 +206,144 @@ curl -X POST https://your-n8n/webhook/enrich \
   -H 'content-type: application/json' \
   -d '{"company":"Anthropic"}'
 ```
+
+## 3. AI Parser — create a reusable parser, then extract
+
+Build a parser once from example product URLs, wait for it to finish
+generating, then extract structured fields from a new URL. The `Wait` +
+`Get` + `IF` loop handles the asynchronous generation (status goes
+`GENERATING` → `FINISHED`). Adapt the poll interval to how long generation
+takes for your pages.
+
+```json
+{
+  "name": "AI Parser - build and extract",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "id": "manual-1",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "resource": "aiparser",
+        "operation": "aiParserCreate",
+        "aiParserName": "product-parser",
+        "aiParserUrls": ["https://example.com/p/1", "https://example.com/p/2"],
+        "aiParserCreateFields": {
+          "field": [
+            { "name": "title", "description": "Product title", "type": "string" },
+            { "name": "price", "description": "Current price in USD", "type": "number" }
+          ]
+        },
+        "aiParserScraperParams": { "render": true, "country_code": "us" }
+      },
+      "type": "n8n-nodes-scraperapi-official.scraperApi",
+      "typeVersion": 1,
+      "position": [480, 300],
+      "id": "create-1",
+      "name": "Create parser",
+      "credentials": {
+        "scraperApi-Api": { "id": "REPLACE", "name": "ScraperAPI API" }
+      }
+    },
+    {
+      "parameters": { "amount": 30 },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [720, 300],
+      "id": "wait-1",
+      "name": "Wait 30s"
+    },
+    {
+      "parameters": {
+        "resource": "aiparser",
+        "operation": "aiParserGet",
+        "aiParserId": "={{ $('Create parser').first().json.response.body.id }}",
+        "aiParserVersion": -1
+      },
+      "type": "n8n-nodes-scraperapi-official.scraperApi",
+      "typeVersion": 1,
+      "position": [960, 300],
+      "id": "get-1",
+      "name": "Get status",
+      "credentials": {
+        "scraperApi-Api": { "id": "REPLACE", "name": "ScraperAPI API" }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.response.body.status }}",
+              "rightValue": "FINISHED",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "id": "if-1",
+      "name": "Finished?"
+    },
+    {
+      "parameters": {
+        "resource": "aiparser",
+        "operation": "aiParserParse",
+        "aiParserId": "={{ $('Create parser').first().json.response.body.id }}",
+        "aiParserVersion": -1,
+        "aiParserUrl": "https://example.com/p/99",
+        "aiParserScraperParams": { "render": true }
+      },
+      "type": "n8n-nodes-scraperapi-official.scraperApi",
+      "typeVersion": 1,
+      "position": [1440, 240],
+      "id": "parse-1",
+      "name": "Parse a URL",
+      "credentials": {
+        "scraperApi-Api": { "id": "REPLACE", "name": "ScraperAPI API" }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [[{ "node": "Create parser", "type": "main", "index": 0 }]]
+    },
+    "Create parser": {
+      "main": [[{ "node": "Wait 30s", "type": "main", "index": 0 }]]
+    },
+    "Wait 30s": {
+      "main": [[{ "node": "Get status", "type": "main", "index": 0 }]]
+    },
+    "Get status": {
+      "main": [[{ "node": "Finished?", "type": "main", "index": 0 }]]
+    },
+    "Finished?": {
+      "main": [
+        [{ "node": "Parse a URL", "type": "main", "index": 0 }],
+        [{ "node": "Wait 30s", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
+```
+
+The `Finished?` false-branch loops back to `Wait 30s`, re-polling until the
+parser reports `FINISHED`. Extracted data lands under
+`response.body.result` on the `Parse a URL` node. Reuse the same parser id
+across many pages: the first parser per account is free but each additional
+one costs **30,000 credits** to generate, whereas each `aiParserParse` call is
+only the standard scraping cost (1 credit, more if you enable render/premium).
+So generate once and parse many — never create parsers in a loop.
 
 ## Notes when adapting
 

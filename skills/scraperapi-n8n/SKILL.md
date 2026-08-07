@@ -10,9 +10,11 @@ description: >
   n8n JSON for a crawler that hits this site", "wire ScraperAPI into n8n to
   email me product reviews", "n8n automation for Walmart price tracking",
   "use ScraperAPI in n8n to enrich leads", "give my n8n AI Agent web access
-  via ScraperAPI", "add ScraperAPI as a tool to my n8n agent". Produces
-  either importable workflow JSON or a step-by-step build guide in the n8n
-  editor, picking the format based on how the user phrased the request.
+  via ScraperAPI", "add ScraperAPI as a tool to my n8n agent", "build an AI
+  parser in n8n to extract custom fields from a site". Produces either
+  importable workflow JSON or a step-by-step build guide in the n8n editor,
+  picking the format based on how the user phrased the request. Covers the
+  api, sde, crawler, and AI Parser resources.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
@@ -55,9 +57,9 @@ If the user is on n8n Cloud and the workflow JSON references this node,
 importing will succeed only after the community node is installed in their
 instance. Mention this when handing over JSON.
 
-## Three resources — pick the right one
+## Four resources — pick the right one
 
-The ScraperAPI node has one operation surface (`resource`) with three
+The ScraperAPI node has one operation surface (`resource`) with four
 branches. Choose based on the job:
 
 | Job | Resource | Why |
@@ -65,11 +67,13 @@ branches. Choose based on the job:
 | Scrape an arbitrary URL and get HTML/Markdown/Text/JSON | `api` | General-purpose proxy. Hand it any URL. |
 | Get clean JSON from a supported site (Amazon, Google, eBay, Walmart, Redfin) | `sde` | Pre-parsed structured data. Saves a Set/Code node for HTML parsing and is more reliable across site changes. |
 | Crawl multiple pages from one starting URL, streaming results to a webhook | `crawler` | Multi-page jobs that follow links. Returns a `jobId`; results arrive at your webhook, not as the node's output. |
+| Extract custom structured JSON from many similarly-structured pages on a site with no SDE | `aiparser` | Build a reusable AI parser once from example URLs, then apply it to any similar page. Asynchronous: create → poll status → parse. |
 
 A common pattern: use a structured endpoint when one exists for the site,
 fall back to `api` (with `apiRender: true` or `apiPremium: true`) for
-anything else, and reach for `crawler` only when one-URL-at-a-time would
-need many sequential node executions.
+anything else, reach for `aiparser` when you need repeatable custom field
+extraction from a site with no SDE, and use `crawler` only when
+one-URL-at-a-time would need many sequential node executions.
 
 ## Required JSON shape — minimal example
 
@@ -184,11 +188,25 @@ uses snake_case. When generating JSON, use the n8n names.
 | `output_format` | `apiOptionalParameters.apiOutputFormat` | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiOutputFormat` |
 | device (desktop) | `apiOptionalParameters.apiDesktopDevice` (bool) | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiDesktopDevice` |
 | device (mobile) | `apiOptionalParameters.apiMobileDevice` (bool) | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiMobileDevice` |
+| `session_number` | `apiOptionalParameters.apiSessionNumber` | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiSessionNumber` |
+| `keep_headers` | `apiOptionalParameters.apiKeepHeaders` | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiKeepHeaders` |
+| `follow_redirect` | `apiOptionalParameters.apiFollowRedirect` | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiFollowRedirect` |
+| `retry_404` | `apiOptionalParameters.apiRetry404` | `crawlerOptionalParameters.crawlerApiParameters.crawlerApiRetry404` |
+| `zip` | `apiOptionalParameters.apiZipCode` | *(api only)* |
+| `custom_headers` | `apiOptionalParameters.apiCustomHeaders` | *(api only)* |
+| `wait_for_selector` | `apiOptionalParameters.apiWaitForSelector` | *(api only)* |
+| `x-sapi-instruction_set` | `apiOptionalParameters.apiInstructionSet` | *(api only)* |
 
 For SDE platforms, see `references/node-reference.md` — each platform/
 operation has its own required field name (e.g., `sdeAsin`, `sdeQuery`,
 `sdeProductId`, `sdeUrl`, `sdeCategory`) and its own optional-parameters
 collection (e.g., `sdeAmazonProductOptions`, `sdeGoogleSearchOptions`).
+
+**AI Parser exception:** the `aiparser` resource uses `aiParser*` camelCase
+field names (`aiParserName`, `aiParserUrls`, `aiParserId`, `aiParserUrl`,
+etc.), **but** the inner keys of its `aiParserScraperParams` collection are
+plain **snake_case** (`render`, `premium`, `country_code`, `session_number`,
+…) — no prefix, unlike every other resource. See `references/node-reference.md`.
 
 If you're not sure of an exact field name, read the reference file before
 generating JSON. Mis-named fields are silently dropped on import.
@@ -276,6 +294,10 @@ the human-readable page so the user can preview before importing:
 ```
 https://n8n.io/workflows/15609-send-daily-price-drop-digest-emails-for-amazon-walmart-and-google-via-scraperapi/
 ```
+
+Before hand-writing any workflow, it's worth checking ScraperAPI's full
+template collection at `https://n8n.io/creators/scraperapi/` — if an
+official template already fits the user's use case, adapt it instead.
 
 If the fetch fails (offline, rate-limited, API change), fall back to
 the shape diagrammed above and the simpler single-ASIN example in
@@ -380,9 +402,15 @@ note in your reply estimating the per-run and per-month cost.
 | `api` + `apiPremium: true` + `apiRender: true` | 25 |
 | `api` + `apiUltraPremium: true` | 30 |
 | `sde` structured endpoint | 1–10 (per vertical; see public docs) |
+| `aiparser` generate (`aiParserCreate`, field-adding `aiParserUpdate`) | **30,000** per additional parser (first parser per account is free) |
+| `aiparser` parse (`aiParserParse`) | standard scraping cost: 1, plus any scraper-param surcharge (e.g. render 10) |
 
-Failed requests (non-200) are generally not charged, but retries on
-transient errors still consume credits if they eventually succeed.
+**AI Parser is expensive to generate.** Every account gets one free parser;
+each *additional* parser costs **30,000 credits** to generate — never create
+parsers in a loop. The recurring per-URL `aiParserParse` cost is small
+(standard scraping rate), so reuse one parser across many pages. Failed
+requests (non-200) are generally not charged, but retries on transient errors
+still consume credits if they eventually succeed.
 
 For full and current pricing, link to
 `https://docs.scraperapi.com/` from the response.
@@ -489,7 +517,9 @@ After producing a workflow JSON, sanity-check it:
 
 1. `node.type` is exactly `n8n-nodes-scraperapi-official.scraperApi`
 2. Every node referenced in `connections` exists in `nodes`
-3. Field names match the prefix rule (`api*` / `sde*` / `crawler*`)
+3. Field names match the prefix rule (`api*` / `sde*` / `crawler*` /
+   `aiParser*`) — except inside `aiParserScraperParams`, whose inner keys
+   are plain snake_case (`render`, `country_code`, …)
 4. The `credentials` block uses key `scraperApi-Api`
 5. No literal API key is anywhere in the JSON
 
@@ -510,6 +540,7 @@ After producing a workflow JSON, sanity-check it:
 ## Documentation
 
 - Node listing: `https://n8n.io/integrations/scraperapi/`
+- ScraperAPI template collection (all official workflows): `https://n8n.io/creators/scraperapi/`
 - Price-drop digest template (page): `https://n8n.io/workflows/15609-send-daily-price-drop-digest-emails-for-amazon-walmart-and-google-via-scraperapi/`
 - Price-drop digest template (API, returns full workflow JSON): `https://api.n8n.io/api/templates/workflows/15609`
 - npm package: `https://www.npmjs.com/package/n8n-nodes-scraperapi-official`

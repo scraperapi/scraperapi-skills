@@ -21,7 +21,7 @@ Product search results with titles, prices, and product IDs.
 | `page` | number | No | Page number for pagination |
 
 ### Best Practices
-- Extract product IDs from results to feed into `walmart_product` or `walmart_reviews`.
+- Extract product IDs from results to feed into `walmart_product` or `walmart_review`.
 - Set `tld` to match the target market — `"com"` for US, `"ca"` for Canada, `"com.mx"` for Mexico.
 
 ---
@@ -58,7 +58,7 @@ Category browse results by category ID — explore products within a department.
 
 ---
 
-## Tool: `walmart_reviews`
+## Tool: `walmart_review`
 
 Product reviews by product ID with filtering and sorting.
 
@@ -82,5 +82,5 @@ Product reviews by product ID with filtering and sorting.
 
 1. **Search**: `walmart_search` with `query` to find products
 2. **Details**: `walmart_product` with the product ID for full info
-3. **Reviews**: `walmart_reviews` with the product ID to analyze customer feedback
+3. **Reviews**: `walmart_review` with the product ID to analyze customer feedback
 4. **Browse**: `walmart_category` to explore products within a department
