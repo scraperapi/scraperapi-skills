@@ -288,12 +288,16 @@ link to `https://docs.scraperapi.com/`.
 ✅ Pick one. Ultra Premium is the strongest tier; use it alone.
 ```
 
-### Country code in the wrong case or `gb` for the UK
+### Country code as `gb` instead of `uk`
 
 ```
-❌ Country Code = US        ❌ Country Code = gb
-✅ Country Code = us        ✅ Country Code = uk   (ScraperAPI uses uk, not gb)
+❌ Country Code = gb        ✅ Country Code = uk   (ScraperAPI uses uk, not gb)
 ```
+
+`uk`-not-`gb` is a ScraperAPI-wide convention. Case, however, is
+endpoint-specific: **Extract Data From URL** and the **Crawler** actions expect
+lowercase (`us`, `uk`, `de`), while **Get Structured Data** accepts uppercase
+codes (`US`, `GB`, `DE`) as shown in its own field help.
 
 ### Crawler with neither depth nor budget
 
