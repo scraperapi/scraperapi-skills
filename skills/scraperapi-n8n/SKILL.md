@@ -295,6 +295,10 @@ the human-readable page so the user can preview before importing:
 https://n8n.io/workflows/15609-send-daily-price-drop-digest-emails-for-amazon-walmart-and-google-via-scraperapi/
 ```
 
+Before hand-writing any workflow, it's worth checking ScraperAPI's full
+template collection at `https://n8n.io/creators/scraperapi/` — if an
+official template already fits the user's use case, adapt it instead.
+
 If the fetch fails (offline, rate-limited, API change), fall back to
 the shape diagrammed above and the simpler single-ASIN example in
 `references/example-workflows.md`.
@@ -536,6 +540,7 @@ After producing a workflow JSON, sanity-check it:
 ## Documentation
 
 - Node listing: `https://n8n.io/integrations/scraperapi/`
+- ScraperAPI template collection (all official workflows): `https://n8n.io/creators/scraperapi/`
 - Price-drop digest template (page): `https://n8n.io/workflows/15609-send-daily-price-drop-digest-emails-for-amazon-walmart-and-google-via-scraperapi/`
 - Price-drop digest template (API, returns full workflow JSON): `https://api.n8n.io/api/templates/workflows/15609`
 - npm package: `https://www.npmjs.com/package/n8n-nodes-scraperapi-official`
