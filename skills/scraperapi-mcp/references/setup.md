@@ -8,12 +8,17 @@ All 28 tools: `scrape`, `google_search`, `google_news`, `google_jobs`, `google_s
 
 ### Remote (Hosted) — recommended
 
+The ScraperAPI plugin configures this for you and asks for the API key when the plugin is enabled. To add it by hand:
+
 ```json
 {
   "mcpServers": {
     "ScraperAPI": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://mcp.scraperapi.com/mcp", "--header", "Authorization: Bearer ${SCRAPERAPI_API_KEY}"]
+      "type": "http",
+      "url": "https://mcp.scraperapi.com/mcp",
+      "headers": {
+        "Authorization": "Bearer <YOUR_SCRAPERAPI_API_KEY>"
+      }
     }
   }
 }
@@ -41,16 +46,16 @@ Python-based, installed via PyPI (`pip install scraperapi-mcp-server`). Exposes 
 
 Both variants expose the same 28 tools, so tool presence no longer distinguishes them. Tell them apart by transport and configuration instead:
 
-- **Remote** — connected via `npx mcp-remote https://mcp.scraperapi.com/mcp` with the API key passed as a `Authorization: Bearer` header (env `SCRAPERAPI_API_KEY`).
+- **Remote** — an HTTP server at `https://mcp.scraperapi.com/mcp` with the API key passed as an `Authorization: Bearer` header.
 - **Local** — run as `python -m scraperapi_mcp_server` with the API key in the `API_KEY` env var.
 
 Either way, select tools from the full list above — no variant-specific fallbacks are needed.
 
-### Environment Variables
+### Where the API key goes
 
-| Variant | Env Var | Description |
+| Variant | Setting | Description |
 |---------|---------|-------------|
-| Remote | `SCRAPERAPI_API_KEY` | API key passed as Bearer token to the hosted MCP server |
-| Local | `API_KEY` | API key passed to the local Python MCP server |
+| Remote | `Authorization: Bearer` header | Entered in the plugin's settings when it is enabled, or written into the header by hand |
+| Local | `API_KEY` env var | API key passed to the local Python MCP server |
 
-Both variables hold the same ScraperAPI key value — the different names reflect what each server variant expects. Direct users to https://www.scraperapi.com/dashboard to obtain or manage their key.
+Both hold the same ScraperAPI key value. Direct users to https://www.scraperapi.com/dashboard to obtain or manage their key.
