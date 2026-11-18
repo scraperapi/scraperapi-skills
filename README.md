@@ -28,7 +28,7 @@ export SCRAPERAPI_API_KEY="your-key-here"
 
 ### 3. Install the plugin
 
-The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 22 MCP tools become available to the agent, authed via your `SCRAPERAPI_API_KEY`.
+The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 28 MCP tools become available to the agent, authed via your `SCRAPERAPI_API_KEY`.
 
 **Claude Code community marketplace:**
 
@@ -73,6 +73,7 @@ Once installed, the skills load automatically — start an agent session and try
 | **[`scraperapi-java-sdk`](skills/scraperapi-java-sdk/SKILL.md)** | Best-practices reference for the Java SDK (`com.scraperapi:sdk`): fluent builder API, escalation ladder, async jobs, structured data. |
 | **[`scraperapi-cli`](skills/scraperapi-cli/SKILL.md)** | Use the official `sapi` command-line tool from shells, pipelines, cron, and CI. Covers install, auth, every command, JSON / piping behaviour, and common recipes. |
 | **[`scraperapi-n8n`](skills/scraperapi-n8n/SKILL.md)** | Generate n8n workflows that use the official ScraperAPI community node (`n8n-nodes-scraperapi-official`). Produces importable workflow JSON or step-by-step build guides. |
+| **[`scraperapi-zapier`](skills/scraperapi-zapier/SKILL.md)** | Guide users to build Zaps with the official ScraperAPI Zapier integration: add web scraping, SERP data, or e-commerce data to a Zapier workflow. |
 | **[`scraperapi-scraper-builder`](skills/scraperapi-scraper-builder/SKILL.md)** | Build a runnable scraper end-to-end: picks structured endpoint vs raw HTML, JS rendering, proxy tier, sync vs async, then generates a complete Python or Node.js script with retries, pagination, and credit estimation. |
 | **[`scraperapi-lead-enrichment`](skills/scraperapi-lead-enrichment/SKILL.md)** | Enrich a contact or company from any seed (name, domain, LinkedIn URL, email) and produce a structured contact card with person and company fields. |
 | **[`scraperapi-research-agent`](skills/scraperapi-research-agent/SKILL.md)** | Autonomous research agent: takes a question, uses ScraperAPI to search and scrape relevant pages, uploads content as file artifacts to the Anthropic Files API, then feeds everything to Claude for a cited markdown report. |
@@ -148,8 +149,8 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 │   ├── scraperapi-ruby-sdk/
 │   ├── scraperapi-scraper-builder/
 │   ├── scraperapi-seo-audit/
-│   └── scraperapi-serp-intelligence/
-├── dist/                        # packaged .skill artifacts (for distribution)
+│   ├── scraperapi-serp-intelligence/
+│   └── scraperapi-zapier/
 ├── LICENSE
 └── README.md
 ```
