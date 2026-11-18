@@ -17,9 +17,9 @@ metadata:
 
 Given a list of products (ASINs, Walmart URLs, or free-text Google Shopping queries) and an optional baseline file, fetch current prices via ScraperAPI's structured endpoints, compare against the baseline, and produce a structured change report.
 
-**You — Claude — execute the API calls** using the `Bash` tool. Do not generate a script for the user to run; fetch the data yourself in this turn and report findings as you go. If the user explicitly asks for a CLI/cron-able script instead, point them at `scraperapi-cli` and stop.
+**You — Claude — execute the API calls** using the ScraperAPI MCP tools. Do not generate a script for the user to run; fetch the data yourself in this turn and report findings as you go. If the user explicitly asks for a CLI/cron-able script instead, point them at `scraperapi-cli` and stop.
 
-**Auth:** All transports authenticate against ScraperAPI. The MCP server reads the key from its own configured environment when the user set it up. The curl fallback reads `$SCRAPERAPI_API_KEY` from the shell. Do not run a standalone check for the key — just make the first real request. ScraperAPI returns `401` if the key is missing or invalid, and Phase 3's failure-handling table already covers that case. Adding a pre-flight `echo` only costs the user an extra permission prompt without learning anything you wouldn't learn from the first call.
+**Auth:** The MCP server holds the API key from the user's setup. Do not run a standalone check for the key — just make the first real request. A missing or invalid key comes back as an auth error, and Phase 3's failure-handling table already covers that case.
 
 ---
 
@@ -55,9 +55,7 @@ Never silently overwrite a baseline without confirming. If the user wants the fi
 
 **Use the ScraperAPI MCP server for this skill.** Tools like `amazon_product`, `walmart_product`, and `google_shopping` give typed arguments and structured responses with no shell-quoting or stdout-parsing concerns, which is what you want for a pricing workflow where field accuracy matters.
 
-If the ScraperAPI MCP server is listed as still connecting, wait briefly and re-check with `ToolSearch` before doing anything else. If MCP is genuinely unavailable, fall back to `curl` (documented below) — do **not** reach for the `sapi` CLI here, even if it is on `$PATH`. CLI output requires shell parsing that's error-prone for price data, and this skill stays simpler by routing all price calls through one transport.
-
-At the end of the report, if you had to use the `curl` fallback, mention that installing the MCP server (`scraperapi-mcp` skill covers setup) will simplify future runs. Never block the current run on installing tooling.
+If the ScraperAPI MCP server is listed as still connecting, wait briefly and re-check with `ToolSearch` before doing anything else. If MCP is genuinely unavailable, stop and tell the user to set up the MCP server (the `scraperapi-mcp` skill covers setup) — do **not** fall back to `curl` or the `sapi` CLI. This skill routes all price calls through one transport.
 
 Run all targets in parallel — multiple tool calls in a single message — so a 10-product watchlist finishes in roughly one round-trip rather than ten.
 
@@ -71,23 +69,7 @@ Run all targets in parallel — multiple tool calls in a single message — so a
 
 See the `scraperapi-mcp` skill for full schemas. Walmart's MCP tool takes a *product ID*, not a URL — strip the `/ip/<id>` segment.
 
-### `curl` fallback
-
-```bash
-curl -sG "https://api.scraperapi.com/structured/amazon/product" \
-  --data-urlencode "api_key=$SCRAPERAPI_API_KEY" \
-  --data-urlencode "asin=B08N5WRWNW" --data-urlencode "country=us"
-
-curl -sG "https://api.scraperapi.com/structured/walmart/product" \
-  --data-urlencode "api_key=$SCRAPERAPI_API_KEY" \
-  --data-urlencode "url=https://www.walmart.com/ip/123456789"
-
-curl -sG "https://api.scraperapi.com/structured/google/shopping" \
-  --data-urlencode "api_key=$SCRAPERAPI_API_KEY" \
-  --data-urlencode "query=airpods pro 2" --data-urlencode "country=us"
-```
-
-### Expected response fields (same for MCP and curl)
+### Expected response fields
 
 - **Amazon:** `pricing` (formatted string like `"$129.99"`), `list_price`, `availability_status`, `product_information.title`, offers. Parse the number out of `pricing` and carry the currency separately.
 - **Walmart:** `price`, `availability`, `seller_name`, `product_name`.
@@ -97,17 +79,17 @@ The exact field names occasionally drift — inspect the first real response of 
 
 ### Handling failures
 
-MCP tools surface errors as tool-call errors; `curl` returns an HTTP status code.
+MCP tools surface errors as tool-call errors carrying the upstream HTTP status.
 
 | Status | Action |
 |--------|--------|
 | 200 with empty/missing price field | Treat as "price not visible" — likely out of stock or layout changed. Record `null` and surface it. |
-| 401 | API key missing or invalid — stop and tell the user to set `SCRAPERAPI_API_KEY` (or fix the value). Do not retry. |
-| 403 | Blocked — retry once with the premium flag (`premium: true` for MCP, `&premium=true` for curl). If it still fails, mark that target as failed and continue. |
+| 401 | API key missing or invalid — stop and tell the user to fix the API key in their ScraperAPI MCP setup. Do not retry. |
+| 403 | Blocked — retry once with `premium: true`. If it still fails, mark that target as failed and continue. |
 | 404 | Product no longer exists — record as `removed` in the report. |
 | 429 | Concurrent limit hit — back off (sleep 3s) and retry once. |
 | 5xx | Transient — retry up to 3 times with backoff (2s, 4s, 8s). |
-| MCP tool unavailable | Fall back to `curl` for the rest of the run. |
+| MCP tool unavailable | Stop and tell the user to set up the MCP server. |
 
 Do **not** retry forever. Failed targets after retries get a `status: "failed"` row in the report so the user knows what's missing.
 

@@ -2,13 +2,9 @@
 
 Reference for the three structured endpoints used by `scraperapi-price-monitoring`. Read this before constructing the first request of a run so you use the correct parameter names. Always verify against the current public docs (https://docs.scraperapi.com/) — fields can change and this file is a snapshot.
 
-Three transports can reach these endpoints. The skill picks at the start of a run, in priority order:
+The skill calls these endpoints only through the **ScraperAPI MCP server** — typed tool calls (`amazon_product`, `walmart_product`, `google_shopping`). See the `scraperapi-mcp` skill for full schemas.
 
-1. **ScraperAPI MCP server** — typed tool calls (`amazon_product`, `walmart_product`, `google_shopping`). Use whenever the tools are present in the available-tools list. See the `scraperapi-mcp` skill for full schemas.
-2. **`sapi` CLI** — `sapi structured <site> <vertical> <arg> --api-key "$SCRAPERAPI_API_KEY" --json`. The `--json` flag is essential — it suppresses the interactive credit-cost confirmation.
-3. **Raw HTTP via `curl`** — last resort, requires `--data-urlencode` for each parameter.
-
-Each section below documents all three surfaces. The parameter semantics are identical; only the wire format differs.
+The CLI and HTTP lines below are reference only, for mapping parameter names. The skill does not run them.
 
 ---
 
