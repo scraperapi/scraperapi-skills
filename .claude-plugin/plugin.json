@@ -9,6 +9,7 @@
   },
   "homepage": "https://www.scraperapi.com",
   "repository": "https://github.com/scraperapi/scraperapi-skills",
+  "icon": "assets/icon.svg",
   "license": "MIT",
   "keywords": [
     "scraperapi",
