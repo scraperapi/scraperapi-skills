@@ -76,12 +76,12 @@ building.
 ## Path A — MCP Server (LLM tool layer)
 
 Use this when the consumer is an LLM agent (Claude Code, custom agent loop) that should call
-ScraperAPI as tools. The MCP server exposes up to 22 tools — scrape, Google, Amazon, Walmart, eBay,
-Redfin, and crawler — over a single connection.
+ScraperAPI as tools. The MCP server exposes up to 28 tools — scrape, Google, Amazon, Walmart, eBay,
+Redfin, crawler, and AI Parser — over a single connection.
 
 ### Remote server (recommended)
 
-No installation required. All 22 tools available.
+No installation required. All 28 tools available.
 
 Add to your `claude_desktop_config.json`, Claude Code project settings, or MCP client config:
 
@@ -130,7 +130,7 @@ variant, use `scrape` with `autoparse: true` and `outputFormat: "json"` on a Goo
 ### After MCP setup
 
 Hand off to the **`scraperapi-mcp`** skill. It owns tool selection, parameter optimization, credit
-cost guidance, and error recovery for all 22 MCP tools. Also check the
+cost guidance, and error recovery for all 28 MCP tools. Also check the
 [MCP setup reference](../scraperapi-mcp/references/setup.md) for variant detection and
 troubleshooting.
 
