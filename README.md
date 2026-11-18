@@ -28,7 +28,7 @@ export SCRAPERAPI_API_KEY="your-key-here"
 
 ### 3. Install the plugin
 
-The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 28 MCP tools become available to the agent, authed via your `SCRAPERAPI_API_KEY`.
+The plugin ships with ScraperAPI's [hosted MCP server](https://mcp.scraperapi.com/mcp) so all 28 MCP tools become available to the agent. In Claude Code, the plugin asks for your API key when you enable it and stores it securely.
 
 **Claude Code community marketplace:**
 

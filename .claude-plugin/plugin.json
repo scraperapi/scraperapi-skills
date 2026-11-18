@@ -10,6 +10,15 @@
   "homepage": "https://www.scraperapi.com",
   "repository": "https://github.com/scraperapi/scraperapi-skills",
   "icon": "assets/icon.svg",
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "ScraperAPI API key",
+      "description": "Your API key from https://dashboard.scraperapi.com",
+      "sensitive": true,
+      "required": true
+    }
+  },
   "license": "MIT",
   "keywords": [
     "scraperapi",
