@@ -32,35 +32,37 @@ Live market research powered by ScraperAPI's web scraping infrastructure. Pulls 
 
 ## MCP Tools Available
 
+These tools come from the ScraperAPI MCP server. Their full names carry a prefix that depends on how the server is connected (plugin, claude.ai connector, or a local config), so match them by the tool name below.
+
 | Tool | Best used for | Render needed? |
 |------|--------------|---------------|
-| `mcp__ScraperAPIRemote__google_search` | Discovering sources, mapping player presence, SERP analysis | No |
-| `mcp__ScraperAPIRemote__google_news` | Trend signals, recent market moves, funding and launches | No |
-| `mcp__ScraperAPIRemote__google_shopping` | Category pricing structure, product listings at scale | No |
-| `mcp__ScraperAPIRemote__google_jobs` | Market-level hiring signals, technology bets, expansion patterns | No |
-| `mcp__ScraperAPIRemote__scrape` | Any public URL — homepages, pricing pages, blog indexes, review pages | See note |
-| `mcp__ScraperAPIRemote__amazon_product` | Product detail, ratings, review summaries | No |
-| `mcp__ScraperAPIRemote__amazon_search` | Category structure, bestseller rankings, price distribution | No |
-| `mcp__ScraperAPIRemote__amazon_offers` | Seller landscape, price variation across sellers | No |
-| `mcp__ScraperAPIRemote__walmart_product` | Product detail and pricing | No |
-| `mcp__ScraperAPIRemote__walmart_search` | Category structure and pricing on Walmart | No |
-| `mcp__ScraperAPIRemote__walmart_review` | Consumer sentiment on physical products | No |
-| `mcp__ScraperAPIRemote__ebay_product` | Secondary market pricing, product condition distribution | No |
-| `mcp__ScraperAPIRemote__ebay_search` | Resale market structure and demand signals | No |
-| `mcp__ScraperAPIRemote__crawler_job_start` | Deep research requiring many pages (blog indexes, full review sets) | — |
-| `mcp__ScraperAPIRemote__crawler_job_status` | Check async crawl job status | — |
+| `google_search` | Discovering sources, mapping player presence, SERP analysis | No |
+| `google_news` | Trend signals, recent market moves, funding and launches | No |
+| `google_shopping` | Category pricing structure, product listings at scale | No |
+| `google_jobs` | Market-level hiring signals, technology bets, expansion patterns | No |
+| `scrape` | Any public URL — homepages, pricing pages, blog indexes, review pages | See note |
+| `amazon_product` | Product detail, ratings, review summaries | No |
+| `amazon_search` | Category structure, bestseller rankings, price distribution | No |
+| `amazon_offers` | Seller landscape, price variation across sellers | No |
+| `walmart_product` | Product detail and pricing | No |
+| `walmart_search` | Category structure and pricing on Walmart | No |
+| `walmart_review` | Consumer sentiment on physical products | No |
+| `ebay_product` | Secondary market pricing, product condition distribution | No |
+| `ebay_search` | Resale market structure and demand signals | No |
+| `crawler_job_start` | Deep research requiring many pages (blog indexes, full review sets) | — |
+| `crawler_job_status` | Check async crawl job status | — |
 
 ### Render guidance for `scrape`
 
-When calling `mcp__ScraperAPIRemote__scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — LinkedIn profiles, Crunchbase, React/SPA-based sites (e.g. G2 grids, Glassdoor). Use standard (no render flags) for static HTML pages: news articles, Wikipedia, company homepages, GitHub, and most `/pricing` pages. JS-rendered calls cost significantly more credits — reserve them for pages where a standard fetch is known to return a shell.
+When calling `scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — LinkedIn profiles, Crunchbase, React/SPA-based sites (e.g. G2 grids, Glassdoor). Use standard (no render flags) for static HTML pages: news articles, Wikipedia, company homepages, GitHub, and most `/pricing` pages. JS-rendered calls cost significantly more credits — reserve them for pages where a standard fetch is known to return a shell.
 
 ### Async crawler workflow
 
 Use `crawler_job_start` when a research task requires fetching many pages at once (e.g. scraping a full review index, a blog archive, or a large product category). Pattern:
 
-1. Call `mcp__ScraperAPIRemote__crawler_job_start` with the target URL and crawl parameters.
+1. Call `crawler_job_start` with the target URL and crawl parameters.
 2. Note the `job_id` returned.
-3. Call `mcp__ScraperAPIRemote__crawler_job_status` with that `job_id` every 10–15 seconds until `status` is `"completed"` or `"failed"`.
+3. Call `crawler_job_status` with that `job_id` every 10–15 seconds until `status` is `"completed"` or `"failed"`.
 4. On `"completed"`, retrieve and synthesize the results. On `"failed"`, log the failure and continue with whatever data you have.
 
 Do not use the async crawler for single-page fetches — use `scrape` directly.
@@ -157,22 +159,22 @@ When you hit a stop condition, announce it: *"Stopping data collection: [reason]
 **Data gathering — call these tools, reading results as they return:**
 
 Run these in parallel (first batch):
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] review site:g2.com OR site:capterra.com"` — surfaces software review pages
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] complaints OR problems OR wish site:reddit.com"` — surfaces Reddit discussions
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "best [category] [year] reviews"` — surfaces roundup content
+- Call `google_search` with `query = "[category] review site:g2.com OR site:capterra.com"` — surfaces software review pages
+- Call `google_search` with `query = "[category] complaints OR problems OR wish site:reddit.com"` — surfaces Reddit discussions
+- Call `google_search` with `query = "best [category] [year] reviews"` — surfaces roundup content
 
 From the URLs returned, select the 2–3 most information-dense sources and fetch them (second batch, run in parallel):
-- Call `mcp__ScraperAPIRemote__scrape` with the G2 category grid URL (use `render=true, premium=true`)
-- Call `mcp__ScraperAPIRemote__scrape` with the most relevant Reddit thread URL (standard fetch)
-- Call `mcp__ScraperAPIRemote__scrape` with the Capterra category URL (standard fetch)
+- Call `scrape` with the G2 category grid URL (use `render=true, premium=true`)
+- Call `scrape` with the most relevant Reddit thread URL (standard fetch)
+- Call `scrape` with the Capterra category URL (standard fetch)
 
 For physical product categories, add (run in parallel with above):
-- Call `mcp__ScraperAPIRemote__amazon_search` with `query = "[category]"` — top products reveal what the market buys
-- Call `mcp__ScraperAPIRemote__amazon_product` with the URL of the top-ranked product — for review summary and themes
-- Call `mcp__ScraperAPIRemote__walmart_review` with a top product URL — for cross-platform sentiment
+- Call `amazon_search` with `query = "[category]"` — top products reveal what the market buys
+- Call `amazon_product` with the URL of the top-ranked product — for review summary and themes
+- Call `walmart_review` with a top product URL — for cross-platform sentiment
 
 Then pull a recency pass:
-- Call `mcp__ScraperAPIRemote__scrape` with `[g2-url]?order=recent` — recent vs. top-rated reviews often diverge meaningfully
+- Call `scrape` with `[g2-url]?order=recent` — recent vs. top-rated reviews often diverge meaningfully
 
 **Analysis rules:**
 
@@ -265,18 +267,18 @@ Then pull a recency pass:
 **Data gathering — call these tools, reading results as they return:**
 
 Run these in parallel (first batch):
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] [year]"` — checks recency of discussion
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] growing OR declining OR trend"` — surfaces explicit trend claims
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[emerging sub-category or related term]"` — tests adjacent demand
+- Call `google_search` with `query = "[category] [year]"` — checks recency of discussion
+- Call `google_search` with `query = "[category] growing OR declining OR trend"` — surfaces explicit trend claims
+- Call `google_search` with `query = "[emerging sub-category or related term]"` — tests adjacent demand
 
 Run these in parallel (second batch):
-- Call `mcp__ScraperAPIRemote__google_news` with `query = "[category] funding OR launch OR acquisition"` — money movement signals
-- Call `mcp__ScraperAPIRemote__google_news` with `query = "[category] trend OR forecast OR growth"` — analyst and press signals
+- Call `google_news` with `query = "[category] funding OR launch OR acquisition"` — money movement signals
+- Call `google_news` with `query = "[category] trend OR forecast OR growth"` — analyst and press signals
 
 Run these in parallel (third batch):
-- Call `mcp__ScraperAPIRemote__amazon_search` with `query = "[category]"` — bestseller rankings reveal current demand shape
-- Call `mcp__ScraperAPIRemote__google_shopping` with `query = "[category]"` — new entrants and price movement
-- Call `mcp__ScraperAPIRemote__google_jobs` with `query = "[category] [key role]"` — hiring as a leading indicator of where companies are investing
+- Call `amazon_search` with `query = "[category]"` — bestseller rankings reveal current demand shape
+- Call `google_shopping` with `query = "[category]"` — new entrants and price movement
+- Call `google_jobs` with `query = "[category] [key role]"` — hiring as a leading indicator of where companies are investing
 
 **Analysis rules:**
 
@@ -364,22 +366,22 @@ Run these in parallel (third batch):
 **Data gathering — call these tools, reading results as they return:**
 
 For physical product categories, run in parallel:
-- Call `mcp__ScraperAPIRemote__amazon_search` with `query = "[category]"` — rankings and price spread
-- Call `mcp__ScraperAPIRemote__google_shopping` with `query = "[category]"` — price distribution across sellers
-- Call `mcp__ScraperAPIRemote__walmart_search` with `query = "[category]"` — mass-market price anchors
-- Call `mcp__ScraperAPIRemote__ebay_search` with `query = "[category]"` — secondary market and price floor signals
+- Call `amazon_search` with `query = "[category]"` — rankings and price spread
+- Call `google_shopping` with `query = "[category]"` — price distribution across sellers
+- Call `walmart_search` with `query = "[category]"` — mass-market price anchors
+- Call `ebay_search` with `query = "[category]"` — secondary market and price floor signals
 
 For SaaS/software categories, first identify the top players:
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] pricing"` — find pricing pages for the top 4–6 players
+- Call `google_search` with `query = "[category] pricing"` — find pricing pages for the top 4–6 players
 
 Then scrape their pricing pages in parallel (most pricing pages are static HTML — use standard fetch):
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-a]/pricing"`
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-b]/pricing"`
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-c]/pricing"`
+- Call `scrape` with `url = "[player-a]/pricing"`
+- Call `scrape` with `url = "[player-b]/pricing"`
+- Call `scrape` with `url = "[player-c]/pricing"`
 
 Then gather third-party pricing commentary:
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] pricing review OR hidden costs OR expensive"`
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] affordable OR cheap OR free alternative"`
+- Call `google_search` with `query = "[category] pricing review OR hidden costs OR expensive"`
+- Call `google_search` with `query = "[category] affordable OR cheap OR free alternative"`
 
 **Analysis rules:**
 
@@ -472,19 +474,19 @@ Then gather third-party pricing commentary:
 **Data gathering — call these tools, reading results as they return:**
 
 Run these in parallel (first batch — discover who's in the market):
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "best [category] tools [year]"` — surfaces comparison roundups
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[category] alternatives OR competitors"` — surfaces head-to-head comparisons
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "site:g2.com [category] grid OR leaders"` — surfaces analyst-style market maps
-- Call `mcp__ScraperAPIRemote__google_news` with `query = "[category] funding OR acquisition OR launch"` — surfaces recent moves
+- Call `google_search` with `query = "best [category] tools [year]"` — surfaces comparison roundups
+- Call `google_search` with `query = "[category] alternatives OR competitors"` — surfaces head-to-head comparisons
+- Call `google_search` with `query = "site:g2.com [category] grid OR leaders"` — surfaces analyst-style market maps
+- Call `google_news` with `query = "[category] funding OR acquisition OR launch"` — surfaces recent moves
 
 From the results, identify the 6–8 most significant players. Then fetch their homepages in parallel (standard fetch — limit to top players):
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-1-homepage]"`
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-2-homepage]"`
-- Call `mcp__ScraperAPIRemote__scrape` with `url = "[player-3-homepage]"`
+- Call `scrape` with `url = "[player-1-homepage]"`
+- Call `scrape` with `url = "[player-2-homepage]"`
+- Call `scrape` with `url = "[player-3-homepage]"`
 
 Then validate stated positioning against customer perception:
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[player-1] review OR alternative OR vs"`
-- Call `mcp__ScraperAPIRemote__google_search` with `query = "[player-2] review OR alternative OR vs"`
+- Call `google_search` with `query = "[player-1] review OR alternative OR vs"`
+- Call `google_search` with `query = "[player-2] review OR alternative OR vs"`
 
 **Analysis rules:**
 

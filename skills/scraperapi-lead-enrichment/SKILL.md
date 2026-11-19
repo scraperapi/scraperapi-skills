@@ -41,7 +41,7 @@ Announce before searching: *"Starting with: [what I have]. Will search for: [wha
 
 Run searches by *what you're looking for*, not by which site to target. Google will surface whatever sources exist — company website, Crunchbase, Wikipedia, news, directories, LinkedIn, G2, etc. Collect all promising URLs from `organic_results[].link` and carry them into Phase 3.
 
-**Search tool:** Call `mcp__ScraperAPI__google_search` with `query`, `num: 10`, and `countryCode: "us"`. Read snippets carefully — they often contain the data you need without an extra fetch.
+**Search tool:** Call the ScraperAPI MCP server's `google_search` tool (its full name carries a setup-specific prefix) with `query`, `num: 10`, and `countryCode: "us"`. Read snippets carefully — they often contain the data you need without an extra fetch.
 
 ### 2a. Person name as seed
 
@@ -70,7 +70,7 @@ Then run 2b with the company name.
    Surfaces: contact pages, email formats, phone directories.
 
 4. **Recent news**
-   Call `mcp__ScraperAPI__google_news` with `query: "COMPANY_NAME"` and `num: 5`.
+   Call `google_news` with `query: "COMPANY_NAME"` and `num: 5`.
    Extract `news_results[].title`, `news_results[].date`, `news_results[].link`. Keep the 3 most recent.
 
 ### 2c. Email address as seed
@@ -109,7 +109,7 @@ Prefer cheap standard fetches (1 credit) over JS-rendered ones (10 credits) when
 
 ### 3b. Fetch pages
 
-For each selected URL, call `mcp__ScraperAPI__scrape` with the appropriate options:
+For each selected URL, call `scrape` with the appropriate options:
 
 - **Standard HTML page** (news, Wikipedia, company sites, G2, GitHub): `url`, `outputFormat: "markdown"`
 - **JS-rendered page** (LinkedIn, Crunchbase, React/SPA sites): `url`, `outputFormat: "markdown"`, `render: true`, `premium: true`
