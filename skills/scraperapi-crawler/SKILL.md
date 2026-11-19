@@ -8,7 +8,7 @@ description: >
   "follow links and scrape each page", "how do I use the ScraperAPI crawler API",
   "scrape a site map", "extract data from every product page on a site",
   "ScraperAPI crawler job API". Covers job creation, URL regex patterns, depth vs budget,
-  per-page scraping parameters, status polling, webhooks, scheduling, and credit costs.
+  per-page scraping parameters, job states, webhooks, scheduling, and credit costs.
   Also invoke when the user is building a site-wide scraper and asks which ScraperAPI product to use.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
@@ -18,7 +18,7 @@ metadata:
       env:
         - SCRAPERAPI_API_KEY
     emoji: "🕷️"
-    homepage: https://docs.scraperapi.com/crawler
+    homepage: https://docs.scraperapi.com/scraperapi-crawler-v2.0
 ---
 
 # ScraperAPI Crawler
@@ -39,10 +39,11 @@ site but don't have the URLs upfront.
 | Action | Method | URL |
 |--------|--------|-----|
 | Start a crawl | POST | `https://crawler.scraperapi.com/job` |
-| Check status | GET | `https://crawler.scraperapi.com/job/<jobId>` |
 | Cancel a crawl | DELETE | `https://crawler.scraperapi.com/job/<jobId>` |
 
-Auth: include `api_key` in the JSON body (POST) or as a query parameter (GET/DELETE).
+Auth: include `api_key` in the JSON body (POST) or as a query parameter (DELETE).
+
+Starting a job returns `{"status": "initiated", "jobId": "<jobId>"}`.
 
 ## Starting a Crawl
 
@@ -64,6 +65,7 @@ job = requests.post(
             "country_code": "us",
             "render":       False,
         },
+        # Required: results are delivered to this webhook (see Webhooks)
         "callback": {
             "type": "webhook",
             "url":  "https://yourapp.com/crawler-results"
@@ -83,6 +85,7 @@ print(f"Started: {job_id}")
 | `start_url` | Seed URL — where the crawl begins |
 | `url_regexp_include` | Regex defining which URLs to crawl (see patterns below) |
 | `max_depth` **or** `crawl_budget` | Must provide at least one; providing both applies whichever limit is hit first |
+| `callback` | `{"type": "webhook", "url": "..."}`. Only webhook callbacks are supported |
 
 ## URL Regex Patterns
 
@@ -148,35 +151,21 @@ Controls how each discovered page is fetched. All standard ScraperAPI parameters
 Add `render: true` only if the site uses JavaScript to load content — it multiplies the credit
 cost of every crawled page. Test without it first.
 
-## Checking Status
+## Tracking a Crawl
 
-```python
-import time, requests
-
-def wait_for_crawl(job_id, api_key, poll_interval=10):
-    url = f"https://crawler.scraperapi.com/job/{job_id}"
-    while True:
-        data = requests.get(url, params={"api_key": api_key}).json()
-        status = data.get("status")
-        print(f"Status: {status}")
-        if status in ("completed", "failed", "cancelled", "delivered"):
-            return data
-        time.sleep(poll_interval)
-```
-
-Job states: `delayed` → `running` → `completed` / `failed` / `cancelled` → `in delivery` → `delivered`.
-
-Use webhooks instead of polling for long crawls — they push results as each page is scraped,
-rather than requiring you to poll for a final result.
+There is no documented endpoint for polling a crawl's progress. Track it through the webhook:
+each scraped page arrives as its own payload, and a final summary payload arrives when the crawl
+ends. Job states: `delayed` → `running` → `completed` / `failed` / `cancelled` → `in delivery` →
+`delivered`.
 
 ## Webhooks
 
-When `callback` is set, ScraperAPI POSTs results to your endpoint as each page is scraped (not
-just at the end). Each payload contains the crawled URL, HTML/content, credit cost for that
-request, and the current depth.
+`callback` is required. ScraperAPI POSTs to your endpoint as each page is scraped (not just at
+the end). Per-page payloads include `jobId`, `url`, `status`, `credits` (this page's cost),
+`currentCost` (running total) and `currentDepth`; failed pages carry a `failReason`.
 
-A final summary payload is sent when the crawl completes, listing all succeeded/failed URLs and
-total cost.
+The final summary payload includes `jobId`, `jobState`, `jobCost`, `crawlBudget`, and the
+`completed`, `cancelled` and `failed` URL lists.
 
 ```json
 {
@@ -187,9 +176,9 @@ total cost.
 }
 ```
 
-The webhook URL must be publicly reachable. ScraperAPI retries delivery up to 3 times; a failed
-webhook does not stop the crawl itself. Results are also retained for up to 30 days if you need
-to re-fetch them.
+The webhook URL must be publicly reachable. ScraperAPI retries failed deliveries, and a failed
+webhook does not stop the crawl itself. Results are stored for up to 7 days (a scheduled crawl's
+new results replace the previous ones), so save each payload as it arrives.
 
 ## Scheduling
 
@@ -216,22 +205,22 @@ site's rate: 1 on a normal site, 10 behind Cloudflare and similar, 5 on Amazon/W
 Set `crawl_budget` to cap total credits. The crawl stops gracefully when the budget is reached —
 it will not exceed it. `200` and `404` pages are charged; failed (`500`) ones are not.
 
-Check the `sa-credit-cost` header on each webhook payload to see per-page cost; use this to
-calibrate `crawl_budget` for future runs.
+Each webhook payload's `credits` field shows that page's cost and `currentCost` the total so far,
+and the summary's `jobCost` gives the total; use them to calibrate `crawl_budget` for future runs.
+If a single page would cost more than `crawl_budget`, the job fails to start.
 
 ## Error Handling
 
 | Code | Meaning | Action |
 |------|---------|--------|
-| 200 | Job created or status returned | Continue |
+| 200 | Job created | Continue |
 | 400 | Malformed request | Check required fields and regex syntax |
 | 401 | Invalid API key | Check `SCRAPERAPI_API_KEY` |
-| 403 | Credits exhausted or free plan depth limit | Upgrade or reduce `max_depth`/`crawl_budget` |
-| 429 | Too many concurrent jobs | Wait and retry |
-| 500 | Transient failure | Retry with backoff |
+| 403 | Free plan limit hit: `max_depth` above 1, or a `schedule` | Lower `max_depth` to 1, drop `schedule`, or upgrade |
 
 ## Documentation
 
-- [Crawler overview](https://docs.scraperapi.com/crawler)
-- [API reference](https://docs.scraperapi.com/crawler/api-reference)
+- [Crawler overview](https://docs.scraperapi.com/scraperapi-crawler-v2.0)
+- [Job lifecycle and parameters](https://docs.scraperapi.com/scraperapi-crawler-v2.0/crawler-api/job-lifecycle)
+- [Callbacks, errors and best practices](https://docs.scraperapi.com/scraperapi-crawler-v2.0/crawler-api/callbacks-errors-and-best-practices)
 - [Dashboard](https://dashboard.scraperapi.com/)

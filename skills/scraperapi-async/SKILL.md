@@ -30,7 +30,7 @@ webhook.
 ## When NOT to use Async
 
 - **Single URL, result needed immediately** → use the Standard API (`api.scraperapi.com`) — simpler and returns inline.
-- **Need to follow links across a site** → use the [Crawler](https://docs.scraperapi.com/crawler).
+- **Need to follow links across a site** → use the [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0).
 - **Need recurring scheduled scraping** → use [DataPipeline](https://docs.scraperapi.com/data-pipeline).
 
 Use Async when: scraping 20+ URLs, the target site is slow or flaky, you want webhook delivery,
