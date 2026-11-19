@@ -23,7 +23,7 @@ metadata:
 
 # ScraperAPI — Node.js SDK Best Practices
 
-**Requires:** Node.js 14+, `npm install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Node.js 18+ (the snippets use the global `fetch`), `npm install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
@@ -31,10 +31,12 @@ metadata:
 // CommonJS
 const scraperapiClient = require('scraperapi-sdk')(process.env.SCRAPERAPI_API_KEY);
 
-// ES Modules / TypeScript
-import ScraperAPIClient from 'scraperapi-sdk';
-const scraperapiClient = new ScraperAPIClient(process.env.SCRAPERAPI_API_KEY);
+// ES Modules / TypeScript — the default export is a factory function, not a class
+import scraperapi from 'scraperapi-sdk';
+const scraperapiClient = scraperapi(process.env.SCRAPERAPI_API_KEY);
 ```
+
+The package ships type definitions in `dist/` but doesn't declare them in `package.json`, so TypeScript reports a missing declaration file. Add `declare module 'scraperapi-sdk';` to a `.d.ts` file in your project, or set `noImplicitAny: false`.
 
 Never hardcode the API key. Read it from the environment every time.
 
@@ -52,32 +54,35 @@ Never hardcode the API key. Read it from the environment every time.
 ## Basic Usage
 
 ```js
-// GET — returns HTML as a string (Promise-based)
-const html = await scraperapiClient.get('https://example.com/');
+// GET — resolves to { body, headers, statusCode }, not a string
+const res = await scraperapiClient.get('https://example.com/');
+if (res.statusCode === 200) console.log(res.body);
 
 // With parameters
-const html = await scraperapiClient.get('https://example.com/', {
+const res = await scraperapiClient.get('https://example.com/', {
   render: true,
   country_code: 'us',
 });
 
 // Without async/await (Promise chain)
 scraperapiClient.get('https://example.com/')
-  .then(html => console.log(html))
-  .catch(err => console.error(err));
+  .then(res => console.log(res.statusCode, res.body))
+  .catch(err => console.error(err)); // network errors only, see Error Handling
 ```
+
+Every method (`get`, `post`, `put`) resolves even when ScraperAPI returns 401, 403, 429 or 500, so always check `res.statusCode` before using `res.body`.
 
 ## POST and PUT Requests
 
 ```js
 // POST — forward a JSON body to the target site
-const result = await scraperapiClient.post('https://example.com/api', {
+const res = await scraperapiClient.post('https://example.com/api', {
   body: JSON.stringify({ query: 'example' }),
   headers: { 'Content-Type': 'application/json' },
 });
 
 // PUT — same signature, different HTTP method
-const result = await scraperapiClient.put('https://example.com/resource', {
+const res = await scraperapiClient.put('https://example.com/resource', {
   body: JSON.stringify({ name: 'updated' }),
   headers: { 'Content-Type': 'application/json' },
 });
@@ -91,16 +96,16 @@ const result = await scraperapiClient.put('https://example.com/resource', {
 // Render JavaScript before returning HTML
 // Use when: page uses React/Vue/Angular, or initial scrape returns empty content
 // Cost: 10 credits per request (instead of 1)
-const html = await scraperapiClient.get('https://spa-site.com/', { render: true });
+const res = await scraperapiClient.get('https://spa-site.com/', { render: true });
 
 // Wait for a specific element before capturing (requires render: true)
-const html = await scraperapiClient.get('https://spa-site.com/', {
+const res = await scraperapiClient.get('https://spa-site.com/', {
   render: true,
   wait_for_selector: '.product-list',
 });
 
 // Screenshot (auto-enables rendering)
-const html = await scraperapiClient.get('https://example.com/', { screenshot: true });
+const res = await scraperapiClient.get('https://example.com/', { screenshot: true });
 ```
 
 Start without `render: true`. Add it only when the response is missing expected content.
@@ -109,20 +114,20 @@ Start without `render: true`. Add it only when the response is missing expected 
 
 ```js
 // Route through a specific country — no extra credit cost
-const html = await scraperapiClient.get('https://example.com/', { country_code: 'gb' });
+const res = await scraperapiClient.get('https://example.com/', { country_code: 'gb' });
 
 // Premium residential/mobile proxies
 // Cost: 10 credits (25 with render: true)
-const html = await scraperapiClient.get('https://hard-site.com/', { premium: true });
+const res = await scraperapiClient.get('https://hard-site.com/', { premium: true });
 
 // Ultra-premium — for the toughest anti-bot protections
 // Cost: 30 credits (75 with render: true)
 // Incompatible with custom headers — keep_headers is ignored when ultra_premium is set
-const html = await scraperapiClient.get('https://hardest-site.com/', { ultra_premium: true });
+const res = await scraperapiClient.get('https://hardest-site.com/', { ultra_premium: true });
 ```
 
 `premium` and `ultra_premium` are mutually exclusive — never set both.
-Escalation order: standard (1 cr) → render (10 cr) → premium (10 cr) → ultra_premium (30 cr).
+Escalation order: standard (1 cr) → render (10 cr) → premium (10 cr) → premium+render (25 cr) → ultra_premium (30 cr).
 
 ### Sessions (Sticky Proxy)
 
@@ -133,31 +138,33 @@ const page1 = await scraperapiClient.get('https://example.com/page1', { session_
 const page2 = await scraperapiClient.get('https://example.com/page2', { session_number: 42 });
 ```
 
+`session_number` can't be combined with `premium` or `ultra_premium`.
+
 ### Headers and Device Type
 
 ```js
 // Forward your own headers to the target site
 // Note: keep_headers is ignored when ultra_premium: true
-const html = await scraperapiClient.get('https://example.com/', {
+const res = await scraperapiClient.get('https://example.com/', {
   keep_headers: true,
   headers: { 'Accept-Language': 'en-US', 'Referer': 'https://google.com' },
 });
 
 // Emulate mobile or desktop browser
-const html = await scraperapiClient.get('https://example.com/', { device_type: 'mobile' });
+const res = await scraperapiClient.get('https://example.com/', { device_type: 'mobile' });
 ```
 
 ### Response Format and Autoparse
 
 ```js
 // Structured JSON for supported sites (Amazon, Google, etc.)
-const data = await scraperapiClient.get('https://amazon.com/dp/B09V3KXJPB', { autoparse: true });
+const res = await scraperapiClient.get('https://amazon.com/dp/B09V3KXJPB', { autoparse: true });
 
 // Markdown — useful for LLM pipelines or documentation tools
-const md = await scraperapiClient.get('https://docs.example.com/', { output_format: 'markdown' });
+const res = await scraperapiClient.get('https://docs.example.com/', { output_format: 'markdown' });
 
 // Plain text
-const text = await scraperapiClient.get('https://example.com/', { output_format: 'text' });
+const res = await scraperapiClient.get('https://example.com/', { output_format: 'text' });
 ```
 
 ## Account Information
@@ -182,16 +189,20 @@ async function scrapeWithEscalation(url) {
     { ultra_premium: true },               // 30 credits
   ];
   for (const params of tiers) {
-    const html = await scraperapiClient.get(url, params);
-    if (html && html.includes('<html')) return html;
+    const res = await scraperapiClient.get(url, params);
+    // bad key, out of credits or max_cost hit: a pricier tier won't help
+    if (res.statusCode === 401 || res.statusCode === 403) throw new Error(`ScraperAPI ${res.statusCode}: ${res.body}`);
+    if (res.statusCode === 200 && res.body.includes('<html')) return res.body;
   }
   return null;
 }
 ```
 
+Credits above are for a normal site; Google, Amazon and bot-protected sites cost more (see [Credit Cost Reference](#credit-cost-reference)).
+
 ## Async Jobs (for Batches)
 
-The sync SDK blocks on each call. For 20+ URLs, use the async endpoint directly to fan out jobs.
+The sync SDK waits on each call and sets no timeout of its own. For 20+ URLs, use the async endpoint directly to fan out jobs.
 
 ```js
 const API_KEY = process.env.SCRAPERAPI_API_KEY;
@@ -200,12 +211,14 @@ async function submitJob(url, apiParams = {}) {
   const res = await fetch('https://async.scraperapi.com/jobs', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey: API_KEY, url, apiParams }),
+    // without expectUnsuccessReport, a job that fails never reaches "failed"
+    body: JSON.stringify({ apiKey: API_KEY, url, apiParams, expectUnsuccessReport: true }),
   });
   return res.json(); // { id, status, statusUrl }
 }
 
-async function pollJob(job, maxWaitMs = 120_000, intervalMs = 5_000) {
+// Jobs can keep retrying for up to 24h; pick a deadline that fits your use case
+async function pollJob(job, maxWaitMs = 600_000, intervalMs = 10_000) {
   const deadline = Date.now() + maxWaitMs;
   while (Date.now() < deadline) {
     const res = await fetch(job.statusUrl);
@@ -217,10 +230,10 @@ async function pollJob(job, maxWaitMs = 120_000, intervalMs = 5_000) {
   throw new Error(`Job ${job.id} timed out`);
 }
 
-// Batch — submit all, then collect
+// Batch — submit all, then collect; allSettled so one failed job doesn't lose the rest
 const urls = ['https://example.com/p1', 'https://example.com/p2'];
-const jobs = await Promise.all(urls.map(submitJob));
-const results = await Promise.all(jobs.map(pollJob));
+const jobs = await Promise.all(urls.map(u => submitJob(u)));
+const results = await Promise.allSettled(jobs.map(j => pollJob(j)));
 ```
 
 ## Structured Data Endpoints
@@ -250,22 +263,27 @@ See [structured data docs](https://docs.scraperapi.com/nodejs) for all verticals
 
 ## Error Handling
 
+The SDK only rejects on network errors (DNS, connection reset). HTTP errors from ScraperAPI resolve normally, so read `statusCode`. It also sets no timeout; ScraperAPI can take up to 70s, so cap the wait yourself.
+
 ```js
+const withTimeout = (p, ms = 75_000) =>
+  Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('Timed out')), ms))]);
+
 async function safeScrape(url, params = {}) {
-  try {
-    return await scraperapiClient.get(url, params);
-  } catch (err) {
-    const status = err?.response?.status ?? err?.status;
-    if (status === 401) throw new Error('Invalid API key — check SCRAPERAPI_API_KEY');
-    if (status === 403) throw new Error("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
-    if (status === 429) throw new Error('Rate limit — reduce concurrency or switch to async');
-    if (status === 500 || status === 503) throw new Error('Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium or ultra_premium');
-    throw err;
-  }
+  const res = await withTimeout(scraperapiClient.get(url, params)); // rejects on network error or timeout
+  const { statusCode, body } = res;
+  if (statusCode === 200 || statusCode === 404) return res; // 404 is the target's answer (charged)
+  if (statusCode === 401) throw new Error('Invalid API key — check SCRAPERAPI_API_KEY');
+  if (statusCode === 403) throw new Error("Out of credits or over max_cost — check https://dashboard.scraperapi.com/billing (don't retry)");
+  if (statusCode === 429) throw new Error('Rate limit — reduce concurrency or switch to async');
+  if (statusCode === 500) throw new Error('Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium or ultra_premium');
+  throw new Error(`ScraperAPI ${statusCode}: ${body.slice(0, 200)}`);
 }
 ```
 
-Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 not found (target, charged),
+`Promise.race` stops waiting but doesn't cancel the underlying request.
+
+Status codes: 200 success, 400 malformed request, 401 bad key, 403 credits exhausted or `max_cost` exceeded (don't retry), 404 not found (target, charged),
 429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
@@ -279,7 +297,7 @@ Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404
 | `ultra_premium: true` | 30 |
 | `ultra_premium: true` + `render: true` | 75 |
 
-Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+Those are the costs on a normal site. Some sites cost more per request:
 
 | Site | Credits |
 |---|---|
@@ -287,6 +305,8 @@ Those are the costs on a normal site. Some sites cost more per request, before a
 | Google, Bing (all subdomains) | 25 |
 | LinkedIn | 30 |
 | Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+Combined costs vary by site; check the exact price with `/account/urlcost` or the `sa-credit-cost` header before a large run. Add `max_cost: N` to any request's options to cap what it can spend (ScraperAPI returns 403 instead).
 
 You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
 of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
