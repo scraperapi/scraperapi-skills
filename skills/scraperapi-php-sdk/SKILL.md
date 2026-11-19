@@ -190,15 +190,12 @@ $apiKey = getenv('SCRAPERAPI_API_KEY');
 function submitJob(string $url, array $apiParams = []): array
 {
     global $apiKey;
-    $ch = curl_init('https://async.scraperapi.com/jobs');
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode(['apiKey' => $apiKey, 'url' => $url, 'apiParams' => $apiParams]),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_RETURNTRANSFER => true,
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
+    $context = stream_context_create(['http' => [
+        'method'  => 'POST',
+        'header'  => 'Content-Type: application/json',
+        'content' => json_encode(['apiKey' => $apiKey, 'url' => $url, 'apiParams' => $apiParams]),
+    ]]);
+    $response = file_get_contents('https://async.scraperapi.com/jobs', false, $context);
     return json_decode($response, true); // ["id" => "...", "statusUrl" => "..."]
 }
 
