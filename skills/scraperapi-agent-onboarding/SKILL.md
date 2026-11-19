@@ -104,7 +104,7 @@ Add to your `claude_desktop_config.json`, Claude Code project settings, or MCP c
 Requires `SCRAPERAPI_API_KEY` set in the environment. `npx mcp-remote` handles the remote
 connection — no separate install step needed.
 
-### Local server (self-hosted, scrape-only)
+### Local server (self-hosted)
 
 If you prefer a local server or the remote endpoint is unavailable. Requires Python 3.11+.
 
@@ -124,8 +124,8 @@ pip install scraperapi-mcp-server
 }
 ```
 
-The local server exposes only the `scrape` tool. For structured Google search data on the local
-variant, use `scrape` with `autoparse: true` and `outputFormat: "json"` on a Google search URL.
+The local server exposes the same 28 tools as the remote one; only the transport and the
+key setting differ.
 
 ### After MCP setup
 
@@ -164,8 +164,9 @@ A `200` with valid JSON confirms you're wired up.
 | Fetch any URL as HTML or markdown | Standard API | [docs](https://docs.scraperapi.com/making-requests) |
 | Render JS-heavy pages (React, Vue, SPAs) | Standard API + `render=true` | [docs](https://docs.scraperapi.com/making-requests/customizing-requests) |
 | Structured JSON: Amazon, Google, Walmart, eBay, Redfin | Structured Data API | [docs](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method) |
-| Batch scraping / 100+ URLs | Async Jobs API | [docs](https://docs.scraperapi.com/making-async-requests) |
-| Recurring, scheduled scraping without managing infra | DataPipeline (dashboard) | [docs](https://docs.scraperapi.com/) |
+| Batch scraping / 100+ URLs | Async Jobs API (`scraperapi-async` skill) | [docs](https://docs.scraperapi.com/making-async-requests) |
+| Every page of a site, following links | Crawler (`scraperapi-crawler` skill) | [docs](https://docs.scraperapi.com/scraperapi-crawler-v2.0) |
+| Recurring, scheduled scraping without managing infra | DataPipeline (`scraperapi-datapipeline` skill) | [docs](https://docs.scraperapi.com/data-pipeline) |
 
 ### Python
 
@@ -194,8 +195,10 @@ const result = await scraperapi.get('https://example.com', { render: true, count
 console.log(result);
 ```
 
-PHP, Ruby, and Java SDKs are also available — see [docs.scraperapi.com](https://docs.scraperapi.com/)
-for setup guides.
+For anything beyond these snippets, hand off to the language's SDK skill:
+`scraperapi-python-sdk`, `scraperapi-nodejs-sdk`, `scraperapi-java-sdk`, `scraperapi-php-sdk`, or
+`scraperapi-ruby-sdk`. To have a complete scraper written for a specific site, use
+`scraperapi-scraper-builder`.
 
 ---
 
@@ -249,14 +252,22 @@ Route to the narrowest skill or reference that fits the task:
 
 | User says… | Go to |
 |------------|-------|
-| "scrape this URL" / "get this page" | `scraperapi-mcp` → `scrape` tool |
-| "search Google for…" / "find URLs about…" | `scraperapi-mcp` → `google_search` |
-| "get Amazon / Walmart / eBay data" | `scraperapi-mcp` → SDE tools |
-| "real estate / Redfin listings" | `scraperapi-mcp` → Redfin tools |
-| "crawl a website / extract all links" | `scraperapi-mcp` → `crawler_job_start` |
-| "scrape 100+ URLs / batch job" | Async Jobs API — Path C above |
-| "schedule recurring scraping" | DataPipeline — https://docs.scraperapi.com/ |
+| "scrape this URL" / "search Google for…" / "get Amazon, Walmart, eBay or Redfin data", in this session | `scraperapi-mcp` (picks the tool and parameters) |
 | "debug a failed scrape or blocked request" | `scraperapi-mcp` error recovery section |
+| "crawl a website" / "every page on this site" | `scraperapi-crawler` in app code; `scraperapi-mcp` → `crawler_job_start` in this session |
+| "scrape 100+ URLs" / "batch job" / "webhook delivery" | `scraperapi-async` |
+| "schedule recurring scraping" / "managed scraping project" | `scraperapi-datapipeline` |
+| "write me a scraper for [site]" | `scraperapi-scraper-builder` |
+| Python, Node.js, Java, PHP or Ruby code that calls ScraperAPI | `scraperapi-python-sdk`, `scraperapi-nodejs-sdk`, `scraperapi-java-sdk`, `scraperapi-php-sdk`, `scraperapi-ruby-sdk` |
+| "from the terminal" / shell scripts / cron / CI | `scraperapi-cli` |
+| "build an n8n workflow" | `scraperapi-n8n` |
+| "build a Zap" | `scraperapi-zapier` |
+| "audit the SEO of my site" | `scraperapi-seo-audit` |
+| "what does Google show for [keyword]" | `scraperapi-serp-intelligence` |
+| "research the [X] market" | `scraperapi-market-research` |
+| "enrich this lead" / "build a contact card" | `scraperapi-lead-enrichment` |
+| "track the price of [product]" | `scraperapi-price-monitoring` |
+| "run the research agent script" | `scraperapi-research-agent` |
 
 When in doubt, prefer structured data endpoints over raw HTML scraping for supported platforms —
 they return clean JSON with no parsing logic, are more reliable, and often cost fewer credits than
