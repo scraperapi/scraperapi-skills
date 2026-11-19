@@ -231,16 +231,16 @@ rescue => e
   status = e.respond_to?(:response) ? e.response&.code&.to_i : nil
   case status
   when 401 then raise "Invalid API key — check SCRAPERAPI_API_KEY"
-  when 403 then raise "Blocked or out of credits — try premium: true or ultra_premium: true"
+  when 403 then raise "Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)"
   when 429 then raise "Rate limit hit — reduce concurrency or switch to async"
-  when 500, 503 then raise "Transient error — retry with exponential backoff"
+  when 500, 503 then raise "Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium: true"
   else raise
   end
 end
 ```
 
-Status code reference: 200 success, 401 bad key, 403 blocked/no credits, 404 target not found,
-429 rate limit, 500/503 transient (not charged — safe to retry).
+Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
+429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
 

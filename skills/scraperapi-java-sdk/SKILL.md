@@ -267,17 +267,17 @@ public static String safeScrape(ScraperApiClient client, String url) {
     } catch (Exception e) {
         String msg = e.getMessage() != null ? e.getMessage() : "";
         if (msg.contains("401")) throw new RuntimeException("Invalid API key — check SCRAPERAPI_API_KEY", e);
-        if (msg.contains("403")) throw new RuntimeException("Blocked or out of credits — try premium/ultraPremium", e);
+        if (msg.contains("403")) throw new RuntimeException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)", e);
         if (msg.contains("429")) throw new RuntimeException("Rate limit — reduce concurrency or use async", e);
         if (msg.contains("500") || msg.contains("503"))
-            throw new RuntimeException("Transient error — retry with backoff", e);
+            throw new RuntimeException("Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium/ultra_premium", e);
         throw new RuntimeException("Scrape failed: " + url, e);
     }
 }
 ```
 
-Status codes: 200 success, 401 bad key, 403 blocked/no credits, 404 target not found,
-429 rate limit, 500/503 transient (not charged — safe to retry with backoff).
+Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
+429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
 

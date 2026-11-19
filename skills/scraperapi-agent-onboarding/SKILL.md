@@ -237,9 +237,9 @@ targets), see the [API reference](https://docs.scraperapi.com/making-requests/cu
 |------|---------|--------|
 | `200` | Success | Return / parse the body |
 | `401` | Invalid API key | Surface error — do not retry |
-| `403` | Blocked by target site | Retry with `premium=true`, `ultra_premium=true`, or a different `country_code` |
+| `403` | Credits exhausted for this billing cycle | Do not retry; upgrade or enable overages at https://dashboard.scraperapi.com/billing |
 | `429` | Concurrent limit hit | Back off; switch to async for batch work |
-| `500`/`503` | Transient failure | Retry with exponential backoff (3–5 attempts) |
+| `500` | Failed after ScraperAPI retried for 70s (not charged) | Retry with backoff; on protected sites add `premium=true`, then `ultra_premium=true`, or try another `country_code` |
 
 ---
 

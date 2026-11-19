@@ -252,10 +252,10 @@ results are pushed to your system immediately upon completion.
 | Status | Meaning | Action |
 |--------|---------|--------|
 | Job `finished`, `statusCode: 200` | Success | Use `response.body` |
-| Job `finished`, `statusCode: 403` | Target blocked the scrape | Retry with `premium: true` in `apiParams` |
+| Job `finished`, `statusCode: 500` | Scrape failed after retries (not charged), often anti-bot | Resubmit with `premium: true`, then `ultra_premium: true`, in `apiParams` |
 | Job `failed`, `failReason: failed_due_to_timeout` | Timed out after 24h retries | Check if target is reachable; try `render: false` |
 | HTTP 401 on submission | Bad API key | Check `SCRAPERAPI_API_KEY` |
-| HTTP 403 on submission | Out of credits or plan limit | Check dashboard |
+| HTTP 403 on submission | Credits exhausted for this billing cycle | Upgrade or enable overages at https://dashboard.scraperapi.com/billing; do not retry |
 | HTTP 429 on submission | Too many concurrent submissions | Back off and re-submit in batches |
 
 Use `max_cost` in `apiParams` to cap per-request credit spend — requests that would exceed the
