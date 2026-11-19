@@ -69,7 +69,7 @@ html = client.get(
 ```python
 # Render JavaScript before returning HTML
 # Use when: page uses React/Vue/Angular, or initial scrape returns empty/partial content
-# Cost: +10 credits (standard: 1 → rendered: 10)
+# Cost: 10 credits per request (instead of 1)
 html = client.get(url="https://spa-site.com/", params={"render": True})
 
 # Wait for a specific element before capturing (requires render=True)
@@ -211,7 +211,7 @@ For very large batches (up to 50,000 URLs), use `https://async.scraperapi.com/ba
 
 ## Structured Data Endpoints
 
-Use these instead of scraping raw HTML when the target platform is supported. They return clean JSON, cost fewer credits than raw scraping with `render=True`, and require no parsing logic.
+Use these instead of scraping raw HTML when the target platform is supported. They return clean JSON and require no parsing logic; they're billed at the target site's rate (5 credits for Amazon, 25 for Google).
 
 ```python
 import os, requests
@@ -283,7 +283,20 @@ Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't re
 | `premium=True` + `render=True` | 25 |
 | `ultra_premium=True` | 30 |
 | `ultra_premium=True` + `render=True` | 75 |
-| Structured Data (most verticals) | 1–5 |
+
+Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+
+| Site | Credits |
+|---|---|
+| Amazon, Walmart, eBay | 5 |
+| Google, Bing (all subdomains) | 25 |
+| LinkedIn | 30 |
+| Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
+of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
+without spending credits with `GET https://api.scraperapi.com/account/urlcost?api_key=...&url=...`
+(it accepts the same parameters). Source: https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs
 
 Add `"max_cost": N` to any request to cap credit spend — returns 403 if the request would exceed N credits.
 

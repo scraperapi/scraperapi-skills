@@ -75,6 +75,7 @@ For every SERP intelligence request:
 
 - **Parallelize** — Issue all independent `google_search` calls in a single response turn, not sequentially.
 - **Be efficient** — A Keyword Scan uses 1 call per keyword plus up to 2 follow-up calls. A Keyword Set Analysis uses 1 per keyword plus up to 3 follow-up calls for the highest-signal findings.
+- **Budget credits** — Google and Bing calls cost 25 credits each, Amazon/Walmart/eBay 5, LinkedIn 30 ([credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs)). A 20-keyword scan is ~500 credits in searches alone, and a rendered Google fallback costs more than a structured search. Tell the user the estimate before scans over ~10 keywords.
 - **Handle failures honestly** — If a SERP returns empty or features are unconfirmed, say so. Never infer SERP state from training knowledge.
 - **Cite every data point** — Include the exact query run. Users must be able to trace every claim.
 - **Date-stamp every report** — Include "Data collected on [date]" so users know freshness.

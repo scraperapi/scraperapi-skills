@@ -55,7 +55,7 @@ Before starting a research run, establish:
 - [ ] **Question clarity** — Is the question specific enough to produce useful search queries? Vague questions like "tell me about AI" produce noise. Better: "What are the tradeoffs between RAG and fine-tuning for domain-specific LLMs?"
 - [ ] **Source count** — How many sources are needed? 3–5 is usually sufficient for a factual summary; 8–10 for a comparative analysis. More sources = more ScraperAPI credits.
 - [ ] **Recency** — Does the answer depend on recent events? Search queries will use recent date filters.
-- [ ] **Credit budget** — Each source costs ~1 credit to scrape (more with JS rendering). 5 sources = ~5–10 credits total.
+- [ ] **Credit budget** — Each Google search costs 25 credits and the script runs up to 3. Each source then costs ~1 credit to scrape on a normal site (more on protected sites). 5 sources ≈ 55–80 credits total.
 - [ ] **Stop condition** — Define when to stop. The default stop is `--max-sources` (5). Do not loop indefinitely.
 
 ---
@@ -133,9 +133,11 @@ The report is a markdown document with:
 
 | Sources | Scraping credits | Anthropic tokens | Total estimate |
 |---------|-----------------|-----------------|----------------|
-| 3 | ~3 | ~15K in / ~2K out | Low |
-| 5 | ~5 | ~25K in / ~3K out | Medium |
-| 10 | ~10 | ~50K in / ~5K out | Higher |
+| 3 | ~28–78 | ~15K in / ~2K out | Low |
+| 5 | ~30–80 | ~25K in / ~3K out | Medium |
+| 10 | ~35–85 | ~50K in / ~5K out | Higher |
+
+Search dominates: 1–3 Google searches at 25 credits each, then ~1 credit per source on a normal site.
 
 Prompt caching applies to the scraped content on repeated runs for the same question.
 

@@ -94,18 +94,18 @@ From the URLs collected in Phase 2, select the most information-dense sources to
 | Source type | Typical yield | Fetch cost |
 |-------------|--------------|------------|
 | Company website (`/`, `/about`, `/contact`, `/team`) | Description, address, phone, email, social links, team members, tech signals | 1 credit/page |
-| Crunchbase (`crunchbase.com/organization/...`) | Funding rounds, investors, employee range, founded year | ~10 credits (needs `render=true`) |
+| Crunchbase (`crunchbase.com/organization/...`) | Funding rounds, investors, employee range, founded year | ~10 credits (bot-protected; more with `render=true`) |
 | Wikipedia (`en.wikipedia.org/wiki/...`) | Founded year, public financials, acquisitions, executive history | 1 credit |
 | AngelList / Wellfound (`wellfound.com/company/...`) | Funding, investors, tech stack, open roles | ~10 credits (needs `render=true`) |
-| LinkedIn person (`linkedin.com/in/...`) | Name, title, location, current company, education | ~10 credits (needs `render=true&premium=true`) |
-| LinkedIn company (`linkedin.com/company/...`) | Employee count, industry, HQ, founded year | ~10 credits (needs `render=true&premium=true`) |
+| LinkedIn person (`linkedin.com/in/...`) | Name, title, location, current company, education | 30+ credits (LinkedIn's rate; needs `render=true&premium=true`) |
+| LinkedIn company (`linkedin.com/company/...`) | Employee count, industry, HQ, founded year | 30+ credits (LinkedIn's rate; needs `render=true&premium=true`) |
 | News article / press release | Funding amounts, key hires, product launches | 1 credit |
 | G2 / Capterra (`g2.com/products/...`) | Product category, company size range, competitors | 1 credit |
 | GitHub org (`github.com/ORG`) | Tech stack, open source projects, activity | 1 credit |
 | Job posting | Tech stack requirements, team growth signals | 1 credit |
 | Glassdoor (`glassdoor.com/...`) | Employee count, HQ, culture signals | ~10 credits (needs `render=true`) |
 
-Prefer cheap standard fetches (1 credit) over JS-rendered ones (10 credits) whenever the page is a static HTML site. Reserve `render=true` for pages that are known to require JavaScript (LinkedIn, Crunchbase, and SPA-style sites).
+Prefer cheap standard fetches (1 credit) over JS-rendered ones (10 credits) whenever the page is a static HTML site. Searches aren't free either: each `google_search` or `google_news` call costs 25 credits, so a typical run of ~6 searches is ~150 credits before any page fetch ([credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs)). Reserve `render=true` for pages that are known to require JavaScript (LinkedIn, Crunchbase, and SPA-style sites).
 
 ### 3b. Fetch pages
 

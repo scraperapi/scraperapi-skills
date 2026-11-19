@@ -126,6 +126,8 @@ Stop gathering data when any of the following is true:
 - **3 or more consecutive calls** returned errors, empty results, or gated content.
 - The user explicitly asks you to stop or move to synthesis.
 
+Budget before you start: Google and Bing calls cost 25 credits each, Amazon/Walmart/eBay 5, LinkedIn 30 ([credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs)); normal pages cost 1 (25 with `render` + `premium`). A full four-module run is roughly 15+ searches, so 400+ credits. Tell the user the estimate before running more than one module.
+
 When you hit a stop condition, announce it: *"Stopping data collection: [reason]. Moving to synthesis with what I have."* Do not loop past these limits.
 
 ---

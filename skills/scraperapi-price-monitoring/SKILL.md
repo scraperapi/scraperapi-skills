@@ -95,7 +95,7 @@ Do **not** retry forever. Failed targets after retries get a `status: "failed"` 
 
 ### Credit budget
 
-Each structured call typically costs ~5 credits. A 50-product watchlist is ~250 credits per run. Before kicking off batches larger than ~100 targets, tell the user the estimate and confirm. If they want recurring monitoring at large scale, recommend they move to a scheduled CLI (`scraperapi-cli`) or DataPipeline rather than burning credits through this skill on every check.
+Each Amazon or Walmart call costs 5 credits; each `google_shopping` call costs 25. A 50-product Amazon/Walmart watchlist is ~250 credits per run. Before kicking off batches larger than ~100 targets, tell the user the estimate and confirm. If they want recurring monitoring at large scale, recommend they move to a scheduled CLI (`scraperapi-cli`) or DataPipeline rather than burning credits through this skill on every check.
 
 ---
 

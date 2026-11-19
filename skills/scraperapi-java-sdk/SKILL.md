@@ -91,7 +91,7 @@ String html = client.get("https://example.com/")
 ```java
 // Render JavaScript before returning HTML
 // Use when: page is a React/Vue/Angular SPA, or initial scrape returns empty content
-// Cost: +10 credits
+// Cost: 10 credits per request (instead of 1)
 String html = client.get("https://spa-site.com/").render(true).result();
 
 // Wait for a DOM element before capturing (requires render)
@@ -289,6 +289,20 @@ Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404
 | `.premium(true).render(true)` | 25 |
 | `.ultraPremium(true)` | 30 |
 | `.ultraPremium(true).render(true)` | 75 |
+
+Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+
+| Site | Credits |
+|---|---|
+| Amazon, Walmart, eBay | 5 |
+| Google, Bing (all subdomains) | 25 |
+| LinkedIn | 30 |
+| Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
+of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
+without spending credits with `GET https://api.scraperapi.com/account/urlcost?api_key=...&url=...`
+(it accepts the same parameters). Source: https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs
 
 ## Documentation
 

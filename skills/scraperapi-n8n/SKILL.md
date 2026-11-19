@@ -401,16 +401,20 @@ note in your reply estimating the per-run and per-month cost.
 | `api` + `apiPremium: true` | 10 |
 | `api` + `apiPremium: true` + `apiRender: true` | 25 |
 | `api` + `apiUltraPremium: true` | 30 |
-| `sde` structured endpoint | 1–10 (per vertical; see public docs) |
+| `api` + `apiUltraPremium: true` + `apiRender: true` | 75 |
+| `sde` structured endpoint | the site's rate: 5 for Amazon/Walmart/eBay, 25 for Google |
 | `aiparser` generate (`aiParserCreate`, field-adding `aiParserUpdate`) | **30,000** per additional parser (first parser per account is free) |
 | `aiparser` parse (`aiParserParse`) | standard scraping cost: 1, plus any scraper-param surcharge (e.g. render 10) |
 
 **AI Parser is expensive to generate.** Every account gets one free parser;
 each *additional* parser costs **30,000 credits** to generate — never create
 parsers in a loop. The recurring per-URL `aiParserParse` cost is small
-(standard scraping rate), so reuse one parser across many pages. Failed
-requests (non-200) are generally not charged, but retries on transient errors
-still consume credits if they eventually succeed.
+(standard scraping rate), so reuse one parser across many pages.
+
+Those are normal-site costs. Some sites cost more per request: Amazon, Walmart
+and eBay 5, Google and Bing 25, LinkedIn 30, sites behind Cloudflare/DataDome/
+PerimeterX/Akamai 10. `200` and `404` responses are charged; failed (`500`)
+requests are not.
 
 For full and current pricing, link to
 `https://docs.scraperapi.com/` from the response.

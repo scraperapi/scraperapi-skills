@@ -82,13 +82,13 @@ The workhorse command. Returns the page body to stdout.
 
 ```bash
 sapi scrape https://example.com
-sapi scrape https://example.com --render                       # +10 credits, JS rendering
+sapi scrape https://example.com --render                       # 10 credits, JS rendering
 sapi scrape https://example.com --render --wait-for "#main"    # wait for selector
 sapi scrape https://example.com --country gb                   # geotarget UK
-sapi scrape https://example.com --premium                      # +10 credits, residential proxies
-sapi scrape https://example.com --ultra-premium                # +30 credits, hardest sites
+sapi scrape https://example.com --premium                      # 10 credits, residential proxies
+sapi scrape https://example.com --ultra-premium                # 30 credits, hardest sites
 sapi scrape https://example.com --autoparse --json             # structured JSON for supported sites
-sapi scrape https://example.com --screenshot --json            # PNG (+10 credits) returned as base64 in JSON
+sapi scrape https://example.com --screenshot --json            # PNG (10 credits) returned as base64 in JSON
 sapi scrape https://example.com --async                        # submit as async job, prints jobId
 ```
 
@@ -96,21 +96,21 @@ sapi scrape https://example.com --async                        # submit as async
 
 Always start at the cheapest option and only escalate when a request fails:
 
-1. Default (1 credit). If 200 → done.
-2. `--render` if the page loads content via JavaScript (SPA, hydrated tables, infinite scroll). +10 credits.
-3. `--premium` if the request fails with 500 or returns a block page from datacenter IPs. +10 credits.
-4. `--ultra-premium` only for the hardest anti-bot sites (Cloudflare Turnstile, sophisticated fingerprinting). +30 credits.
+1. Default (1 credit on a normal site; 5 on Amazon/Walmart/eBay, 25 on Google, 30 on LinkedIn, 10 behind Cloudflare and similar). If 200 → done.
+2. `--render` if the page loads content via JavaScript (SPA, hydrated tables, infinite scroll). 10 credits.
+3. `--premium` if the request fails with 500 or returns a block page from datacenter IPs. 10 credits.
+4. `--ultra-premium` only for the hardest anti-bot sites (Cloudflare Turnstile, sophisticated fingerprinting). 30 credits.
 
-Combining flags adds credits — `--render --premium` is ~20 credits per success.
+Combining flags costs more than either alone: `--render --premium` is 25 credits, `--render --ultra-premium` is 75. `200` and `404` responses are charged; failed (`500`) ones are not.
 
 ### Flag reference
 
 | Flag | Description | Credits |
 |------|-------------|---------|
-| `--render` | JavaScript rendering | +10 |
-| `--premium` | Residential proxies | +10 |
-| `--ultra-premium` | Advanced anti-bot bypass | +30 |
-| `--screenshot` | PNG screenshot (base64 in JSON mode) | +10 |
+| `--render` | JavaScript rendering | 10 |
+| `--premium` | Residential proxies | 10 (25 with `--render`) |
+| `--ultra-premium` | Advanced anti-bot bypass | 30 (75 with `--render`) |
+| `--screenshot` | PNG screenshot (base64 in JSON mode) | 10 |
 | `--autoparse` | Auto-parsed JSON for supported sites | — |
 | `--country <cc>` | ISO 3166-1 (e.g. `us`, `gb`, `de`) | — |
 | `--device <type>` | `mobile` or `desktop` user-agent | — |
@@ -313,4 +313,4 @@ Cheap → expensive, only paying for the next tier when the previous one fails. 
 | Hangs forever in a script | Default 70s timeout, target is slow | `--timeout 120`, or use `--async` |
 | Output is JSON instead of HTML | stdout is piped → auto-JSON | Force with `--output html` if you want raw HTML in a pipe |
 
-See [`docs.scraperapi.com`](https://docs.scraperapi.com/) for the full parameter reference and current credit costs.
+See [`docs.scraperapi.com`](https://docs.scraperapi.com/) for the full parameter reference and [current credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs).

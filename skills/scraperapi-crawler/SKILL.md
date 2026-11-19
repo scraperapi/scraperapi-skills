@@ -210,10 +210,11 @@ plan — free accounts can only run one-time crawls at `max_depth: 1`.
 ## Credit Cost
 
 Crawler credit cost = **sum of all individual page requests** in the crawl. Each page costs the
-same as a direct Standard API call with the same `api_params` (render, premium, etc.).
+same as a direct Standard API call with the same `api_params` (render, premium, etc.), at the
+site's rate: 1 on a normal site, 10 behind Cloudflare and similar, 5 on Amazon/Walmart/eBay.
 
 Set `crawl_budget` to cap total credits. The crawl stops gracefully when the budget is reached —
-it will not exceed it. Failed requests are not charged.
+it will not exceed it. `200` and `404` pages are charged; failed (`500`) ones are not.
 
 Check the `sa-credit-cost` header on each webhook payload to see per-page cost; use this to
 calibrate `crawl_budget` for future runs.

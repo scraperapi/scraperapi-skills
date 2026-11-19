@@ -53,14 +53,15 @@ def scrape(url: str, params: dict, attempt: int = 0) -> Optional[str]:
         raise
 
 
+# Normal-site costs; Amazon/Walmart/eBay, Google and bot-protected sites cost more.
+# shortcut: table-based estimate undercounts those sites; use the probe's sa-credit-cost header there.
 def estimate_credits(pages: int, render: bool, premium: bool, ultra_premium: bool) -> int:
-    cost = 1
-    if render:
-        cost = 10
-    if premium:
-        cost = max(cost, 10)
     if ultra_premium:
-        cost = 30
+        cost = 75 if render else 30
+    elif premium:
+        cost = 25 if render else 10
+    else:
+        cost = 10 if render else 1
     return pages * cost
 
 
@@ -92,9 +93,9 @@ def main():
     parser.add_argument("--pages", type=int, default=1, help="Pages to scrape")
     parser.add_argument("--output", help="Output file (default: stdout)")
     parser.add_argument("--max-credits", type=int, help="Abort if estimate exceeds this")
-    parser.add_argument("--render", action="store_true", help="Enable JS rendering (~10 credits/req)")
-    parser.add_argument("--premium", action="store_true", help="Use premium proxies (~10 credits/req)")
-    parser.add_argument("--ultra-premium", action="store_true", help="Use ultra premium proxies (~30 credits/req)")
+    parser.add_argument("--render", action="store_true", help="Enable JS rendering (10 credits/req)")
+    parser.add_argument("--premium", action="store_true", help="Use premium proxies (10 credits/req, 25 with --render)")
+    parser.add_argument("--ultra-premium", action="store_true", help="Use ultra premium proxies (30 credits/req, 75 with --render)")
     parser.add_argument("--country-code", help="Proxy country (e.g. us, gb, de)")
     parser.add_argument("--session", type=int, help="Session number for IP stickiness")
     args = parser.parse_args()
@@ -307,10 +308,11 @@ program
 
 const opts = program.opts();
 const pages = parseInt(opts.pages);
-let costPer = 1;
-if (opts.render) costPer = 10;
-if (opts.ultraPremium) costPer = 30;
-else if (opts.premium) costPer = Math.max(costPer, 10);
+// Normal-site costs; Amazon/Walmart/eBay, Google and bot-protected sites cost more.
+let costPer;
+if (opts.ultraPremium) costPer = opts.render ? 75 : 30;
+else if (opts.premium) costPer = opts.render ? 25 : 10;
+else costPer = opts.render ? 10 : 1;
 const estimated = pages * costPer;
 
 console.error(`Estimated: ${pages} pages × ${costPer} credits = ~${estimated} credits`);

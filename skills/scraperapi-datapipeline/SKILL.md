@@ -277,8 +277,9 @@ All standard ScraperAPI parameters are supported inside `apiParams`:
 
 ## Credit Costs
 
-DataPipeline uses the same underlying credit rates as the Standard API. Cost is the sum of all
-requests in a job run. Preview the estimated cost before launching a project from the dashboard.
+DataPipeline uses the same underlying credit rates as the Standard API, including per-site rates
+(Amazon/Walmart/eBay 5, Google 25, LinkedIn 30, bot-protected sites 10), so a Google or Amazon
+project type costs that per input. Cost is the sum of all requests in a job run. Preview the estimated cost before launching a project from the dashboard.
 
 Only successful `200` and `404` responses are charged; failed requests are not.
 

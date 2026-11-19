@@ -71,7 +71,7 @@ Parameters are passed as keyword arguments after the URL. `.raw_body` extracts t
 ```ruby
 # Render JavaScript before returning HTML
 # Use when: page is a React/Vue/Angular SPA, or initial scrape returns empty/partial content
-# Cost: +10 credits
+# Cost: 10 credits per request (instead of 1)
 html = client.get("https://spa-site.com/", render: true).raw_body
 
 # Wait for a specific DOM element (requires render: true)
@@ -252,6 +252,20 @@ Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't re
 | `premium: true, render: true` | 25 |
 | `ultra_premium: true` | 30 |
 | `ultra_premium: true, render: true` | 75 |
+
+Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+
+| Site | Credits |
+|---|---|
+| Amazon, Walmart, eBay | 5 |
+| Google, Bing (all subdomains) | 25 |
+| LinkedIn | 30 |
+| Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
+of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
+without spending credits with `GET https://api.scraperapi.com/account/urlcost?api_key=...&url=...`
+(it accepts the same parameters). Source: https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs
 
 ## Documentation
 

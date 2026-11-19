@@ -37,8 +37,8 @@ Per ScraperAPI's public pricing ([docs](https://docs.scraperapi.com/)):
   (`ai_parser_create`, and field-adding/modifying `ai_parser_update`) costs
   **30,000 API credits** — budget for this before creating parsers in a loop.
 - **Parsing a URL** (`ai_parser_parse_url`) uses standard scraping costs: **1
-  credit** for a plain fetch, more if the `scraperParams` escalate it (e.g.
-  `render` = 10, `premium` = 10, `ultraPremium` = 30). This is the recurring
+  credit** for a plain fetch on a normal site (5 on Amazon/Walmart/eBay, 25 on Google, 30 on LinkedIn, 10 on bot-protected sites), more if the `scraperParams` escalate it (e.g.
+  `render` = 10, `premium` = 10, `premium` + `render` = 25, `ultraPremium` = 30). This is the recurring
   cost, so reusing one parser across many pages is what keeps it cheap.
 
 Confirm current numbers against the public pricing docs — they can change.
