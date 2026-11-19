@@ -1,6 +1,6 @@
 # SERP & News Monitoring — Detailed Guide
 
-A workflow for monitoring Google Search (SERP) and Google News using the `scrape` MCP tool. Useful for SEO monitoring, media tracking, competitive intelligence, and trend analysis.
+A workflow for monitoring Google Search (SERP) and Google News over time with the `google_search` and `google_news` MCP tools, and reporting what changed between runs. Useful for SEO monitoring, media tracking, and competitive intelligence. For a one-off analysis of a SERP (intent, content gaps, who ranks and why), use the `scraperapi-serp-intelligence` skill instead.
 
 ## Overview
 
@@ -13,7 +13,7 @@ This workflow enables:
 - Producing structured JSON output
 - Generating change reports (new / removed / rank shifts)
 
-All web fetching is performed via the **ScraperAPI MCP tool (`scrape`)**.
+Use the structured Google tools rather than `scrape`-ing google.com: they cost the same (25 credits per call) and return parsed JSON with explicit positions, so runs can be compared field by field instead of re-parsing a page each time.
 
 ## Inputs to Ask For (only if missing)
 
@@ -23,34 +23,19 @@ All web fetching is performed via the **ScraperAPI MCP tool (`scrape`)**.
 - **Result count** for SERP (default: 10)
 - **Recency filter**: none | last day | last week | last month
 
-## URLs to Build
+## Calls to Make
 
 ### SERP
 
-```
-https://www.google.com/search?q=<QUERY>&num=<N>&hl=<HL>&gl=<GL>&pws=0
-```
+Call `google_search` with `query`, `num`, `hl`, `gl`, and `countryCode` set to the market, so every run sees the same localized results. For recency, set `timePeriod`: `"1D"` (last day), `"1W"` (last week), or `"1M"` (last month).
 
-Recency filters (append to URL):
-- Last day → `&tbs=qdr:d`
-- Last week → `&tbs=qdr:w`
-- Last month → `&tbs=qdr:m`
+Map `organic_results[]` to the SERP JSON below (`position` → `rank`). The documented response has no Top Stories block; if the user specifically needs Top Stories, `scrape` `https://www.google.com/search?q=<QUERY>&hl=<HL>&gl=<GL>` with `outputFormat: "markdown"` for that part only.
 
 ### Google News
 
-```
-https://news.google.com/search?q=<QUERY>&hl=<HL>&gl=<GL>&ceid=<GL>:<HL>
-```
+Call `google_news` with `query`, `hl`, `gl`, `countryCode`, and a `timePeriod` — undated news searches return stale coverage.
 
-## Fetch Strategy (must follow)
-
-1. Call `scrape` with just the URL first (cheapest).
-2. If the page is incomplete or shows a consent/interstitial:
-   - Retry with `deviceType: "desktop"`
-   - Then try `deviceType: "mobile"` if needed
-3. If geo issues / repeated errors: retry with `countryCode` matching the market (e.g., `gb`, `us`).
-4. If blocking persists: set `premium: true`. If still failing, use `ultraPremium: true`.
-   - Don't combine `premium` and `ultraPremium` — the API treats them as incompatible.
+If a call fails, see the escalation and error table in [../references/scraping.md](../references/scraping.md).
 
 ## Extraction Requirements
 
@@ -116,8 +101,7 @@ Then summarize the changes.
 
 ## Best Practices
 
-- **Always use `scrape`** (not `google_search` or `google_news`) for this workflow — scraping Google directly gives full page context including Top Stories, People Also Ask, etc.
-- **Set `outputFormat: "markdown"`** for easier parsing of the HTML structure.
+- **Keep the parameters identical between runs** (`query`, `num`, `hl`, `gl`, `countryCode`) — otherwise the change report shows differences caused by the settings, not the SERP.
 - **Use recency filters** to keep results fresh for monitoring use cases.
 - **Store snapshots** as JSON to enable change detection across runs.
 - **Dedupe before comparing** — URL canonicalization prevents false positives in change reports.

@@ -16,6 +16,7 @@ Scrapes a URL and returns its content. Handles proxy rotation, CAPTCHAs, and ant
 | `deviceType` | enum | — | `"mobile"` or `"desktop"` |
 | `outputFormat` | enum | raw HTML | `"text"`, `"markdown"`, `"html"`, `"csv"`, or `"json"` |
 | `autoparse` | boolean | false | Auto-parse JSON on supported sites; set `true` for csv/json output |
+| `binaryTarget` | boolean | false | Set `true` when the URL points to a binary file (image, PDF); returns it in its native format instead of as text |
 
 ## When to Use Each Parameter
 
