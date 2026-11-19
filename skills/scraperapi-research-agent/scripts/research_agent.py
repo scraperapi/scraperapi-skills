@@ -162,7 +162,7 @@ def upload_artifact(
 ) -> Optional[str]:
     """Upload scraped content as a text artifact. Returns file_id or None."""
     try:
-        uploaded = client.beta.files.upload(
+        uploaded = client.files.upload(
             file=(filename, content.encode("utf-8", errors="replace"), "text/plain"),
         )
         return uploaded.id
@@ -175,7 +175,7 @@ def cleanup_artifacts(client: anthropic.Anthropic, file_ids: list[str]) -> None:
     """Delete uploaded file artifacts from Anthropic after synthesis."""
     for fid in file_ids:
         try:
-            client.beta.files.delete(fid)
+            client.files.delete(fid)
         except Exception:
             pass  # Best-effort cleanup
 
@@ -252,7 +252,6 @@ def synthesize_report(
         thinking={"type": "adaptive"},
         system=SYNTHESIS_SYSTEM,
         messages=messages,
-        betas=["files-api-2025-04-14"],
     ) as stream:
         for text in stream.text_stream:
             full_response.append(text)
@@ -351,13 +350,13 @@ def main() -> None:
             file_ids.append(fid)
             print(f"  [{i}] Uploaded: {source['title'][:50]}")
 
-    # Phase 6: Synthesize
+    # Phase 6: Synthesize; clean up uploads even if synthesis fails
     print(f"\n[6/6] Synthesising report ({args.model})...\n")
-    report = synthesize_report(args.question, sources, anthropic_client, model=args.model)
-
-    # Clean up artifacts
-    print("\nCleaning up file artifacts...")
-    cleanup_artifacts(anthropic_client, file_ids)
+    try:
+        report = synthesize_report(args.question, sources, anthropic_client, model=args.model)
+    finally:
+        print("\nCleaning up file artifacts...")
+        cleanup_artifacts(anthropic_client, file_ids)
 
     # Output
     header = f"# Research Report\n\n**Question:** {args.question}\n\n---\n\n"
