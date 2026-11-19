@@ -49,8 +49,8 @@ All optional fields live inside the `apiOptionalParameters` collection.
 | `apiMobileDevice` | no | boolean | Mutually exclusive with `apiDesktopDevice` |
 | `apiOutputFormat` | no | enum | `html` (default), `markdown`, `text`, `csv`, `json`. `csv` and `json` require an autoparse-supported site. |
 | `apiPremium` | no | boolean | Mutually exclusive with `apiUltraPremium` |
-| `apiRender` | no | boolean | JS rendering. +10 credits. |
-| `apiUltraPremium` | no | boolean | Highest-tier proxies. +30 credits. |
+| `apiRender` | no | boolean | JS rendering. 10 credits per request instead of 1. |
+| `apiUltraPremium` | no | boolean | Highest-tier proxies. 30 credits per request (75 with render). |
 | `apiFollowRedirect` | no | boolean | Follow HTTP redirects. Default `true`. |
 | `apiKeepHeaders` | no | boolean | Forward your custom request headers. Not available with Ultra Premium. |
 | `apiCustomHeaders` | no | fixedCollection | Custom request headers (`header[]` of `{name, value}`). Providing any header auto-enables `apiKeepHeaders`. Ignored with Ultra Premium. |

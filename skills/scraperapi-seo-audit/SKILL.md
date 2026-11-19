@@ -60,6 +60,7 @@ For every SEO audit request:
 
 - **Parallelize** — Within each stage, issue all tool calls in a single response turn. Never loop sequentially over pages or keywords.
 - **Be efficient** — Mode A targets ~8–12 tool calls. Mode B targets ~20–30. If you need more, tell the user and ask how to prioritize.
+- **Budget credits** — Google and Bing calls cost 25 credits each, Amazon/Walmart/eBay 5, LinkedIn 30 ([credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs)); normal pages cost 1 (10 with render). Mode A is roughly 100–250 credits and Mode B 300–500, mostly from searches. Tell the user the estimate before starting Mode B.
 - **Always geo-target** — Pass `countryCode` and `gl` to every `google_search` call for the user's target market. US is the default; always confirm geography before starting.
 - **Handle render failures** — If a page returns empty or near-empty content, retry once with `render=true, premium=true`. Note the escalation in the report.
 - **Cite every finding** — Include the exact query or URL. Users must be able to trace every claim back to a tool call.

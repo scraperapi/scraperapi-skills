@@ -110,6 +110,20 @@ If no recipe matches, select a tool:
 
 **Always escalate gradually**: standard → render → premium → ultraPremium. Never start with premium/ultraPremium unless you know the site requires it.
 
+| Call | Credits |
+|---|---|
+| `scrape`, normal site | 1 |
+| `render: true` | 10 |
+| `premium: true` | 10 (25 with render) |
+| `ultraPremium: true` | 30 (75 with render) |
+| Amazon, Walmart, eBay tools or pages | 5 |
+| Google tools or pages (all subdomains), Bing | 25 |
+| LinkedIn pages | 30 |
+| Sites behind Cloudflare, DataDome, PerimeterX, Akamai | 10 |
+
+`200` and `404` responses are charged; failed (`500`) ones are not. A Google-heavy task adds up fast:
+10 searches is 250 credits. Source: https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs
+
 ## Key Best Practices
 
 - **Default `outputFormat` is `"markdown"`** for the `scrape` tool — good for most reading tasks.

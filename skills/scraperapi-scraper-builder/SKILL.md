@@ -45,7 +45,7 @@ Before writing code, collect the following. Pull from the user's prompt; ask onl
 
 ## Phase 2 — Site Reconnaissance
 
-**Before making any architecture decisions, fetch 1–2 sample pages from the target site using ScraperAPI** to observe actual behavior. This replaces guesswork with evidence and costs at most 2 credits.
+**Before making any architecture decisions, fetch 1–2 sample pages from the target site using ScraperAPI** to observe actual behavior. This replaces guesswork with evidence and costs 1–2 requests at the site's rate (1 credit on a normal site, 5 on Amazon, 25 on Google, 10 behind Cloudflare and similar).
 
 ### What to fetch
 
@@ -142,7 +142,7 @@ Endpoint pattern: `GET https://api.scraperapi.com/structured/<site>/<type>?api_k
 
 ### Decision 2 — Does the page require JavaScript rendering?
 
-Enable `render=true` only when the Site Profile confirms that target data was absent in the standard response. Cost: ~10 credits/req.
+Enable `render=true` only when the Site Profile confirms that target data was absent in the standard response. Cost: 10 credits/req instead of 1.
 
 - Site Profile says "Target data visible: No" or "JS rendering needed: Yes" → enable `render=true`
 - Site Profile says "Target data visible: Yes" → do not enable `render=true`
@@ -155,8 +155,8 @@ Do not enable `render=true` speculatively — the Phase 2 probe is the evidence.
 Use the Site Profile's "Anti-bot protection" row as the starting point. Escalate gradually — never start at the highest tier.
 
 - Site Profile says "None" → start with standard
-- Site Profile says "Cloudflare" or any bot manager → start with `premium=true` (~10 credits)
-- `premium=true` still returns 500 or a block page → escalate to `ultra_premium=true` (~30 credits)
+- Site Profile says "Cloudflare" or any bot manager → start with `premium=true` (10 credits)
+- `premium=true` still returns 500 or a block page → escalate to `ultra_premium=true` (30 credits)
 
 `ultra_premium=true` and `premium=true` are mutually exclusive — never set both.
 
@@ -240,12 +240,27 @@ Same flags and behavior as above. Use `node-fetch@2` + `commander`. Match the us
 | Configuration | Credits per request |
 |---------------|---------------------|
 | Standard | 1 |
-| `render=true` | ~10 |
-| `premium=true` | ~10 |
-| `ultra_premium=true` | ~30 |
-| Structured endpoint | 1–10 (varies by vertical) |
+| `render=true` | 10 |
+| `premium=true` | 10 |
+| `premium=true` + `render=true` | 25 |
+| `ultra_premium=true` | 30 |
+| `ultra_premium=true` + `render=true` | 75 |
 
-Print a cost estimate before executing: `# Estimated: 50 pages × 10 credits = ~500 credits`
+Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+
+| Site | Credits |
+|---|---|
+| Amazon, Walmart, eBay | 5 |
+| Google, Bing (all subdomains) | 25 |
+| LinkedIn | 30 |
+| Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
+of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
+without spending credits with `GET https://api.scraperapi.com/account/urlcost?api_key=...&url=...`
+(it accepts the same parameters). Source: https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs
+
+Print a cost estimate before executing: `# Estimated: 50 pages × 10 credits = ~500 credits`. On sites that cost more than 1 credit, base the estimate on the probe's `sa-credit-cost` header (or `/account/urlcost`) rather than the table, since the table alone undercounts there.
 
 The generated script must include a `--max-credits` flag that aborts if the estimate exceeds the budget.
 

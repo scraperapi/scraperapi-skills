@@ -263,14 +263,18 @@ frequently, estimate the per-run and monthly cost in your reply.
 | Setting | Approx credits per request |
 |---------|----------------------------|
 | Standard request | 1 |
-| Render JavaScript | ~10 |
-| Premium Proxies | ~10 |
-| Premium + Render | ~25 |
-| Ultra Premium | ~30 |
-| Structured Data endpoint | 1–10 (varies by vertical) |
+| Render JavaScript | 10 |
+| Premium Proxies | 10 |
+| Premium + Render | 25 |
+| Ultra Premium | 30 |
+| Ultra Premium + Render | 75 |
+| Structured Data endpoint | the site's rate: 5 for Amazon/Walmart/eBay, 25 for Google |
 
-Failed (non-200) requests are generally not charged. For current pricing,
-link to `https://docs.scraperapi.com/`.
+Those are normal-site costs. Some sites cost more per request: Amazon, Walmart
+and eBay 5, Google and Bing 25, LinkedIn 30, sites behind Cloudflare/DataDome/
+PerimeterX/Akamai 10. `200` and `404` responses are charged; failed (`500`)
+requests are not. For current pricing, link to
+`https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs`.
 
 ## Common mistakes — ❌ wrong / ✅ right
 
