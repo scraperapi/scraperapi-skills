@@ -1,7 +1,16 @@
 ---
 name: scraperapi-lead-enrichment
-description: >-
-  Use this skill whenever the user wants to enrich a contact or company and build a profile. Trigger on: "enrich this lead", "find info about [person or company]", "build a contact card for X", "I have this LinkedIn URL, find more about them", "find the email for [person] at [company]", "research this contact", "I have an email, can you find more details". Accepts any seed input — a name, company name, LinkedIn URL, email address, domain, or any combination. Executes ScraperAPI calls directly to search Google and fetch web pages, then synthesizes all findings into a structured contact card covering person fields (name, title, email, phone, LinkedIn, location, social) and company fields (domain, revenue, funding, employee count, founded year, HQ, tech stack, key investors, recent news, competitors).
+description: >
+  Use this skill whenever the user wants to enrich one contact or company and build a profile.
+  Trigger on: "enrich this lead", "find info about [person or company]", "build a contact card for
+  X", "I have this LinkedIn URL, find more about them", "find the email for [person] at
+  [company]", "research this contact", "I have an email, can you find more details". Accepts any
+  seed: a name, company name, LinkedIn URL, email address, domain, or a mix. Searches Google and
+  fetches pages through the ScraperAPI MCP server, then builds a structured contact card with
+  person fields (name, title, email, phone, LinkedIn, location, social) and company fields
+  (domain, revenue, funding, employee count, founded year, HQ, tech stack, investors, news,
+  competitors). It works on one person or company at a time: for a whole market, category or
+  competitor landscape, use scraperapi-market-research.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

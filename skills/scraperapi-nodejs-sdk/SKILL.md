@@ -1,14 +1,15 @@
 ---
 name: scraperapi-nodejs-sdk
 description: >
-  Best-practices reference for the ScraperAPI Node.js / JavaScript SDK (scraperapi-sdk npm package).
-  Consult whenever the user is writing, debugging, or reviewing JavaScript or TypeScript code that
-  calls ScraperAPI. Use when user asks: "scrape a website with Node.js and ScraperAPI",
-  "ScraperAPI JavaScript example", "how do I use scraperapi-sdk in Node",
-  "ScraperAPI TypeScript", "ScraperAPI async await Node.js", "ScraperAPI POST request JavaScript",
-  "Node.js ScraperAPI render", "ScraperAPI account info Node". Covers both CommonJS and ESM import
-  styles, Promises and async/await, all request parameters, POST/PUT requests, account info,
-  error handling, and credit costs.
+  Best-practices reference for the ScraperAPI Node.js / JavaScript SDK (scraperapi-sdk npm
+  package). Consult whenever the user is writing, debugging, or reviewing JavaScript or TypeScript
+  code that calls ScraperAPI. Use when user asks: "how do I use scraperapi-sdk in Node",
+  "ScraperAPI JavaScript example", "ScraperAPI TypeScript", "ScraperAPI async await Node.js",
+  "ScraperAPI POST request JavaScript", "Node.js ScraperAPI render", "ScraperAPI account info
+  Node". Covers CommonJS and ESM imports, Promises and async/await, all request parameters,
+  POST/PUT requests, account info, error handling, and credit costs. To write a complete new
+  scraper from scratch, use scraperapi-scraper-builder; for the Async Jobs API in depth (batches,
+  webhooks), use scraperapi-async.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

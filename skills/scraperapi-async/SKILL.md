@@ -1,14 +1,15 @@
 ---
 name: scraperapi-async
 description: >
-  Product-usage reference for ScraperAPI's Async Jobs API — submit scraping jobs in the background
-  and retrieve results via polling or webhook, including batch jobs up to 50,000 URLs.
-  Consult when the user is scraping many URLs, needs non-blocking requests, or wants webhook delivery.
-  Use when user asks: "how do I scrape 1000 URLs with ScraperAPI", "ScraperAPI async jobs",
-  "batch scraping with ScraperAPI", "submit a scraping job and poll for results",
-  "ScraperAPI webhook callback", "scrape URLs in the background", "ScraperAPI batchjobs endpoint".
-  Covers single jobs, batch jobs (up to 50k URLs), webhook callbacks, all apiParams,
-  async-exclusive parameters, binary response decoding, retention policy, and error handling.
+  Reference for ScraperAPI's Async Jobs REST API: submit scraping jobs in the background and get
+  results by polling or webhook, including batch jobs. Consult when the user is scraping many
+  URLs, needs non-blocking requests, or wants webhook delivery. Use when user asks: "how do I
+  scrape 1000 URLs with ScraperAPI", "ScraperAPI async jobs", "batch scraping with ScraperAPI",
+  "submit a scraping job and poll for results", "ScraperAPI webhook callback", "ScraperAPI
+  batchjobs endpoint". Covers single and batch jobs, webhook callbacks, apiParams, async-only
+  parameters, binary responses, retention, and error handling. It is language-agnostic: for SDK
+  client code, use the language's SDK skill; to crawl a whole site by following links, use
+  scraperapi-crawler.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

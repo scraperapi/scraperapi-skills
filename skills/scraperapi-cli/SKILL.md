@@ -1,17 +1,15 @@
 ---
 name: scraperapi-cli
 description: >
-  Product-usage reference for the official ScraperAPI command-line tool (`sapi`, distributed as
-  `scraperapi-cli`). Use this skill whenever the user wants to scrape, run async jobs, fetch
-  structured data, manage crawls, check account credits, or drive DataPipeline projects from a
-  terminal or shell script — anywhere a one-liner is more convenient than writing SDK code.
-  Trigger on: "scrape this URL from the terminal", "use sapi to fetch X", "ScraperAPI CLI",
-  "ScraperAPI from bash", "sapi scrape", "sapi cost", "sapi jobs", "sapi structured amazon",
-  "pipe ScraperAPI into jq", "shell one-liner to scrape Y", "scrape from a Makefile / cron / CI",
-  "check my ScraperAPI credits from the command line", "submit 10000 URLs as a batch from a file".
-  Covers install, auth resolution order, every top-level command (`scrape`, `cost`, `jobs`,
-  `structured`, `crawler`, `pipeline`, `account`, `config`, `init`), JSON / piping behaviour,
-  pre-flight cost checks, and common shell recipes.
+  Reference for the official ScraperAPI command-line tool (`sapi`, package `scraperapi-cli`). Use
+  this skill whenever the user wants to scrape, run async jobs, fetch structured data, manage
+  crawls, check credits, or drive DataPipeline from a terminal or shell script. Trigger on:
+  "scrape this URL from the terminal", "use sapi to fetch X", "ScraperAPI CLI", "ScraperAPI from
+  bash", "sapi scrape", "sapi jobs", "pipe ScraperAPI into jq", "scrape from a Makefile / cron /
+  CI", "check my ScraperAPI credits from the command line", "submit 10000 URLs as a batch from a
+  file". Covers install, auth, every command, JSON and piping behaviour, cost checks, and shell
+  recipes. Not for writing scraper code: for a new scraper script use scraperapi-scraper-builder,
+  and for code that calls ScraperAPI use the language's SDK skill.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

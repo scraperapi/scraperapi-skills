@@ -1,18 +1,16 @@
 ---
 name: scraperapi-mcp
 description: >
-  Knowledge base for the 28 ScraperAPI MCP tools. Covers scrape, Google (search, news, jobs,
-  shopping, maps), Amazon (product, search, offers), Walmart (search, product, category, review),
-  eBay (search, product), Redfin (for_sale, for_rent, search, agent), crawler tools, and the
-  AI Parser (create, get_details, parse_url, list, update, delete) for reusable custom extraction.
-  Provides tool selection, parameter optimization, credit cost guidance, and error recovery.
-  Requires the ScraperAPI MCP server and a valid SCRAPERAPI_API_KEY.
-  Trigger on: web scraping, scraping a URL, reading a webpage behind bot protection, Google
-  search queries, current events and news lookup, job listings,
-  product price comparison, shopping research, Amazon/Walmart/eBay product lookup or search,
-  e-commerce data extraction, Redfin real estate listings, property search, rental search,
-  site crawling, custom structured extraction, building a reusable parser, extracting fields
-  from any site, SERP monitoring, SEO tracking, competitive intelligence, or market research.
+  Knowledge base for the ScraperAPI MCP tools: scrape, Google (search, news, jobs, shopping,
+  maps), Amazon, Walmart, eBay, Redfin, the crawler, and the AI Parser. Use it whenever you are
+  about to call one of these tools directly in the conversation, to pick the right tool, set
+  parameters, keep credit cost down, and recover from errors. Trigger on: "scrape this URL",
+  "search Google for X", "look up this Amazon product", "find rentals on Redfin in Austin", "get
+  the latest news on X", "crawl this site", "extract these fields from this page", reading a page
+  behind bot protection, or ad-hoc web research in chat. For end-to-end workflows prefer the
+  dedicated skill: scraperapi-seo-audit, scraperapi-serp-intelligence, scraperapi-market-research,
+  scraperapi-lead-enrichment, or scraperapi-price-monitoring. Requires the ScraperAPI MCP server
+  and a SCRAPERAPI_API_KEY.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

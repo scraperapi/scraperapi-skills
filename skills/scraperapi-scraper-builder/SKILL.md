@@ -1,15 +1,16 @@
 ---
 name: scraperapi-scraper-builder
 description: >
-  Build and implement web scrapers using ScraperAPI. Use this skill whenever the user asks to
-  build, write, create, or implement a scraper, or wants runnable code that extracts data from
-  a website. Trigger on: "build me a scraper for [website]", "write a scraper that fetches
-  product pages from [ecommerce site]", "I need to scrape [data] from [website]", "create a
-  script that extracts [fields] from [URL]", "help me scrape [website] — I need [fields]",
-  "write code to scrape [website]", "make a script that scrapes [website]", "implement a
-  scraper for [URL]". Guides architectural decisions (structured endpoint vs. raw HTML, JS
-  rendering, proxy tier, sync vs. async batch), then generates a complete runnable Python or
-  Node.js script with retry logic, error handling, pagination, and credit estimation.
+  Build a new, complete web scraper that uses ScraperAPI. Use this skill whenever the user wants
+  runnable scraper code written from scratch for a site. Trigger on: "build me a scraper for
+  [website]", "write a scraper that fetches product pages from [ecommerce site]", "I need to
+  scrape [data] from [website]", "create a script that extracts [fields] from [URL]", "write code
+  to scrape [website]", "implement a scraper for [URL]". Probes the site, decides structured
+  endpoint vs. raw HTML, JS rendering, proxy tier and sync vs. async batch, then generates a
+  Python or Node.js script with retries, error handling, pagination and credit estimates. Not for
+  questions about the SDK in existing code (use the language's SDK skill, e.g.
+  scraperapi-python-sdk), shell one-liners with the sapi tool (use scraperapi-cli), or no-code
+  automations (use scraperapi-n8n or scraperapi-zapier).
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

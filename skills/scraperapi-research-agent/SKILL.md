@@ -1,17 +1,18 @@
 ---
 name: scraperapi-research-agent
 description: >
-  Autonomous web research agent — takes a research question, uses ScraperAPI to discover and
-  scrape relevant sources, uploads content as file artifacts to the Anthropic Files API, then
-  feeds everything to Claude for synthesis into a cited research report. All in one flow.
-  Use when user asks: "research X for me and give me a cited report",
-  "investigate Y online and summarize what you find", "do a deep dive on Z using real web sources",
-  "find information about X across multiple websites and cite your sources",
-  "run the scraperapi research agent on this topic". Produces a structured markdown report with
-  inline citations and a numbered source list. Invoke whenever the user wants multi-source web
-  research that requires scraping real pages, not just answering from memory.
+  Runs the bundled Python research script: it plans Google searches, scrapes the top sources
+  through ScraperAPI, uploads them to the Anthropic Files API, and has Claude write a cited
+  markdown report with a numbered source list. Use only when the user wants this script run, or
+  wants a standalone, repeatable research pipeline outside the chat. Trigger on: "run the
+  scraperapi research agent on X", "use the research agent script to investigate Y", "give me a
+  script that researches a question and writes a cited report". Requires Python 3.9+, `pip install
+  requests anthropic`, SCRAPERAPI_API_KEY and ANTHROPIC_API_KEY. For research done directly in the
+  conversation, use the ScraperAPI MCP tools (scraperapi-mcp); for a whole market or category, use
+  scraperapi-market-research; for one person or company, use scraperapi-lead-enrichment.
 
-  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI; uploads scraped content to the Anthropic Files API.
+  Note: Transmits user-supplied queries, URLs, and content to ScraperAPI; uploads scraped content
+  to the Anthropic Files API.
 metadata:
   openclaw:
     requires:

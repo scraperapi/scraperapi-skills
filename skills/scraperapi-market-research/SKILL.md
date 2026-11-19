@@ -1,12 +1,15 @@
 ---
 name: scraperapi-market-research
 description: >
-  Market research powered by live web data. Use this skill when the user wants
-  to understand a market, category, or customer segment — including consumer
-  sentiment, demand and trend signals, price and category structure, or the
-  competitive landscape. Trigger on requests like "research the [X] market,"
-  "what do customers think about [category]," "how is [category] priced,"
-  "what trends are shaping [industry]," or "who are the players in [space]."
+  Market research powered by live web data. Use this skill whenever the user wants to understand a
+  market, category, or customer segment, including consumer sentiment, demand and trend signals,
+  price and category structure, or the competitive landscape, even if they don't say "market
+  research". Trigger on: "research the [X] market", "what do customers think about [category]",
+  "how is [category] priced", "what trends are shaping [industry]", "who are the players in
+  [space]". It works at the category level: for a profile of one person or company use
+  scraperapi-lead-enrichment; for keyword SERP analysis use scraperapi-serp-intelligence; to run
+  the standalone Python research script use scraperapi-research-agent. Requires the ScraperAPI MCP
+  server.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
