@@ -153,7 +153,7 @@ See [ScraperAPI docs](https://docs.scraperapi.com/) for rate limits and credit c
 
 ## Anthropic APIs Used
 
-- **Files API** (beta) — uploads scraped pages as document artifacts
+- **Files API** — uploads scraped pages as document artifacts
 - **Messages API** — Claude synthesizes the report with citations
 
-Requires `ANTHROPIC_API_KEY` with access to `claude-opus-4-8` and the Files API beta.
+Requires `ANTHROPIC_API_KEY` with access to `claude-opus-4-8` and the Files API.
