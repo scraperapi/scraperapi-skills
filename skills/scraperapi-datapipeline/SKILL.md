@@ -30,7 +30,7 @@ retries, or infrastructure.
 ## When NOT to use DataPipeline
 
 - **One-off scrapes of a known URL list** → use the [Async API](https://docs.scraperapi.com/making-async-requests) — faster, cheaper, no project setup.
-- **Exploring a site without known URLs** → use the [Crawler](https://docs.scraperapi.com/crawler).
+- **Exploring a site without known URLs** → use the [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0).
 - **Need results in real-time within your code** → Async API is programmable; DataPipeline is scheduled.
 - **Free plan, need recurring execution** → recurring schedules require a paid plan.
 
