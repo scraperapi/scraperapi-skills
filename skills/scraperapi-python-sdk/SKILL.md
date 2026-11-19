@@ -259,19 +259,19 @@ def scrape(url, params=None):
         if status == 401:
             raise ValueError("Invalid API key — check SCRAPERAPI_API_KEY") from e
         if status == 403:
-            # Blocked or credits exhausted — try escalating proxy tier
-            raise RuntimeError("Blocked or out of credits") from e
+            # Monthly credits exhausted — retrying won't help
+            raise RuntimeError("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)") from e
         if status == 429:
             # Concurrent request limit — back off and retry
             raise RuntimeError("Rate limit — reduce concurrency or switch to async") from e
         if status in (500, 503):
-            # Transient failure — retry with exponential backoff
+            # ScraperAPI already retried for 70s (not charged) — retry; on protected sites escalate to premium/ultra_premium
             raise RuntimeError(f"Transient error {status} — retry") from e
         raise
 ```
 
-Status code reference: 200 success, 401 bad key, 403 blocked/no credits, 404 target not found,
-429 rate limit, 500/503 transient (safe to retry). ScraperAPI does not charge for 500 responses.
+Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
+429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
 

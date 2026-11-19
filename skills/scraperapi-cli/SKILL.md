@@ -98,7 +98,7 @@ Always start at the cheapest option and only escalate when a request fails:
 
 1. Default (1 credit). If 200 → done.
 2. `--render` if the page loads content via JavaScript (SPA, hydrated tables, infinite scroll). +10 credits.
-3. `--premium` if the site returns 403 / a block page from datacenter IPs. +10 credits.
+3. `--premium` if the request fails with 500 or returns a block page from datacenter IPs. +10 credits.
 4. `--ultra-premium` only for the hardest anti-bot sites (Cloudflare Turnstile, sophisticated fingerprinting). +30 credits.
 
 Combining flags adds credits — `--render --premium` is ~20 credits per success.
@@ -307,7 +307,8 @@ Cheap → expensive, only paying for the next tier when the previous one fails. 
 |---------|--------------|-----|
 | `command not found: sapi` | Not installed, or `npm` global bin not on `$PATH` | `npm install -g scraperapi-cli`; check `npm config get prefix` |
 | `401 Invalid API key` | Key missing or wrong | Run `sapi account` to confirm; re-run `sapi init` |
-| `403` on a public page | Datacenter IP blocked | Retry with `--premium`, then `--ultra-premium` |
+| `500` on a public page | ScraperAPI retried for 70s and still got blocked (not charged) | Retry with `--premium`, then `--ultra-premium` |
+| `403` | Credits exhausted for this billing cycle | Check `sapi account`; upgrade or enable overages at https://dashboard.scraperapi.com/billing |
 | `429` from `sapi` | Hit concurrent request limit | Switch to `sapi jobs batch` or add `xargs -P` cap |
 | Hangs forever in a script | Default 70s timeout, target is slow | `--timeout 120`, or use `--async` |
 | Output is JSON instead of HTML | stdout is piped → auto-JSON | Force with `--output html` if you want raw HTML in a pipe |

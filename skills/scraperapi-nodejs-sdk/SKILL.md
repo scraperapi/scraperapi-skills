@@ -256,16 +256,16 @@ async function safeScrape(url, params = {}) {
   } catch (err) {
     const status = err?.response?.status ?? err?.status;
     if (status === 401) throw new Error('Invalid API key — check SCRAPERAPI_API_KEY');
-    if (status === 403) throw new Error('Blocked or out of credits — try premium or ultra_premium');
+    if (status === 403) throw new Error("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
     if (status === 429) throw new Error('Rate limit — reduce concurrency or switch to async');
-    if (status === 500 || status === 503) throw new Error('Transient error — retry with backoff');
+    if (status === 500 || status === 503) throw new Error('Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium or ultra_premium');
     throw err;
   }
 }
 ```
 
-Status codes: 200 success, 401 bad key, 403 blocked/no credits, 404 not found (target),
-429 rate limit, 500/503 transient (not charged, safe to retry).
+Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 not found (target, charged),
+429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
 

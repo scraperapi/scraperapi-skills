@@ -26,7 +26,7 @@ Scrapes a URL and returns its content. Handles proxy rotation, CAPTCHAs, and ant
 - **Cost**: Significantly more expensive than standard scrape
 
 ### `premium: true`
-- Standard request returns 403/429
+- Standard request fails with 500 (ScraperAPI retried for 70s and still got blocked)
 - Site has known anti-bot protection (Cloudflare, Akamai, PerimeterX)
 - **Cost**: Significantly more expensive than standard; even more with render
 
@@ -65,7 +65,7 @@ Always start minimal and escalate only as needed:
    - Retry with `deviceType: "desktop"`
    - Then try `deviceType: "mobile"` if needed
 4. If geo issues / repeated errors: retry with `countryCode` matching the target market (e.g., `us`, `gb`).
-5. If 403/429 or blocking persists: add `premium: true` (more expensive still).
+5. If 500s or block pages persist: add `premium: true` (more expensive still).
 6. If still blocked: switch to `ultraPremium: true` (most expensive).
    - **NEVER** combine `premium` and `ultraPremium`.
 
@@ -74,8 +74,9 @@ Always start minimal and escalate only as needed:
 | Error | Likely Cause | Fix |
 |-------|-------------|-----|
 | Empty response | JS-rendered content | Add `render: true` |
-| HTTP 403 | Anti-bot protection | Add `premium: true` or `ultraPremium: true` |
-| HTTP 429 | Rate limiting | Add `premium: true`; ScraperAPI retries internally |
+| HTTP 500 | Blocked after ScraperAPI's 70s of retries (not charged) | Add `premium: true`, then `ultraPremium: true` |
+| HTTP 403 | Credits exhausted for this billing cycle | Stop; tell the user to upgrade or enable overages at https://dashboard.scraperapi.com/billing |
+| HTTP 429 | Too many concurrent requests for the plan | Back off and retry with fewer parallel calls |
 | Timeout | Slow target site | ScraperAPI handles retries; if persistent, site may be down |
 | Partial content | Page too large (>50MB) | Scrape specific subpages instead of root |
 

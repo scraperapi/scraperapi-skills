@@ -255,18 +255,18 @@ function safeScrape(Client $client, string $url, array $params = []): ?string
         $status = method_exists($e, 'getCode') ? (int) $e->getCode() : 0;
         switch ($status) {
             case 401: throw new \RuntimeException('Invalid API key — check SCRAPERAPI_API_KEY');
-            case 403: throw new \RuntimeException('Blocked or out of credits — try premium or ultra_premium');
+            case 403: throw new \RuntimeException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
             case 429: throw new \RuntimeException('Rate limit — reduce concurrency or switch to async');
             case 500:
-            case 503: throw new \RuntimeException('Transient error — retry with exponential backoff');
+            case 503: throw new \RuntimeException('Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium');
             default:  throw $e;
         }
     }
 }
 ```
 
-Status code reference: 200 success, 401 bad key, 403 blocked/no credits, 404 target not found,
-429 rate limit, 500/503 transient (not charged — safe to retry).
+Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
+429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 Also see [retry docs](https://docs.scraperapi.com/php/handle-and-process-responses-via-scraperapi-in-php/use-api-status-codes-to-retry-failed-requests-in-php).
 

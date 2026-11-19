@@ -66,9 +66,10 @@ GET https://api.scraperapi.com/?api_key=<SCRAPERAPI_API_KEY>&url=<target_url>
 | Status | Meaning |
 |--------|---------|
 | 200 | Proceed to content analysis |
-| 403 + body has "Just a moment", `cf-ray`, or "Cloudflare" | Cloudflare detected |
-| 403 + body has "DataDome", "PerimeterX", or "Akamai" | Bot manager detected |
-| 403 (generic) | Anti-bot protection present; premium proxies likely needed |
+| 200 + body has "Just a moment", `cf-ray`, or "Cloudflare" | Cloudflare challenge page got through |
+| 200 + body has "DataDome", "PerimeterX", or "Akamai" | Bot manager detected |
+| 500 | ScraperAPI retried for 70s and still failed (not charged); anti-bot protection likely, premium proxies likely needed |
+| 403 | Account is out of credits; says nothing about the site. Stop and tell the user |
 | 429 | Rate limited; note for architecture phase |
 
 **2. Content completeness** (for 200 responses)
@@ -108,7 +109,7 @@ Summarize findings as a table before proceeding. Every row maps to a specific de
 ```
 | Signal                  | Observed                              |
 |-------------------------|---------------------------------------|
-| HTTP status (standard)  | 200 / 403 / ...                       |
+| HTTP status (standard)  | 200 / 500 / ...                       |
 | Anti-bot protection     | None / Cloudflare / DataDome / ...    |
 | JS rendering needed     | Yes / No / Uncertain                  |
 | Pagination pattern      | ?page=N / rel=next / load-more / ...  |
@@ -155,7 +156,7 @@ Use the Site Profile's "Anti-bot protection" row as the starting point. Escalate
 
 - Site Profile says "None" → start with standard
 - Site Profile says "Cloudflare" or any bot manager → start with `premium=true` (~10 credits)
-- `premium=true` still returns 403 → escalate to `ultra_premium=true` (~30 credits)
+- `premium=true` still returns 500 or a block page → escalate to `ultra_premium=true` (~30 credits)
 
 `ultra_premium=true` and `premium=true` are mutually exclusive — never set both.
 
@@ -256,10 +257,10 @@ The generated script must include a `--max-credits` flag that aborts if the esti
 |--------|--------|
 | 200 | Parse and return |
 | 401 | Abort — invalid API key, do not retry |
-| 403 | Retry with `premium=true`; if still blocked, try `ultra_premium=true` |
+| 403 | Abort: credits exhausted for this billing cycle. Upgrade or enable overages at https://dashboard.scraperapi.com/billing; do not retry |
 | 404 | Skip this URL — page does not exist |
 | 429 | Exponential backoff and retry; switch to async for large batches |
-| 500/503 | Exponential backoff, max 5 attempts |
+| 500/503 | Failed after ScraperAPI's own 70s of retries (not charged). Exponential backoff, max 5 attempts; if it persists, escalate to `premium=true`, then `ultra_premium=true` |
 
 ---
 

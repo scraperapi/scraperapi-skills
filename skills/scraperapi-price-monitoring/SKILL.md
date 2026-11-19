@@ -85,7 +85,7 @@ MCP tools surface errors as tool-call errors carrying the upstream HTTP status.
 |--------|--------|
 | 200 with empty/missing price field | Treat as "price not visible" — likely out of stock or layout changed. Record `null` and surface it. |
 | 401 | API key missing or invalid — stop and tell the user to fix the API key in their ScraperAPI MCP setup. Do not retry. |
-| 403 | Blocked — retry once with `premium: true`. If it still fails, mark that target as failed and continue. |
+| 403 | Credits exhausted for this billing cycle — stop the run (every remaining call will fail too) and tell the user to upgrade or enable overages at https://dashboard.scraperapi.com/billing. |
 | 404 | Product no longer exists — record as `removed` in the report. |
 | 429 | Concurrent limit hit — back off (sleep 3s) and retry once. |
 | 5xx | Transient — retry up to 3 times with backoff (2s, 4s, 8s). |

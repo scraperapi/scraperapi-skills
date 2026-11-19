@@ -34,7 +34,7 @@ def scrape(url: str, params: dict, attempt: int = 0) -> Optional[str]:
         if r.status_code == 401:
             sys.exit("Error: Invalid API key (401)")
         if r.status_code == 403:
-            raise RuntimeError("Blocked (403). Retry with --premium or --ultra-premium.")
+            sys.exit("Error: Out of API credits (403). Upgrade or enable overages at https://dashboard.scraperapi.com/billing")
         if r.status_code == 404:
             print(f"Not found (404): {url}", file=sys.stderr)
             return None
@@ -260,7 +260,7 @@ async function scrape(url, params, attempt = 0) {
     const res = await fetch(`${BASE_URL}?${qs}`, { timeout: 60000 });
     if (res.ok) return res.text();
     if (res.status === 401) { console.error('Error: Invalid API key'); process.exit(1); }
-    if (res.status === 403) throw new Error('Blocked (403). Try --premium or --ultra-premium.');
+    if (res.status === 403) { console.error('Error: Out of API credits (403). Upgrade or enable overages at https://dashboard.scraperapi.com/billing'); process.exit(1); }
     if (res.status === 404) { console.warn(`Not found (404): ${url}`); return null; }
     if ([429, 500, 503].includes(res.status)) {
       if (attempt < 4) {
