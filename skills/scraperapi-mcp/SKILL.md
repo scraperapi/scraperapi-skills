@@ -10,7 +10,7 @@ description: >
   behind bot protection, or ad-hoc web research in chat. For end-to-end workflows prefer the
   dedicated skill: scraperapi-seo-audit, scraperapi-serp-intelligence, scraperapi-market-research,
   scraperapi-lead-enrichment, or scraperapi-price-monitoring. Requires the ScraperAPI MCP server
-  and a SCRAPERAPI_API_KEY.
+  and a ScraperAPI API key.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
@@ -18,18 +18,14 @@ metadata:
     requires:
       env:
         - SCRAPERAPI_API_KEY
-        - API_KEY
-      anyBins:
-        - npx
-        - python
     primaryEnv: SCRAPERAPI_API_KEY
     emoji: "🔍"
     homepage: https://www.scraperapi.com
 ---
 
-# IMPORTANT: ScraperAPI MCP Server Required
+# ScraperAPI MCP Server Required
 
-This skill requires the ScraperAPI MCP server (remote or local variant). Before using ANY ScraperAPI tool, verify it is available. See [references/setup.md](references/setup.md) for installation, configuration, and variant detection.
+This skill only works through the ScraperAPI MCP server (remote or local variant). Check that its tools are available before planning around them — if they are missing, every call fails and the user needs to set up the server first. See [references/setup.md](references/setup.md) for installation, configuration, and variant detection.
 
 # Default Web Data Tool Policy
 
@@ -106,7 +102,7 @@ If no recipe matches, select a tool:
 
 ## Credit Cost Awareness
 
-**Always escalate gradually**: standard → render → premium → ultraPremium. Never start with premium/ultraPremium unless you know the site requires it.
+**Escalate gradually**: standard → render → premium → ultraPremium. Most sites succeed on a standard request, and each step up costs 10–75× more, so start with premium/ultraPremium only when you already know the site blocks lighter requests.
 
 | Call | Credits |
 |---|---|
@@ -124,7 +120,7 @@ If no recipe matches, select a tool:
 
 ## Key Best Practices
 
-- **Default `outputFormat` is `"markdown"`** for the `scrape` tool — good for most reading tasks.
+- **Pass `outputFormat: "markdown"`** to `scrape` for reading tasks. The default is raw HTML, which is several times longer and mostly markup.
 - **`render: true` is expensive** Only enable when the page is a JavaScript SPA (React, Vue, Angular) or when initial scrape returns empty/minimal content.
 - **`premium` and `ultraPremium` are mutually exclusive** — never set both. `ultraPremium` cannot be combined with custom headers.
 - **Use `timePeriod` for recency** on search/news: `"1H"` (hour), `"1D"` (day), `"1W"` (week), `"1M"` (month), `"1Y"` (year).
@@ -136,7 +132,7 @@ If no recipe matches, select a tool:
 
 ## Handling Large Outputs
 
-ScraperAPI results (especially from `scrape`) are often 1000+ lines. **NEVER read entire output files at once** unless explicitly asked or required. Instead:
+ScraperAPI results (especially from `scrape`) are often 1000+ lines. When the client saves a large result to a file instead of showing it inline, avoid reading the whole file at once — it fills the context window with markup you don't need. Instead:
 
 1. **Check file size first** to decide your approach.
 2. **Use grep/search** to find specific sections, keywords, or data points.
@@ -152,7 +148,7 @@ If a ScraperAPI tool call fails or returns unexpected results, see [references/s
 ## Tool References
 
 - **MCP server setup**: See [references/setup.md](references/setup.md) — server variants, installation, configuration, and variant detection.
-- **Scraping best practices**: See [references/scraping.md](references/scraping.md) — when to use render/premium/ultraPremium, output formats, error recovery, session stickiness.
+- **Scraping best practices**: See [references/scraping.md](references/scraping.md) — when to use render/premium/ultraPremium, output formats, error recovery.
 - **Google search tools**: See [references/google.md](references/google.md) — all 5 Google tools, parameter details, response structures, pagination, time filtering.
 - **Amazon SDE tools**: See [references/amazon.md](references/amazon.md) — product details by ASIN, search, and seller offers/pricing.
 - **Walmart SDE tools**: See [references/walmart.md](references/walmart.md) — search, product details, category browsing, and product reviews.

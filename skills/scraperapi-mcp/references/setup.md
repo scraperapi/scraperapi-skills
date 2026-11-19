@@ -58,4 +58,4 @@ Either way, select tools from the full list above — no variant-specific fallba
 | Remote | `Authorization: Bearer` header | Entered in the plugin's settings when it is enabled, or written into the header by hand |
 | Local | `API_KEY` env var | API key passed to the local Python MCP server |
 
-Both hold the same ScraperAPI key value. Direct users to https://www.scraperapi.com/dashboard to obtain or manage their key.
+Both hold the same ScraperAPI key value. Direct users to https://dashboard.scraperapi.com to obtain or manage their key.

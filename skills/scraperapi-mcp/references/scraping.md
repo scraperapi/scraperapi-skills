@@ -14,7 +14,7 @@ Scrapes a URL and returns its content. Handles proxy rotation, CAPTCHAs, and ant
 | `premium` | boolean | false | Use premium residential proxies |
 | `ultraPremium` | boolean | false | Advanced bypass mechanisms (incompatible with `premium`) |
 | `deviceType` | enum | — | `"mobile"` or `"desktop"` |
-| `outputFormat` | enum | `"markdown"` | `"text"`, `"markdown"`, `"html"`, `"csv"`, or `"json"` |
+| `outputFormat` | enum | raw HTML | `"text"`, `"markdown"`, `"html"`, `"csv"`, or `"json"` |
 | `autoparse` | boolean | false | Auto-parse JSON on supported sites; set `true` for csv/json output |
 
 ## When to Use Each Parameter
@@ -39,16 +39,15 @@ Scrapes a URL and returns its content. Handles proxy rotation, CAPTCHAs, and ant
 ### `countryCode`
 - Content varies by region (pricing, availability, regulations)
 - Site serves different content per locale
-- **Cost**: More expensive than standard
 
 ### `deviceType`
 - Site serves different layouts for mobile vs desktop
 - Need mobile-specific content or responsive version
 
 ### `outputFormat`
-- `"markdown"` (default) — best for reading content, preserves structure
+- `"markdown"` — best for reading content, preserves structure; pass it explicitly
 - `"text"` — plain text, no formatting
-- `"html"` — raw HTML when you need to parse DOM structure
+- `"html"` (same as the default) — raw HTML when you need to parse DOM structure
 - `"csv"` / `"json"` — use with `autoparse: true` on supported sites
 
 ### `autoparse: true`
@@ -67,7 +66,7 @@ Always start minimal and escalate only as needed:
 4. If geo issues / repeated errors: retry with `countryCode` matching the target market (e.g., `us`, `gb`).
 5. If 500s or block pages persist: add `premium: true` (more expensive still).
 6. If still blocked: switch to `ultraPremium: true` (most expensive).
-   - **NEVER** combine `premium` and `ultraPremium`.
+   - Don't combine `premium` and `ultraPremium` — the API treats them as incompatible.
 
 ## Error Patterns
 
