@@ -83,26 +83,23 @@ Redfin, crawler, and AI Parser — over a single connection.
 
 No installation required. All 28 tools available.
 
-Add to your `claude_desktop_config.json`, Claude Code project settings, or MCP client config:
+If you installed the ScraperAPI plugin, this server is already configured — the plugin asks for
+your API key when you enable it. Otherwise, add it to your Claude Code project settings or MCP
+client config:
 
 ```json
 {
   "mcpServers": {
     "ScraperAPI": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.scraperapi.com/mcp",
-        "--header",
-        "Authorization: Bearer ${SCRAPERAPI_API_KEY}"
-      ]
+      "type": "http",
+      "url": "https://mcp.scraperapi.com/mcp",
+      "headers": {
+        "Authorization": "Bearer <YOUR_SCRAPERAPI_API_KEY>"
+      }
     }
   }
 }
 ```
-
-Requires `SCRAPERAPI_API_KEY` set in the environment. `npx mcp-remote` handles the remote
-connection — no separate install step needed.
 
 ### Local server (self-hosted)
 
