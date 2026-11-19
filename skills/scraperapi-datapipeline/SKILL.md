@@ -29,14 +29,13 @@ retries, or infrastructure.
 
 ## When NOT to use DataPipeline
 
-- **One-off scrapes of a known URL list** → use the [Async API](https://docs.scraperapi.com/making-async-requests) — faster, cheaper, no project setup.
+- **One-off scrapes of a known URL list** → use the [Async API](https://docs.scraperapi.com/making-async-requests) — faster, no project setup.
 - **Exploring a site without known URLs** → use the [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0).
 - **Need results in real-time within your code** → Async API is programmable; DataPipeline is scheduled.
-- **Free plan, need recurring execution** → recurring schedules require a paid plan.
 
-Use DataPipeline when: scraping runs on a fixed schedule, the input list is large (up to 100,000
-items), results should flow to a webhook automatically, or you want email notifications on job
-completion.
+Use DataPipeline when: scraping runs on a schedule, the input list is large (up to 100,000 items
+per project), results should flow to a webhook automatically, or you want email notifications
+about job runs.
 
 ## Base URL and Auth
 
@@ -47,30 +46,27 @@ Auth:     ?api_key=YOUR_KEY  (query parameter on every request)
 
 ## Project Types
 
-Set `projectType` in the create request to choose what to scrape:
+Set `projectType` in the create request to choose what to scrape. If you omit it, the project
+type is `urls`.
 
 | Type | Input |
 |------|-------|
-| `urls` | Raw HTML from any URL |
-| `urls_with_js` | Same but with JavaScript rendering |
-| `google_search` | Search queries |
-| `google_news` | Search queries |
-| `google_jobs` | Search queries |
-| `google_shopping` | Search queries |
-| `google_maps` | Search queries |
-| `amazon_product` | ASINs |
+| `urls` | Any URLs (raw HTML). For JavaScript-heavy pages, add `"render": true` in `apiParams` |
+| `google_search`, `google_news`, `google_jobs`, `google_shopping`, `google_maps_search` | Search queries |
+| `google_ai_mode`, `google_gemini`, `chatgpt`, `perplexity` | See the [endpoints reference](https://docs.scraperapi.com/data-pipeline/datapipeline-endpoints/endpoints-and-parameters) |
+| `amazon_product`, `amazon_offer` | ASINs |
 | `amazon_search` | Search queries |
-| `amazon_offers` | ASINs |
-| `walmart_product` | Product IDs |
+| `walmart_product`, `walmart_review` | Product IDs |
 | `walmart_search` | Search queries |
 | `walmart_category` | Category IDs |
-| `walmart_reviews` | Product IDs |
-| `ebay_product` | 12-digit product IDs |
+| `ebay_product` | Product IDs |
 | `ebay_search` | Search queries |
-| `redfin_listing_for_sale` | Listing URLs |
-| `redfin_listing_for_rent` | Listing URLs |
-| `redfin_listing_search` | Search result URLs |
-| `redfin_agent_details` | Agent profile URLs |
+| `homedepot_product`, `homedepot_search`, `homedepot_reviews` | See the endpoints reference |
+| `redfin_forsale`, `redfin_search`, `redfin_agent` | Redfin URLs |
+
+The docs spell the Redfin rentals type as `refin_forrent`; if the API rejects it, contact support
+rather than guessing. An unknown type fails with a 400:
+`/projectType: must be equal to one of the allowed values`.
 
 ## Creating a Project
 
@@ -80,123 +76,146 @@ import os, requests
 API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 BASE    = "https://datapipeline.scraperapi.com/api"
 
-project = requests.post(
+resp = requests.post(
     f"{BASE}/projects",
     params={"api_key": API_KEY},
     json={
-        "name":               "Weekly Amazon price monitor",
-        "projectType":        "amazon_product",
-        "schedulingEnabled":  True,
-        "scrapingInterval":   "weekly",
-        "scheduledAt":        "now",
+        "name":              "Weekly Amazon price monitor",
+        "projectType":       "amazon_product",
+        "schedulingEnabled": True,
+        "scrapingInterval":  "weekly",
+        "scheduledAt":       "now",
         "projectInput": {
             "type": "list",
             "list": ["B09V3KXJPB", "B08N5WRWNW"]   # ASINs
         },
         "apiParams": {
-            "country_code": "us"
+            "outputFormat": "csv"
         },
         "webhookOutput": {
-            "url":             "https://yourapp.com/pipeline-results",
-            "webhookEncoding": "multipart_form_data_encoding"
+            "url": "https://yourapp.com/pipeline-results"
         },
         "notificationConfig": {
-            "notifyOnSuccess": "with_every_run",
+            "notifyOnSuccess": "never",
             "notifyOnFailure": "with_every_run"
         }
     }
-).json()
-
+)
+resp.raise_for_status()   # a 400 body names the field that failed validation
+project = resp.json()
 print(f"Project created: id={project['id']}")
+```
+
+The smallest valid project is just an input list; everything else has a default:
+
+```json
+{"projectInput": {"type": "list", "list": ["https://example.com/"]}}
 ```
 
 ### Create request fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | No | Human-readable project name |
-| `projectType` | Yes | What to scrape (see table above) |
-| `schedulingEnabled` | No | `true` to enable recurring schedule |
-| `scrapingInterval` | Yes (if scheduled) | See scheduling options below |
-| `scheduledAt` | No | `"now"` to run immediately on create |
-| `projectInput` | Yes | Input data (see input methods below) |
-| `apiParams` | No | Standard ScraperAPI parameters |
-| `webhookOutput` | No | Webhook delivery config |
-| `notificationConfig` | No | Email notification settings |
+| Field | Description |
+|-------|-------------|
+| `projectInput` | What to scrape (see input methods below) |
+| `projectType` | What kind of data (see table above); defaults to `urls` |
+| `name` | Human-readable project name |
+| `schedulingEnabled` | `true` / `false` |
+| `scrapingInterval` | How often to run (see scheduling below) |
+| `scheduledAt` | ISO 8601 timestamp of the next run, or `"now"` |
+| `apiParams` | Scraping parameters (see below) |
+| `webhookOutput` | Webhook delivery config |
+| `notificationConfig` | Email notification settings |
+
+`id` and `createdAt` are set by ScraperAPI.
 
 ## Input Methods
 
-### Direct list (up to 500 items)
+### Direct list
 
 ```json
 {
   "projectInput": {
     "type": "list",
-    "list": ["query one", "query two", "B09V3KXJPB"]
+    "list": ["query one", "query two"]
   }
 }
 ```
 
-### CSV file (up to 100,000 items)
+Items are URLs, queries, ASINs or IDs, depending on the project type.
 
-Upload a CSV with one URL/query/ASIN per line — no header rows, no commas. Do this through the
-[dashboard](https://dashboard.scraperapi.com/projects) when creating a project; the API accepts
-list inputs only.
+### CSV file (dashboard)
 
-### Webhook input (dynamic polling)
+In the [dashboard](https://dashboard.scraperapi.com/projects) you can upload a CSV of up to
+100,000 items, one per line, with no header row and no commas. The dashboard's text field takes
+up to 500 items.
+
+### Webhook input
 
 ```json
 {
   "projectInput": {
-    "type": "webhook",
-    "webhookUrl": "https://yourapp.com/input-items"
+    "type": "webhook_input",
+    "url": "https://yourapp.com/input-items"
   }
 }
 ```
 
-ScraperAPI polls your webhook URL for the item list when the job starts. One item per line;
+On every run, ScraperAPI downloads the item list from that URL. Return one item per line, with
 no commas. Useful for dynamically generated lists (e.g., new ASINs added since the last run).
 
 ## Scheduling Options
 
 | `scrapingInterval` | Description |
 |-------------------|-------------|
-| `"once"` | Run a single job immediately |
+| (omitted) | Scrape once (the default) |
 | `"hourly"` | Every hour |
 | `"daily"` | Once per day |
 | `"weekly"` | Once per week |
 | `"monthly"` | Once per month |
-| `"cron"` | Custom cron expression (use `cron` field instead of `interval`) |
+| a cron expression, e.g. `"0 0 * * 1"` | Custom schedule (five fields: minute, hour, day of month, month, day of week) |
 
-Recurring schedules (`hourly`, `daily`, `weekly`, `monthly`, `cron`) require a paid plan.
-
-Set `"scheduledAt": "now"` to trigger the first run immediately when the project is created.
+Set `"scheduledAt": "now"` to trigger a run immediately, on create or later via `PATCH`.
 
 ## Output / Delivery
 
 ### Webhook delivery
 
-Results are POSTed to your webhook URL as they complete. The `webhookEncoding` field controls
-the format:
-
 ```json
 {
   "webhookOutput": {
-    "url":             "https://yourapp.com/results",
-    "webhookEncoding": "multipart_form_data_encoding"
+    "url": "https://yourapp.com/results"
   }
 }
 ```
 
+Add `"webhookEncoding": "multipart_form_data_encoding"` if your receiver expects multipart form
+data. Set `"webhookOutput": null` to stop webhook delivery.
+
 ### Dashboard download
 
-Omit `webhookOutput` and results are saved for download in the
-[DataPipeline dashboard](https://dashboard.scraperapi.com/projects). Results are retained for
-**30 days** then automatically deleted.
+Results are always available for download on the project's page in the
+[DataPipeline dashboard](https://dashboard.scraperapi.com/projects), and through each job's
+`resultUrl`. Results are delivered as a zipped file and kept for **30 days**, then deleted
+permanently.
 
-Output formats by project type:
-- `urls` / `urls_with_js` → HTML wrapped in JSONL
-- Structured types (Amazon, Google, Walmart, eBay, Redfin) → JSON or CSV
+Output formats:
+- `urls` projects → HTML, wrapped in JSONL
+- Structured types (Amazon, Google, Walmart, eBay, Redfin) → JSON (default, wrapped in JSONL) or
+  CSV. Choose with `"apiParams": {"outputFormat": "csv"}` or `"json"`.
+
+## `apiParams`
+
+The DataPipeline examples use these, written as shown:
+
+| Parameter | Purpose |
+|-----------|---------|
+| `outputFormat` | `"json"` or `"csv"`, structured project types only |
+| `render` | JavaScript rendering |
+| `premium` | Premium residential proxies |
+
+The docs point to the [Async API parameter list](https://docs.scraperapi.com/asynchronous-api/callbacks-and-api-params)
+for the rest, but don't confirm that every one works in a project. If you need another parameter,
+check the endpoints reference and read the 400 message if the API rejects it.
 
 ## Managing Projects
 
@@ -205,41 +224,44 @@ Output formats by project type:
 projects = requests.get(f"{BASE}/projects", params={"api_key": API_KEY}).json()
 
 # Get a single project
-project = requests.get(f"{BASE}/projects/525", params={"api_key": API_KEY}).json()
+project = requests.get(f"{BASE}/projects/{project_id}", params={"api_key": API_KEY}).json()
 
-# Update (partial update — only include fields to change)
+# Update: send only the fields that change
 requests.patch(
-    f"{BASE}/projects/525",
+    f"{BASE}/projects/{project_id}",
     params={"api_key": API_KEY},
     json={
         "scrapingInterval": "daily",
         "apiParams":        {"premium": True},
-        "notificationConfig": {"notifyOnSuccess": "never"}
+        # both keys are required whenever notificationConfig is sent
+        "notificationConfig": {"notifyOnSuccess": "weekly", "notifyOnFailure": "weekly"}
     }
 )
 
-# Delete / archive (irreversible without support)
-requests.delete(f"{BASE}/projects/525", params={"api_key": API_KEY})
+# Archive (restoring it needs ScraperAPI support)
+requests.delete(f"{BASE}/projects/{project_id}", params={"api_key": API_KEY})
 ```
-
-Updatable fields: `scrapingInterval`, `scheduledAt`, `outputFormat`, `apiParams`, `notificationConfig`.
 
 ## Managing Jobs
 
 ```python
 # List jobs for a project
 jobs = requests.get(
-    f"{BASE}/projects/525/jobs",
+    f"{BASE}/projects/{project_id}/jobs",
     params={"api_key": API_KEY}
 ).json()
 
 # Cancel a running job
 requests.delete(
-    f"{BASE}/projects/525/jobs/{job_id}",
+    f"{BASE}/projects/{project_id}/jobs/{job_id}",
     params={"api_key": API_KEY}
 )
-# Running requests within the job finish first; final status becomes "Cancelled"
+# Running requests within the job finish first; then the job's status becomes cancelled
 ```
+
+Each job reports `status`, `successfulTasks`, `failedTasks`, `inProgressTasks`, `cancelledTasks`,
+`credits`, `resultUrl` and `errorReportUrl`. A job is marked as an error when more than half of
+its requests fail.
 
 A new job can only start if no other job for that project is currently running.
 
@@ -248,53 +270,36 @@ A new job can only start if no other job for that project is currently running.
 ```json
 {
   "notificationConfig": {
-    "notifyOnSuccess": "with_every_run",
+    "notifyOnSuccess": "never",
     "notifyOnFailure": "with_every_run"
   }
 }
 ```
 
-Options for both fields: `"never"`, `"with_every_run"`, `"daily"`, `"weekly"`.
-
-## `apiParams` Reference
-
-All standard ScraperAPI parameters are supported inside `apiParams`:
-
-| Parameter | Purpose |
-|-----------|---------|
-| `country_code` | Geotarget (e.g. `"us"`, `"gb"`) |
-| `render` | JavaScript rendering |
-| `premium` | Premium residential proxies |
-| `ultra_premium` | Ultra-premium proxies (mutually exclusive with `premium`) |
-| `device_type` | `"desktop"` or `"mobile"` |
-| `output_format` | `"text"` or `"markdown"` for LLM pipelines |
-| `autoparse` | Structured JSON extraction for supported sites |
-| `keep_headers` | Forward custom headers |
-| `follow_redirect` | Control redirect handling |
-| `wait_for_selector` | Wait for CSS selector (requires `render: true`) |
-| `screenshot` | Capture screenshot (auto-enables rendering) |
-| `retry_404` | Retry 404 responses |
+Notifications are emails. Send both keys whenever you send `notificationConfig`:
+- `notifyOnSuccess`: `"never"`, `"with_every_run"`, `"daily"`, `"weekly"`
+- `notifyOnFailure`: `"with_every_run"`, `"daily"`, `"weekly"` (no `"never"`)
 
 ## Credit Costs
 
-DataPipeline uses the same underlying credit rates as the Standard API, including per-site rates
-(Amazon/Walmart/eBay 5, Google 25, LinkedIn 30, bot-protected sites 10), so a Google or Amazon
-project type costs that per input. Cost is the sum of all requests in a job run. Preview the estimated cost before launching a project from the dashboard.
-
-Only successful `200` and `404` responses are charged; failed requests are not.
+DataPipeline jobs cost the same as standard API requests: 1 credit per normal request, 5 for
+e-commerce sites (Amazon, Walmart, eBay), 25 for search engines (Google), and more with
+`render` or `premium`. See the [DataPipeline credit costs](https://docs.scraperapi.com/data-pipeline/jobs-and-costs-management/credit-costs)
+page for the full table. A job's cost is the sum of its requests, so it depends on how many
+succeed; each job reports its total in `credits`.
 
 ## Limits
 
 | Limit | Value |
 |-------|-------|
-| Max input items | 100,000 per job |
-| Direct list input | 500 items |
-| Data retention | 30 days |
-| Free plan concurrency | 5 connections |
-| Free plan scheduling | One-time runs only |
+| Max input items | 100,000 per project |
+| Dashboard text field | 500 items |
+| Concurrent jobs per project | 1 |
+| Result retention | 30 days |
 
 ## Documentation
 
 - [DataPipeline overview](https://docs.scraperapi.com/data-pipeline)
+- [Endpoints and parameters](https://docs.scraperapi.com/data-pipeline/datapipeline-endpoints/endpoints-and-parameters)
+- [How to use the API](https://docs.scraperapi.com/data-pipeline/datapipeline-endpoints/how-to-use)
 - [Dashboard — manage projects](https://dashboard.scraperapi.com/projects)
-- [API reference](https://docs.scraperapi.com/data-pipeline/api-reference)
