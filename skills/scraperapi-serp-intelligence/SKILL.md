@@ -34,15 +34,17 @@ Live SERP landscape analysis powered by ScraperAPI's real-time search data. Answ
 
 ## MCP Tools Available
 
+These tools come from the ScraperAPI MCP server. Their full names carry a prefix that depends on how the server is connected (plugin, claude.ai connector, or a local config), so match them by the tool name below.
+
 | Tool | What it returns |
 |------|----------------|
-| `mcp__ScraperAPIRemote__google_search` | Full structured SERP — organic results, featured snippets, PAA, shopping, knowledge panels, related searches |
-| `mcp__ScraperAPIRemote__google_news` | News results for a query — useful for understanding news pack presence and freshness signals |
-| `mcp__ScraperAPIRemote__google_shopping` | Shopping results and pricing — confirms transactional intent and commercial SERP structure |
-| `mcp__ScraperAPIRemote__scrape` | Full page content for a specific URL — use to read AI Overview citations or examine top-ranking content structure |
+| `google_search` | Full structured SERP — organic results, featured snippets, PAA, shopping, knowledge panels, related searches |
+| `google_news` | News results for a query — useful for understanding news pack presence and freshness signals |
+| `google_shopping` | Shopping results and pricing — confirms transactional intent and commercial SERP structure |
+| `scrape` | Full page content for a specific URL — use to read AI Overview citations or examine top-ranking content structure |
 
 ### Render guidance for `scrape`
-When calling `mcp__ScraperAPIRemote__scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — Google search result pages, LinkedIn profiles, Crunchbase, React/SPA-based sites (e.g. G2 grids). Use standard (no render flags) for static HTML pages: news articles, Wikipedia, company homepages, GitHub, and most `/pricing` pages.
+When calling `scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — Google search result pages, LinkedIn profiles, Crunchbase, React/SPA-based sites (e.g. G2 grids). Use standard (no render flags) for static HTML pages: news articles, Wikipedia, company homepages, GitHub, and most `/pricing` pages.
 
 ### Structured parser limitations for `google_search`
 The `google_search` tool returns parsed JSON, not raw HTML. Its parser does not reliably handle all SERP result types. Known gaps:
@@ -54,7 +56,7 @@ The `google_search` tool returns parsed JSON, not raw HTML. Its parser does not 
 **When organic results don't start at position 1, always follow up with a rendered scrape of the Google search URL to confirm what is actually above the fold:**
 
 ```
-mcp__ScraperAPIRemote__scrape  url="https://www.google.com/search?q=[url-encoded-query]"  render=true  premium=true
+scrape  url="https://www.google.com/search?q=[url-encoded-query]"  render=true  premium=true
 ```
 
 Read the returned HTML visually to identify any results the structured parser missed. Never assume missing positions are explained by SERP features — verify first.
@@ -91,20 +93,20 @@ For every SERP intelligence request:
 **Data gathering**:
 ```
 # Run one search per keyword (run in parallel)
-mcp__ScraperAPIRemote__google_search  query="[keyword 1]"
-mcp__ScraperAPIRemote__google_search  query="[keyword 2]"
+google_search  query="[keyword 1]"
+google_search  query="[keyword 2]"
 
 # If shopping signals appear in organic results, confirm with:
-mcp__ScraperAPIRemote__google_shopping  query="[keyword]"
+google_shopping  query="[keyword]"
 
 # If a news pack appears, confirm freshness signal with:
-mcp__ScraperAPIRemote__google_news  query="[keyword]"
+google_news  query="[keyword]"
 
 # If an AI Overview appears and citations are visible, scrape a cited source:
-mcp__ScraperAPIRemote__scrape  url="[cited-source-url]"
+scrape  url="[cited-source-url]"
 
 # AI Overview fallback — if ai_box is detected but content is empty:
-mcp__ScraperAPIRemote__scrape  url="https://www.google.com/search?q=[url-encoded-keyword]"  render=true  premium=true
+scrape  url="https://www.google.com/search?q=[url-encoded-keyword]"  render=true  premium=true
 # Parse returned HTML for AI Overview text and source citations.
 # If still unrecoverable, flag as "AI Overview detected, content unconfirmed" — never assume absent.
 ```
@@ -227,21 +229,21 @@ If absent: note that organic results are unobstructed.]
 **Data gathering**:
 ```
 # Run all keyword queries in parallel
-mcp__ScraperAPIRemote__google_search  query="[keyword 1]"
-mcp__ScraperAPIRemote__google_search  query="[keyword 2]"
-mcp__ScraperAPIRemote__google_search  query="[keyword 3]"
+google_search  query="[keyword 1]"
+google_search  query="[keyword 2]"
+google_search  query="[keyword 3]"
 # ... (one call per keyword)
 
 # Follow-up calls (up to 3) for the highest-signal findings:
 
 # If shopping signals appear in organic results:
-mcp__ScraperAPIRemote__google_shopping  query="[keyword]"
+google_shopping  query="[keyword]"
 
 # If a news pack appears:
-mcp__ScraperAPIRemote__google_news  query="[keyword]"
+google_news  query="[keyword]"
 
 # If an AI Overview is detected and a cited source warrants deeper inspection:
-mcp__ScraperAPIRemote__scrape  url="[cited-source-url]"
+scrape  url="[cited-source-url]"
 ```
 
 **Analysis**: Apply the same per-keyword analysis as Keyword Scan (features, intent, effective visibility). Then add cross-set synthesis:

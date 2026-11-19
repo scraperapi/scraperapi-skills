@@ -32,14 +32,16 @@ Live SEO analysis powered by ScraperAPI's real-time SERP and scraping tools. No 
 
 ## MCP Tools Available
 
+These tools come from the ScraperAPI MCP server. Their full names carry a prefix that depends on how the server is connected (plugin, claude.ai connector, or a local config), so match them by the tool name below.
+
 | Tool | What it returns |
 |------|----------------|
-| `mcp__ScraperAPIRemote__google_search` | Live structured SERP — organic rankings, featured snippets, People Also Ask, AI Overview presence, knowledge panels, sitelinks. Returns parsed JSON, not raw HTML. Supports geo-targeting via `countryCode` and `gl` parameters. |
-| `mcp__ScraperAPIRemote__scrape` | Full page content with JS rendering — use `outputFormat: "markdown"` for content extraction and word count, `outputFormat: "html"` for schema markup, meta tags, and canonical inspection |
-| `mcp__ScraperAPIRemote__google_news` | Brand and topic mention recency — useful for E-E-A-T and freshness signals |
+| `google_search` | Live structured SERP — organic rankings, featured snippets, People Also Ask, AI Overview presence, knowledge panels, sitelinks. Returns parsed JSON, not raw HTML. Supports geo-targeting via `countryCode` and `gl` parameters. |
+| `scrape` | Full page content with JS rendering — use `outputFormat: "markdown"` for content extraction and word count, `outputFormat: "html"` for schema markup, meta tags, and canonical inspection |
+| `google_news` | Brand and topic mention recency — useful for E-E-A-T and freshness signals |
 
 ### Render guidance for `scrape`
-When calling `mcp__ScraperAPIRemote__scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — React/Next.js apps, SPAs, Webflow sites with client-side rendering. Use standard (no render flags) for static HTML: WordPress sites, GitHub, news articles. If the returned HTML has an empty `<head>` or missing body content, escalate to `render=true, premium=true` and retry.
+When calling `scrape`, set `render=true` and `premium=true` for any page that requires JavaScript to display content — React/Next.js apps, SPAs, Webflow sites with client-side rendering. Use standard (no render flags) for static HTML: WordPress sites, GitHub, news articles. If the returned HTML has an empty `<head>` or missing body content, escalate to `render=true, premium=true` and retry.
 
 ---
 
@@ -90,24 +92,24 @@ Check the user's request for these four parameters. Ask all unclear parameters i
 **Data gathering**:
 ```
 # Stage 1: Indexation check (run in parallel)
-mcp__ScraperAPIRemote__google_search  query="site:[domain]"  countryCode="[cc]"  gl="[cc]"
-mcp__ScraperAPIRemote__google_search  query='"[Brand Name]"'
+google_search  query="site:[domain]"  countryCode="[cc]"  gl="[cc]"
+google_search  query='"[Brand Name]"'
 
 # Stage 2: Keyword visibility — one per target keyword (run in parallel)
-mcp__ScraperAPIRemote__google_search  query="[target keyword 1]"  countryCode="[cc]"  gl="[cc]"
-mcp__ScraperAPIRemote__google_search  query="[target keyword 2]"  countryCode="[cc]"  gl="[cc]"
+google_search  query="[target keyword 1]"  countryCode="[cc]"  gl="[cc]"
+google_search  query="[target keyword 2]"  countryCode="[cc]"  gl="[cc]"
 
 # Stage 3: On-page analysis — target page + homepage (run in parallel)
-mcp__ScraperAPIRemote__scrape  url="[target-page-url]"  outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[target-page-url]"  outputFormat="markdown"
-mcp__ScraperAPIRemote__scrape  url="[homepage-url]"     outputFormat="html"
+scrape  url="[target-page-url]"  outputFormat="html"
+scrape  url="[target-page-url]"  outputFormat="markdown"
+scrape  url="[homepage-url]"     outputFormat="html"
 
 # Stage 4: Top 2 competitors surfaced in Stage 2 (run in parallel)
-mcp__ScraperAPIRemote__scrape  url="[competitor-1-url]"  outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[competitor-2-url]"  outputFormat="html"
+scrape  url="[competitor-1-url]"  outputFormat="html"
+scrape  url="[competitor-2-url]"  outputFormat="html"
 
 # Stage 5: Brand freshness signals
-mcp__ScraperAPIRemote__google_news  query='"[Brand Name]"'
+google_news  query='"[Brand Name]"'
 ```
 
 **Analysis**: Run all five Audit Stages below. Focus depth on the target page and its direct competitors.
@@ -123,31 +125,31 @@ mcp__ScraperAPIRemote__google_news  query='"[Brand Name]"'
 **Data gathering**:
 ```
 # Stage 1: Indexation check (run in parallel)
-mcp__ScraperAPIRemote__google_search  query="site:[domain]"  countryCode="[cc]"  gl="[cc]"
-mcp__ScraperAPIRemote__google_search  query='"[Brand Name]"'
-mcp__ScraperAPIRemote__google_search  query="[Brand Name]"
+google_search  query="site:[domain]"  countryCode="[cc]"  gl="[cc]"
+google_search  query='"[Brand Name]"'
+google_search  query="[Brand Name]"
 
 # Stage 2: Keyword visibility (run in parallel, one per keyword)
-mcp__ScraperAPIRemote__google_search  query="[target keyword 1]"  countryCode="[cc]"  gl="[cc]"
-mcp__ScraperAPIRemote__google_search  query="[target keyword 2]"  countryCode="[cc]"  gl="[cc]"
-mcp__ScraperAPIRemote__google_search  query="[target keyword 3]"  countryCode="[cc]"  gl="[cc]"
+google_search  query="[target keyword 1]"  countryCode="[cc]"  gl="[cc]"
+google_search  query="[target keyword 2]"  countryCode="[cc]"  gl="[cc]"
+google_search  query="[target keyword 3]"  countryCode="[cc]"  gl="[cc]"
 
 # Stage 3: On-page analysis — homepage + up to 7 key pages (run in parallel)
 # Infer key pages from homepage navigation links
-mcp__ScraperAPIRemote__scrape  url="[homepage-url]"   outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[page-2-url]"     outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[page-3-url]"     outputFormat="html"
+scrape  url="[homepage-url]"   outputFormat="html"
+scrape  url="[page-2-url]"     outputFormat="html"
+scrape  url="[page-3-url]"     outputFormat="html"
 # ... (up to 8 pages total)
 # Follow with markdown for content depth assessment on highest-priority pages:
-mcp__ScraperAPIRemote__scrape  url="[priority-page-url]"  outputFormat="markdown"
+scrape  url="[priority-page-url]"  outputFormat="markdown"
 
 # Stage 4: Top 2–3 competitors per keyword (run in parallel)
-mcp__ScraperAPIRemote__scrape  url="[competitor-1-url]"  outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[competitor-2-url]"  outputFormat="html"
-mcp__ScraperAPIRemote__scrape  url="[competitor-3-url]"  outputFormat="html"
+scrape  url="[competitor-1-url]"  outputFormat="html"
+scrape  url="[competitor-2-url]"  outputFormat="html"
+scrape  url="[competitor-3-url]"  outputFormat="html"
 
 # Stage 5: Brand freshness signals
-mcp__ScraperAPIRemote__google_news  query='"[Brand Name]"'
+google_news  query='"[Brand Name]"'
 ```
 
 **Analysis**: Run all five Audit Stages below at full depth across all sampled pages.
