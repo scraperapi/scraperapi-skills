@@ -50,7 +50,7 @@ https://news.google.com/search?q=<QUERY>&hl=<HL>&gl=<GL>&ceid=<GL>:<HL>
    - Then try `deviceType: "mobile"` if needed
 3. If geo issues / repeated errors: retry with `countryCode` matching the market (e.g., `gb`, `us`).
 4. If blocking persists: set `premium: true`. If still failing, use `ultraPremium: true`.
-   - **NEVER** combine `premium` and `ultraPremium`.
+   - Don't combine `premium` and `ultraPremium` — the API treats them as incompatible.
 
 ## Extraction Requirements
 
