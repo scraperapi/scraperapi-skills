@@ -130,16 +130,24 @@ Use the Site Profile from Phase 2 as primary evidence for each decision. Work th
 
 Check if the target site is one of the supported verticals. If yes, use it — structured endpoints return clean JSON with no HTML parsing, and they handle rendering and anti-bot automatically. Skip Decisions 2 and 3.
 
-Supported verticals (verify against [docs](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method)):
-- Amazon: `product`, `search`, `offers`, `reviews`
-- Google: `search`, `news`, `jobs`, `shopping`, `maps`
-- Walmart: `product`, `search`, `category`
-- eBay: `product`, `search`
-- Redfin: `listing`, `search`
-- Indeed: `jobs`, `job`
-- LinkedIn: `profile`, `jobs` (availability may vary)
+Supported endpoints and their required parameter (verify against [docs](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method)):
 
-Endpoint pattern: `GET https://api.scraperapi.com/structured/<site>/<type>?api_key=...&<required_param>=...`
+| Endpoint path | Required |
+|---|---|
+| `amazon/product`, `amazon/offers` | `asin` |
+| `amazon/search` | `query` |
+| `walmart/product`, `walmart/review` | `product_id` (`walmart/review` also needs `tld`, `country_code`) |
+| `walmart/search` | `query` |
+| `walmart/category` | `category` |
+| `ebay/product` | `product_id` |
+| `ebay/search/v2` | `query` |
+| `google/search`, `google/news`, `google/jobs`, `google/shopping` | `query` |
+| `google/mapssearch` | `query`, `latitude`, `longitude` |
+| `redfin/forsale`, `redfin/forrent`, `redfin/search`, `redfin/agent` | `url` |
+
+There is no structured endpoint for other sites (LinkedIn, Indeed, Amazon reviews, etc.) — scrape those as HTML.
+
+Endpoint pattern: `GET https://api.scraperapi.com/structured/<path>?api_key=...&<required_param>=...`
 
 ### Decision 2 — Does the page require JavaScript rendering?
 
@@ -287,9 +295,10 @@ Before presenting the script:
 - [ ] Site Profile was produced in Phase 2 and each architecture decision cites it
 - [ ] API key is read from `$SCRAPERAPI_API_KEY` env var — not hardcoded
 - [ ] Retry logic covers 429, 500, 503 with exponential backoff
+- [ ] Sync request timeout is at least 70s, so the client doesn't cancel (and pay for) a request ScraperAPI is still retrying
 - [ ] `--max-credits` guard is present and enforced before the first request
 - [ ] Credit estimate is printed to stderr before any requests are made
-- [ ] If using a structured endpoint: vertical name matches the cheatsheet exactly
+- [ ] If using a structured endpoint: path and required parameter match the Decision 1 table exactly
 - [ ] If async: script includes polling loop or webhook handling, not just job submission
 - [ ] `ultra_premium` and `premium` are not both set
 - [ ] Setup instructions comment is at the top of the script
