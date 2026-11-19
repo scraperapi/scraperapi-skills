@@ -28,7 +28,8 @@ BASE_URL = "https://api.scraperapi.com/"
 def scrape(url: str, params: dict, attempt: int = 0) -> Optional[str]:
     req_params = {"api_key": API_KEY, "url": url, **params}
     try:
-        r = requests.get(BASE_URL, params=req_params, timeout=60)
+        # Above ScraperAPI's 70s retry window: cancelling earlier still bills the request.
+        r = requests.get(BASE_URL, params=req_params, timeout=75)
         if r.status_code == 200:
             return r.text
         if r.status_code == 401:
@@ -209,10 +210,22 @@ def main():
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--premium", action="store_true")
     parser.add_argument("--country-code")
+    parser.add_argument("--max-credits", type=int, help="Abort if estimate exceeds this")
     args = parser.parse_args()
 
     with open(args.input) as f:
         urls = [line.strip() for line in f if line.strip()]
+
+    # Normal-site costs; Amazon/Walmart/eBay, Google and bot-protected sites cost more.
+    # shortcut: table-based estimate undercounts those sites; use /account/urlcost on one URL there.
+    if args.premium:
+        cost_per = 25 if args.render else 10
+    else:
+        cost_per = 10 if args.render else 1
+    estimated = len(urls) * cost_per
+    print(f"Estimated: {len(urls)} URLs × {cost_per} credits = ~{estimated} credits", file=sys.stderr)
+    if args.max_credits and estimated > args.max_credits:
+        sys.exit(f"Error: Estimated {estimated} credits exceeds --max-credits={args.max_credits}")
 
     api_params: dict = {}
     if args.render:
@@ -258,7 +271,8 @@ const BASE_URL = 'https://api.scraperapi.com/';
 async function scrape(url, params, attempt = 0) {
   const qs = new URLSearchParams({ api_key: API_KEY, url, ...params });
   try {
-    const res = await fetch(`${BASE_URL}?${qs}`, { timeout: 60000 });
+    // Above ScraperAPI's 70s retry window: cancelling earlier still bills the request.
+    const res = await fetch(`${BASE_URL}?${qs}`, { timeout: 75000 });
     if (res.ok) return res.text();
     if (res.status === 401) { console.error('Error: Invalid API key'); process.exit(1); }
     if (res.status === 403) { console.error('Error: Out of API credits (403). Upgrade or enable overages at https://dashboard.scraperapi.com/billing'); process.exit(1); }
@@ -368,14 +382,17 @@ API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
 if not API_KEY:
     sys.exit("Error: SCRAPERAPI_API_KEY environment variable not set")
 
-# TODO: Set the correct vertical, e.g. "amazon/search", "google/search", "walmart/product"
+# TODO: Set the correct path from the Decision 1 table, e.g. "amazon/search", "google/search", "walmart/product"
 VERTICAL = "google/search"
 BASE_URL = f"https://api.scraperapi.com/structured/{VERTICAL}"
+# TODO: Credits per call: 25 for google/*, 5 for amazon/walmart/ebay. Confirm with one call's sa-credit-cost header.
+COST_PER_CALL = 25
 
 
 def fetch_structured(params: dict, attempt: int = 0) -> dict:
     req_params = {"api_key": API_KEY, **params}
-    r = requests.get(BASE_URL, params=req_params, timeout=60)
+    # Above ScraperAPI's 70s retry window: cancelling earlier still bills the request.
+    r = requests.get(BASE_URL, params=req_params, timeout=75)
     if r.status_code == 200:
         return r.json()
     if r.status_code == 401:
@@ -394,7 +411,13 @@ def main():
     parser.add_argument("--pages", type=int, default=1)
     parser.add_argument("--country-code", default="us")
     parser.add_argument("--output", help="Output file (default: stdout)")
+    parser.add_argument("--max-credits", type=int, help="Abort if estimate exceeds this")
     args = parser.parse_args()
+
+    estimated = args.pages * COST_PER_CALL
+    print(f"Estimated: {args.pages} calls × {COST_PER_CALL} credits = ~{estimated} credits", file=sys.stderr)
+    if args.max_credits and estimated > args.max_credits:
+        sys.exit(f"Error: Estimated {estimated} credits exceeds --max-credits={args.max_credits}")
 
     results = []
     for page in range(1, args.pages + 1):
