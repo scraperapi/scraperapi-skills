@@ -5,7 +5,7 @@
 ScraperAPI's official Claude Code plugin — a growing library of agent skills that cover the full ScraperAPI surface: onboarding, product primitives, SDK best practices, command-line and workflow tooling, and end-to-end data pipelines.
 
 - **Onboarding & product routing** — `scraperapi-agent-onboarding` decides which ScraperAPI product fits the job.
-- **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/making-async-requests), [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](skills/scraperapi-mcp/SKILL.md) tools.
+- **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/asynchronous-api), [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](skills/scraperapi-mcp/SKILL.md) tools.
 - **SDK best practices** — language-specific guides for Python, Node.js, Ruby, PHP, and Java.
 - **Tools** — official ScraperAPI [CLI](skills/scraperapi-cli/SKILL.md) and [n8n](https://n8n.io/integrations/scraperapi/) community node.
 - **Workflows** — opinionated, ready-to-run recipes: scraper building, lead enrichment, autonomous research, market research, SEO audits, SERP intelligence, and price monitoring.

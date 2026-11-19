@@ -311,6 +311,6 @@ Before presenting the script:
 - [references/code-templates.md](references/code-templates.md) — Python and Node.js base templates (sync + async)
 - [ScraperAPI docs](https://docs.scraperapi.com/)
 - [Structured Data endpoints](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method)
-- [Async API](https://docs.scraperapi.com/making-async-requests)
+- [Async API](https://docs.scraperapi.com/asynchronous-api)
 - [Parameter reference](https://docs.scraperapi.com/python/making-requests/customizing-requests)
 - [Dashboard](https://dashboard.scraperapi.com/)
