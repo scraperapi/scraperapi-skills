@@ -1,14 +1,15 @@
 ---
 name: scraperapi-python-sdk
 description: >
-  Best-practices reference for the ScraperAPI Python SDK (scraperapi-sdk package).
-  Consult whenever the user is writing, debugging, or reviewing Python code that calls ScraperAPI.
-  Use when user asks: "scrape a website with Python and ScraperAPI", "how do I use ScraperAPIClient",
-  "ScraperAPI Python render example", "Python ScraperAPI async", "batch scraping Python ScraperAPI",
-  "ScraperAPI premium Python", "how to handle ScraperAPI errors in Python",
-  "ScraperAPI structured data Python". Covers client setup, all request parameters,
-  the escalation ladder (standard → render → premium → ultra_premium), async jobs for batches,
-  structured data endpoints, error handling, and credit budgeting.
+  Best-practices reference for the ScraperAPI Python SDK (scraperapi-sdk package). Consult
+  whenever the user is writing, debugging, or reviewing Python code that calls ScraperAPI. Use
+  when user asks: "how do I use ScraperAPIClient", "ScraperAPI Python render example", "Python
+  ScraperAPI async", "ScraperAPI premium Python", "how to handle ScraperAPI errors in Python",
+  "ScraperAPI structured data Python", "why does my scraperapi_sdk call fail". Covers client
+  setup, all request parameters, the escalation ladder (standard → render → premium →
+  ultra_premium), async jobs, structured data endpoints, error handling, and credit budgeting. To
+  write a complete new scraper from scratch, use scraperapi-scraper-builder; for the Async Jobs
+  API in depth (batches, webhooks), use scraperapi-async.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

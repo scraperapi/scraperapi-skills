@@ -1,14 +1,15 @@
 ---
 name: scraperapi-seo-audit
 description: >
-  Run a comprehensive SEO audit using ScraperAPI's live SERP and scraping tools — no setup required.
-  Use this skill whenever the user wants to: audit SEO for a website, understand why a page isn't
-  ranking, check SEO health, analyze keyword rankings, compare against competitors in search results,
-  find content gaps, review on-page signals (titles, meta, headings, schema), diagnose a traffic drop,
-  check indexation, or get prioritized SEO recommendations. Also trigger when the user says things like
-  "why am I not showing up on Google," "my traffic dropped," "how do I rank for X," "what's wrong
-  with my SEO," "SEO check," or "SEO review." This skill works out of the box — it uses the
-  ScraperAPI MCP tools already connected to this session, with no CLI or API key setup needed.
+  Run an SEO audit of a specific website or page using live SERP and page data from the ScraperAPI
+  MCP server. Use this skill whenever the user names their own site or URL and wants to check SEO
+  health, find out why a page isn't ranking, diagnose a traffic drop, check indexation, review
+  on-page signals (titles, meta, headings, schema), compare their site against competitors in
+  search, find content gaps, or get prioritized SEO fixes. Trigger on: "audit the SEO of
+  example.com", "why isn't my page showing up on Google", "my traffic dropped", "what's wrong with
+  my site's SEO", "SEO check for [URL]". It needs a site to audit: for keyword-only questions with
+  no site (what Google shows for a keyword, which keywords to target, AI Overview presence), use
+  scraperapi-serp-intelligence instead. Requires the ScraperAPI MCP server and an API key.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

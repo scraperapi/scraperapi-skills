@@ -1,16 +1,15 @@
 ---
 name: scraperapi-serp-intelligence
 description: >
-  SERP landscape analysis for SEO strategy decisions. Use this skill when the
-  user wants to understand what a search results page actually looks like for
-  their target keywords — including AI Overview presence and attribution, SERP
-  feature composition, how Google is interpreting query intent, which competitors
-  dominate specific keyword sets, and where organic rankings actually translate
-  to visible traffic. Trigger on requests like "analyze the SERP for [keyword],"
-  "why isn't my content getting traffic even though it ranks," "what does Google
-  show for [keyword]," "which keywords are worth targeting," "is [keyword]
-  dominated by AI Overviews," "who owns the SERP for [topic]," "SERP analysis,"
-  or "keyword landscape."
+  SERP landscape analysis for SEO strategy decisions. Use this skill when the user wants to
+  understand what a search results page actually looks like for their target keywords: AI Overview
+  presence and attribution, SERP feature composition, how Google reads query intent, which
+  competitors dominate a keyword set, and where organic rankings turn into visible traffic.
+  Trigger on: "analyze the SERP for [keyword]", "what does Google show for [keyword]", "which
+  keywords are worth targeting", "is [keyword] dominated by AI Overviews", "who owns the SERP for
+  [topic]", "why isn't my content getting traffic even though it ranks", "keyword landscape". It
+  works from keywords, not a site: to audit a specific website's SEO health, indexation or on-page
+  issues, use scraperapi-seo-audit instead. Requires the ScraperAPI MCP server.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:

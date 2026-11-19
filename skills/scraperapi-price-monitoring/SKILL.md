@@ -1,7 +1,15 @@
 ---
 name: scraperapi-price-monitoring
-description: >-
-  Use this skill whenever the user wants to check, track, or be alerted about product prices on Amazon, Walmart, or via Google Shopping. Trigger on: "monitor the price of this Amazon product", "did the price drop on [Walmart URL]?", "track these ASINs", "compare today's prices to last week", "alert me if [product] goes below $X", "what's the current price of [product]?", "check my price watchlist", "scrape the price of [URL]". Accepts ASINs, Amazon/Walmart product URLs, or free-text product queries for Google Shopping. Reads an optional baseline JSON file to detect changes, fetches live prices via ScraperAPI's structured endpoints, and reports increases, decreases, restocks, and out-of-stock transitions in a structured change report.
+description: >
+  Use this skill whenever the user wants to check, track, or be alerted about product prices on
+  Amazon, Walmart, or via Google Shopping. Trigger on: "monitor the price of this Amazon product",
+  "did the price drop on [Walmart URL]?", "track these ASINs", "compare today's prices to last
+  week", "alert me if [product] goes below $X", "what's the current price of [product]?", "check
+  my price watchlist", "what's the price of [Amazon or Walmart URL]". Accepts ASINs,
+  Amazon/Walmart product URLs, or free-text product queries for Google Shopping. Reads an optional
+  baseline JSON file to detect changes, fetches live prices via ScraperAPI's structured endpoints,
+  and reports increases, decreases, restocks, and out-of-stock transitions in a change report. For
+  prices on other sites, use scraperapi-mcp to scrape the page.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
 metadata:
@@ -33,7 +41,7 @@ Before fetching anything, classify each target. Different inputs route to differ
 | URL containing `amazon.` | `structured/amazon/product` | extract `asin` from URL, fall back to `url` |
 | URL containing `walmart.com` | `structured/walmart/product` | `url` |
 | Free-text query (e.g., `"airpods pro 2"`) | `structured/google/shopping` | `query` |
-| Anything else | Tell the user it is not supported by this skill; suggest `scraperapi-autonomous-research` for arbitrary URLs |
+| Anything else | Tell the user it is not supported by this skill; suggest the `scraperapi-mcp` skill's `scrape` tool for arbitrary URLs |
 
 Announce the parsed plan before running: *"Watchlist parsed: 3 Amazon products, 1 Walmart product, 1 Google Shopping query. Baseline: prices.json (last updated 2026-05-25). Fetching now."*
 
