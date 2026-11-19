@@ -23,7 +23,7 @@ metadata:
 
 # ScraperAPI — Python SDK Best Practices
 
-**Requires:** Python 3.7+, `pip install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Python 3.10+ (the SDK uses `list | tuple` annotations, so importing it fails on older versions), `pip install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
 
 ## Setup
 
@@ -48,12 +48,12 @@ Pick the right call pattern before writing any code.
 | Page loads content via JavaScript (React, Vue, Angular) | `client.get()` with `render=True` |
 | Site blocks standard proxies | `client.get()` with `premium=True` |
 
-Use the sync SDK for simple, single-URL work. Switch to raw `requests` against the async endpoint for batches — the SDK has no built-in async or batch support.
+Use the sync SDK for simple, single-URL work. For batches, the SDK has `ScraperAPIAsyncClient` (single jobs only); use raw `requests` for `/batchjobs` or when you need control over polling — see [Async Jobs](#async-jobs-for-batches).
 
 ## Basic Usage
 
 ```python
-# Simple scrape — returns HTML as a string
+# Simple scrape. Returns str for text/HTML, dict for JSON (autoparse, output_format=json), bytes otherwise
 html = client.get(url="https://example.com/")
 
 # With parameters
@@ -115,11 +115,11 @@ html1 = client.get("https://example.com/page1", params={"session_number": 42})
 html2 = client.get("https://example.com/page2", params={"session_number": 42})
 ```
 
+`session_number` can't be combined with `premium` or `ultra_premium`.
+
 ### Headers and Device Type
 
 ```python
-import requests
-
 # Forward your own headers to the target site
 # Note: keep_headers is incompatible with ultra_premium=True
 html = client.get(
@@ -157,6 +157,8 @@ content = client.get(url="https://example.com/report.pdf", params={"binary_targe
 Always start cheapest. Move up only when the site blocks the previous tier.
 
 ```python
+from scraperapi_sdk import ScraperAPIException
+
 def scrape_with_escalation(url):
     for params in [
         {},                       # 1 credit
@@ -165,17 +167,40 @@ def scrape_with_escalation(url):
         {"premium": True, "render": True},  # 25 credits
         {"ultra_premium": True},  # 30 credits
     ]:
-        result = client.get(url=url, params=params)
-        if result and "<html" in result.lower():
+        try:
+            result = client.get(url=url, params=params)
+        except ScraperAPIException as e:
+            resp = getattr(e.original_exception, "response", None)
+            if resp is not None and resp.status_code in (401, 403):
+                raise  # bad key, out of credits or max_cost hit: a pricier tier won't help
+            continue  # 500 or timeout: try the next tier
+        if isinstance(result, str) and "<html" in result.lower():
             return result
     return None
 ```
+
+`client.get` raises on any non-2xx, so each tier needs its own `try`. Credits above are for a normal site; Google, Amazon and bot-protected sites cost more (see [Credit Cost Reference](#credit-cost-reference)).
 
 Log which tier succeeded so you can start there next time for the same domain.
 
 ## Async Jobs (for Batches)
 
-The sync SDK blocks on each call (up to 70 seconds per URL). For 20+ URLs, use the async endpoint with `requests` directly — it submits jobs in the background and lets you poll or receive webhooks.
+The sync SDK blocks on each call, and `client.get` gives up after 55 seconds while ScraperAPI may keep retrying for up to 70 (requests cancelled before 70s are still charged). For slow targets, call `client.make_request(url=..., params=..., timeout=70)`, which returns the raw `requests.Response`. For 20+ URLs, use the async endpoint: it submits jobs in the background and lets you poll or receive webhooks.
+
+The SDK's `ScraperAPIAsyncClient` covers single jobs:
+
+```python
+from scraperapi_sdk import ScraperAPIAsyncClient
+
+async_client = ScraperAPIAsyncClient(os.environ["SCRAPERAPI_API_KEY"])
+job = async_client.create("https://example.com/", api_params={"render": True})
+# wait() checks max_retries times, then returns the job as-is, even if it is still running
+data = async_client.wait(job["id"], cooldown=10, max_retries=60)
+if data["status"] == "finished":
+    body = data["response"]["body"]
+```
+
+For more control, or for `/batchjobs`, use `requests` directly:
 
 ```python
 import os, requests, time
@@ -183,16 +208,21 @@ import os, requests, time
 API_KEY = os.environ["SCRAPERAPI_API_KEY"]
 
 def submit_job(url, extra_params=None):
-    payload = {"apiKey": API_KEY, "url": url, "apiParams": extra_params or {}}
+    payload = {
+        "apiKey": API_KEY,
+        "url": url,
+        "apiParams": extra_params or {},
+        "expectUnsuccessReport": True,  # without it, a job that fails never reaches "failed"
+    }
     r = requests.post("https://async.scraperapi.com/jobs", json=payload, timeout=10)
     r.raise_for_status()
     return r.json()  # {"id": "...", "status": "running", "statusUrl": "..."}
 
-def poll_job(job, max_wait=120, interval=5):
+def poll_job(job, max_wait=600, interval=10):
+    # Jobs can keep retrying for up to 24h; pick a deadline that fits your use case
     deadline = time.time() + max_wait
     while time.time() < deadline:
-        r = requests.get(job["statusUrl"], timeout=10)
-        data = r.json()
+        data = requests.get(job["statusUrl"], timeout=10).json()
         if data["status"] == "finished":
             return data["response"]["body"]
         if data["status"] == "failed":
@@ -200,10 +230,16 @@ def poll_job(job, max_wait=120, interval=5):
         time.sleep(interval)
     raise TimeoutError(f"Job {job['id']} did not finish in {max_wait}s")
 
-# Batch pattern — submit all, then collect
+# Batch pattern: submit all, then collect, so one bad job doesn't lose the rest
 urls = ["https://example.com/page1", "https://example.com/page2"]
 jobs = [submit_job(u) for u in urls]
-results = [poll_job(j) for j in jobs]
+results = {}
+for j in jobs:
+    try:
+        results[j["url"]] = poll_job(j)
+    except (RuntimeError, TimeoutError) as e:
+        results[j["url"]] = None
+        print(e)
 ```
 
 Use webhooks (`"callback": {"type": "webhook", "url": "https://yourapp.com/cb"}`) when you control a server — eliminates polling entirely. See [async docs](https://docs.scraperapi.com/asynchronous-api).
@@ -237,41 +273,48 @@ items = structured_get("walmart/search", {"query": "standing desk", "tld": "com"
 ```
 
 Supported verticals: `google/search`, `google/news`, `google/jobs`, `google/shopping`,
-`google/maps`, `amazon/product`, `amazon/search`, `amazon/offers`,
-`walmart/product`, `walmart/search`, `walmart/category`,
-`ebay/product`, `ebay/search`, `redfin/listing`, `redfin/search`.
+`google/mapssearch`, `amazon/product`, `amazon/search`, `amazon/offers`,
+`walmart/product`, `walmart/search`, `walmart/category`, `walmart/review`,
+`ebay/product`, `ebay/search/v2`, `redfin/forsale`, `redfin/forrent`, `redfin/search`, `redfin/agent`.
+
+The SDK also has shortcut methods: `client.google.search(query)`, `client.amazon.product(asin)`, `client.walmart.product(product_id)`, `client.ebay.searchV2(query)`, `client.redfin.forsale(url)` and so on. They send geotargeting as `country`, while the endpoints document `country_code`, so use `structured_get` above when you need a specific country.
 
 See [structured data docs](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method) for required parameters per vertical.
 
 ## Error Handling
 
+The SDK wraps every failure (HTTP errors, timeouts, connection errors) in `ScraperAPIException`. The original `requests` exception is on `e.original_exception`; for HTTP errors, its `.response` carries the status code.
+
 ```python
-import os, requests
-from scraperapi_sdk import ScraperAPIClient
+import os
+from scraperapi_sdk import ScraperAPIClient, ScraperAPIException
 
 client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
 
 def scrape(url, params=None):
     try:
-        result = client.get(url=url, params=params or {})
-        return result
-    except requests.exceptions.HTTPError as e:
-        status = e.response.status_code
+        return client.get(url=url, params=params or {})
+    except ScraperAPIException as e:
+        resp = getattr(e.original_exception, "response", None)
+        if resp is None:
+            # Timeout or connection error: no status code. Retry, or use make_request(timeout=70)
+            raise RuntimeError(f"Network error or timeout: {e.original_exception}") from e
+        status = resp.status_code
         if status == 401:
             raise ValueError("Invalid API key — check SCRAPERAPI_API_KEY") from e
         if status == 403:
-            # Monthly credits exhausted — retrying won't help
-            raise RuntimeError("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)") from e
+            # Credits exhausted, or the request would cost more than max_cost. Retrying won't help
+            raise RuntimeError("Out of credits or over max_cost — check https://dashboard.scraperapi.com/billing (don't retry)") from e
         if status == 429:
             # Concurrent request limit — back off and retry
             raise RuntimeError("Rate limit — reduce concurrency or switch to async") from e
-        if status in (500, 503):
+        if status == 500:
             # ScraperAPI already retried for 70s (not charged) — retry; on protected sites escalate to premium/ultra_premium
-            raise RuntimeError(f"Transient error {status} — retry") from e
+            raise RuntimeError("Request failed after retries — retry or escalate") from e
         raise
 ```
 
-Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
+Status code reference: 200 success, 400 malformed request, 401 bad key, 403 credits exhausted or `max_cost` exceeded (don't retry), 404 target not found (charged),
 429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
 
 ## Credit Cost Reference
@@ -285,7 +328,7 @@ Status code reference: 200 success, 401 bad key, 403 credits exhausted (don't re
 | `ultra_premium=True` | 30 |
 | `ultra_premium=True` + `render=True` | 75 |
 
-Those are the costs on a normal site. Some sites cost more per request, before any parameters:
+Those are the costs on a normal site. Some sites cost more per request:
 
 | Site | Credits |
 |---|---|
@@ -293,6 +336,8 @@ Those are the costs on a normal site. Some sites cost more per request, before a
 | Google, Bing (all subdomains) | 25 |
 | LinkedIn | 30 |
 | Sites behind Cloudflare, DataDome, PerimeterX or Akamai | 10 |
+
+Combined costs vary by site; check the exact price with `/account/urlcost` or the `sa-credit-cost` header before a large run.
 
 You're charged for `200` and `404` responses, and for requests you cancel before ScraperAPI's 70s
 of retries finish. Each response's `sa-credit-cost` header shows what it cost; preview a cost
