@@ -18,7 +18,7 @@ metadata:
       env:
         - SCRAPERAPI_API_KEY
     emoji: "🐍"
-    homepage: https://docs.scraperapi.com/python/getting-started
+    homepage: https://docs.scraperapi.com/python
 ---
 
 # ScraperAPI — Python SDK Best Practices
@@ -206,7 +206,7 @@ jobs = [submit_job(u) for u in urls]
 results = [poll_job(j) for j in jobs]
 ```
 
-Use webhooks (`"callback": {"type": "webhook", "url": "https://yourapp.com/cb"}`) when you control a server — eliminates polling entirely. See [async docs](https://docs.scraperapi.com/making-async-requests).
+Use webhooks (`"callback": {"type": "webhook", "url": "https://yourapp.com/cb"}`) when you control a server — eliminates polling entirely. See [async docs](https://docs.scraperapi.com/asynchronous-api).
 
 For very large batches (up to 50,000 URLs), use `https://async.scraperapi.com/batchjobs` with a `"urls": [...]` array.
 
@@ -303,8 +303,8 @@ Add `"max_cost": N` to any request to cap credit spend — returns 403 if the re
 
 ## Documentation
 
-- [Python SDK getting started](https://docs.scraperapi.com/python/getting-started)
+- [Python SDK getting started](https://docs.scraperapi.com/python)
 - [Request parameters](https://docs.scraperapi.com/python/making-requests/customizing-requests)
 - [Structured data endpoints](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method)
-- [Async API](https://docs.scraperapi.com/making-async-requests)
+- [Async API](https://docs.scraperapi.com/asynchronous-api)
 - [Dashboard & credits](https://dashboard.scraperapi.com/)

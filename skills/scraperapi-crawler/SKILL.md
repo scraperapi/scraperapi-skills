@@ -29,7 +29,7 @@ site but don't have the URLs upfront.
 
 ## When NOT to use the Crawler
 
-- **You have a known URL list** → use the [Async API](https://docs.scraperapi.com/making-async-requests) instead; it's cheaper and more predictable.
+- **You have a known URL list** → use the [Async API](https://docs.scraperapi.com/asynchronous-api) instead; it's cheaper and more predictable.
 - **You need a single page** → use the Standard API (`api.scraperapi.com`).
 - **The content is behind login** → the Crawler only accesses publicly available pages.
 - **Free plan, need depth > 1** → free accounts are capped at `max_depth: 1`.

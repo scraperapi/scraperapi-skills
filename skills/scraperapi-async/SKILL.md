@@ -18,7 +18,7 @@ metadata:
       env:
         - SCRAPERAPI_API_KEY
     emoji: "⚡"
-    homepage: https://docs.scraperapi.com/making-async-requests
+    homepage: https://docs.scraperapi.com/asynchronous-api
 ---
 
 # ScraperAPI Async Jobs API
@@ -292,6 +292,6 @@ without spending credits with `GET https://api.scraperapi.com/account/urlcost?ap
 
 ## Documentation
 
-- [Async API overview](https://docs.scraperapi.com/making-async-requests)
-- [Batch jobs](https://docs.scraperapi.com/making-async-requests)
+- [Async API overview](https://docs.scraperapi.com/asynchronous-api)
+- [Batch jobs](https://docs.scraperapi.com/asynchronous-api/batch-requests)
 - [Dashboard & credits](https://dashboard.scraperapi.com/)

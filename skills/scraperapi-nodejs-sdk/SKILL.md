@@ -296,7 +296,7 @@ without spending credits with `GET https://api.scraperapi.com/account/urlcost?ap
 ## Documentation
 
 - [Node.js SDK getting started](https://docs.scraperapi.com/nodejs)
-- [SDK method reference](https://docs.scraperapi.com/nodejs/making-requests-or-nodejs/sdk-method-or-nodejs)
+- [SDK method reference](https://docs.scraperapi.com/nodejs)
 - [API status codes](https://docs.scraperapi.com/nodejs/handling-and-processing-responses/api-status-codes)
 - [Account information](https://docs.scraperapi.com/nodejs/account-information)
 - [Dashboard & credits](https://dashboard.scraperapi.com/)

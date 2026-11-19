@@ -271,7 +271,7 @@ without spending credits with `GET https://api.scraperapi.com/account/urlcost?ap
 
 - [Ruby SDK getting started](https://docs.scraperapi.com/ruby)
 - [SDK method reference](https://docs.scraperapi.com/ruby/making-requests/sdk-method)
-- [JavaScript rendering](https://docs.scraperapi.com/ruby/making-requests-or-ruby/customizing-requests-or-ruby/rendering-javascript-or-ruby)
+- [JavaScript rendering](https://docs.scraperapi.com/javascript-rendering/overview)
 - [Sessions](https://docs.scraperapi.com/ruby/making-requests/customizing-requests/sessions)
 - [API status codes](https://docs.scraperapi.com/ruby/handling-and-processing-responses/api-status-codes)
 - [Dashboard & credits](https://dashboard.scraperapi.com/)

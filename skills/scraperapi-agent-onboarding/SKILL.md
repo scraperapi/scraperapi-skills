@@ -158,10 +158,10 @@ A `200` with valid JSON confirms you're wired up.
 
 | Job in the app | API | Key docs |
 |----------------|-----|----------|
-| Fetch any URL as HTML or markdown | Standard API | [docs](https://docs.scraperapi.com/making-requests) |
+| Fetch any URL as HTML or markdown | Standard API | [docs](https://docs.scraperapi.com/making-requests/customizing-requests) |
 | Render JS-heavy pages (React, Vue, SPAs) | Standard API + `render=true` | [docs](https://docs.scraperapi.com/making-requests/customizing-requests) |
 | Structured JSON: Amazon, Google, Walmart, eBay, Redfin | Structured Data API | [docs](https://docs.scraperapi.com/python/making-requests/structured-data-collection-method) |
-| Batch scraping / 100+ URLs | Async Jobs API (`scraperapi-async` skill) | [docs](https://docs.scraperapi.com/making-async-requests) |
+| Batch scraping / 100+ URLs | Async Jobs API (`scraperapi-async` skill) | [docs](https://docs.scraperapi.com/asynchronous-api) |
 | Every page of a site, following links | Crawler (`scraperapi-crawler` skill) | [docs](https://docs.scraperapi.com/scraperapi-crawler-v2.0) |
 | Recurring, scheduled scraping without managing infra | DataPipeline (`scraperapi-datapipeline` skill) | [docs](https://docs.scraperapi.com/data-pipeline) |
 
