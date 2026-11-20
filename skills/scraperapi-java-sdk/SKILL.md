@@ -21,7 +21,7 @@ metadata:
 
 # ScraperAPI — Java SDK Best Practices
 
-**Requires:** Java 8+, Maven or Gradle, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Java 8+ for the SDK, Maven or Gradle, `SCRAPERAPI_API_KEY` environment variable. The samples that call the API directly use `java.net.http` (Java 11+).
 
 ## Setup
 
@@ -51,23 +51,28 @@ ScraperApiClient client = new ScraperApiClient(System.getenv("SCRAPERAPI_API_KEY
 
 Never hardcode the API key. Read it from the environment every time.
 
+## How the SDK Behaves
+
+- **Method names are snake_case**, like the API parameters: `country_code`, `device_type`, `session_number`. There is no `countryCode()` or `sessionNumber()`.
+- **`.result()` returns the response body as a `String`, whatever the status code.** It doesn't throw on 401, 403, 429 or 500, and you can't read the status code. It only throws (`kong.unirest.UnirestException`) on timeouts and connection errors.
+- **Only six API parameters exist:** `render`, `premium`, `autoparse`, `country_code`, `device_type`, `session_number`. For anything else (`ultra_premium`, `wait_for_selector`, `output_format`, `max_cost`, `screenshot`…), call the API directly. See [Parameters the SDK Doesn't Have](#parameters-the-sdk-doesnt-have).
+- **The timeout is 60 seconds by default**, but ScraperAPI can retry for up to 70 seconds, and requests you cancel before then are still charged. Set `.timeout(75_000)` (milliseconds) on every request.
+- **`.retry(n)` doesn't retry n times.** Any value above 0 only turns on retries of dropped connections; non-200 responses are never retried. `.retry(0)` turns it off.
+- **Each `.result()` call resets Unirest's global configuration.** If your app also uses Unirest, its settings get wiped.
+
 ## Basic Usage
 
-The Java SDK uses a **fluent builder** pattern. Chain parameter methods onto the result of `.get()`, then call `.result()` to block and retrieve the HTML.
+The SDK uses a **fluent builder**: `client.get(url)` returns a request, you chain parameters onto it, and `.result()` sends it and blocks until the body comes back.
 
 ```java
-// Simple GET — returns HTML as a String
-String html = client.get("https://example.com/").result();
-
-// With parameters — chain before .result()
-String html = client.get("https://example.com/")
-    .render(true)
-    .result();
+// Simple GET, returns the body as a String
+String html = client.get("https://example.com/").timeout(75_000).result();
 
 // Multiple parameters
 String html = client.get("https://example.com/")
     .render(true)
-    .countryCode("us")
+    .country_code("us")
+    .timeout(75_000)
     .result();
 ```
 
@@ -75,12 +80,13 @@ String html = client.get("https://example.com/")
 
 | Situation | Approach |
 |-----------|---------|
-| Single URL, synchronous | `.get(url).<params>.result()` |
+| Single URL, synchronous | `client.get(url).<params>.timeout(75_000).result()` |
 | Page loads content via JavaScript | Chain `.render(true)` |
 | Site blocks datacenter proxies | Chain `.premium(true)` |
-| Toughest anti-bot protection | Chain `.ultraPremium(true)` |
-| Multi-step / paginated flow on same domain | Chain `.sessionNumber(n)` |
-| Transient failures expected | Chain `.retry(n)` |
+| Toughest anti-bot protection | `apiGet` with `ultra_premium=true` (not in the SDK) |
+| Wait for an element, Markdown output, cost cap | `apiGet` with `wait_for_selector`, `output_format`, `max_cost` (not in the SDK) |
+| You need the status code | `apiGet` |
+| Multi-step / paginated flow on same domain | Chain `.session_number("42")` |
 | 20+ URLs or batch jobs | Async endpoint via `HttpClient` |
 | Supported platform (Amazon, Google, etc.) | Structured data endpoint |
 
@@ -92,125 +98,155 @@ String html = client.get("https://example.com/")
 // Render JavaScript before returning HTML
 // Use when: page is a React/Vue/Angular SPA, or initial scrape returns empty content
 // Cost: 10 credits per request (instead of 1)
-String html = client.get("https://spa-site.com/").render(true).result();
-
-// Wait for a DOM element before capturing (requires render)
-String html = client.get("https://spa-site.com/")
-    .render(true)
-    .waitForSelector(".product-list")
-    .result();
+String html = client.get("https://spa-site.com/").render(true).timeout(75_000).result();
 ```
 
 Don't call `.render(true)` by default — try without it first. It adds cost and latency.
+To wait for a DOM element, use `apiGet` with `render=true` and `wait_for_selector`.
 
 ### Proxies and Geotargeting
 
 ```java
 // Route through a country-specific proxy — no extra credit cost
-String html = client.get("https://example.com/").countryCode("gb").result();
+String html = client.get("https://example.com/").country_code("gb").timeout(75_000).result();
 
 // Premium residential/mobile IPs — for sites that block datacenter proxies
 // Cost: 10 credits (25 with render)
-String html = client.get("https://hard-site.com/").premium(true).result();
-
-// Ultra-premium — for the toughest anti-bot protections
-// Cost: 30 credits (75 with render)
-// Note: incompatible with custom headers
-String html = client.get("https://hardest-site.com/").ultraPremium(true).result();
+String html = client.get("https://hard-site.com/").premium(true).timeout(75_000).result();
 ```
 
-`premium` and `ultraPremium` are mutually exclusive — never chain both.
-Escalation order: standard (1 cr) → render (10 cr) → premium (10 cr) → ultraPremium (30 cr).
+For the toughest anti-bot protections, use `ultra_premium=true` through `apiGet` (30 credits, 75 with render).
+`premium` and `ultra_premium` are mutually exclusive — never set both. `ultra_premium` ignores custom headers.
+Escalation order: standard (1 cr) → render (10 cr) → premium (10 cr) → ultra_premium (30 cr).
 
 ### Sessions (Sticky Proxy)
 
 ```java
 // Reuse the same proxy IP across requests — useful for pagination and multi-step flows
-// Sessions expire 15 minutes after last use; any integer is a valid ID
-String page1 = client.get("https://example.com/page1").sessionNumber(42).result();
-String page2 = client.get("https://example.com/page2").sessionNumber(42).result();
+// Sessions expire 15 minutes after last use. The SDK takes the session ID as a String.
+String page1 = client.get("https://example.com/page1").session_number("42").timeout(75_000).result();
+String page2 = client.get("https://example.com/page2").session_number("42").timeout(75_000).result();
 ```
 
-### Device Type and Autoparse
+### Headers, Device Type and Autoparse
 
 ```java
+// Forward a custom header to the target site (the SDK sets keep_headers=true for you)
+String html = client.get("https://example.com/").header("Accept-Language", "de-DE").timeout(75_000).result();
+
 // Emulate a mobile browser user-agent
-String html = client.get("https://example.com/").deviceType("mobile").result();
+String html = client.get("https://example.com/").device_type("mobile").timeout(75_000).result();
 
 // Return structured JSON for supported sites (Amazon, Google, etc.)
-String json = client.get("https://amazon.com/dp/B09V3KXJPB").autoparse(true).result();
+String json = client.get("https://amazon.com/dp/B09V3KXJPB").autoparse(true).timeout(75_000).result();
 ```
 
-### Retry
+## POST and PUT Requests
 
 ```java
-// Override the default retry count (default: 3)
-// ScraperAPI retries failed requests for up to 70 seconds internally;
-// .retry() controls how many times the SDK retries after a non-200 response
-String html = client.get("https://flaky-site.com/").retry(5).result();
+// POST a JSON body to the target site through ScraperAPI
+String result = client.post("https://example.com/api")
+    .header("Content-Type", "application/json")
+    .body("{\"key\":\"value\"}")
+    .timeout(75_000)
+    .result();
 ```
 
-Do not set very low timeouts — the SDK defaults are calibrated to allow ScraperAPI's internal retry
-window (up to 70 seconds). Setting a 5-second client timeout will cause false failures.
+`client.put(url)` works the same way.
+
+## Parameters the SDK Doesn't Have
+
+Call the API directly with `java.net.http`. This helper URL-encodes every value and returns the whole response, so you can check the status code. The structured, error-handling and escalation samples below reuse it.
+
+```java
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.*;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.*;
+import java.util.stream.Collectors;
+
+private static final String API_KEY = System.getenv("SCRAPERAPI_API_KEY");
+private static final HttpClient HTTP = HttpClient.newHttpClient();
+
+// GET https://api.scraperapi.com/<path>?api_key=...&<params>
+public static HttpResponse<String> apiGet(String path, Map<String, String> params) throws Exception {
+    Map<String, String> all = new LinkedHashMap<>(params);
+    all.put("api_key", API_KEY);
+    String query = all.entrySet().stream()
+        .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+        .collect(Collectors.joining("&"));
+    HttpRequest req = HttpRequest.newBuilder(URI.create("https://api.scraperapi.com/" + path + "?" + query))
+        .timeout(Duration.ofSeconds(75))
+        .GET()
+        .build();
+    return HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+}
+
+// Ultra-premium
+HttpResponse<String> resp = apiGet("", Map.of("url", "https://hardest-site.com/", "ultra_premium", "true"));
+
+// Render and wait for an element, then return Markdown, never spending more than 10 credits
+HttpResponse<String> resp = apiGet("", Map.of(
+    "url", "https://spa-site.com/",
+    "render", "true",
+    "wait_for_selector", ".product-list",
+    "output_format", "markdown",
+    "max_cost", "10"));
+```
 
 ## Escalation Ladder
 
-Always start cheapest. Escalate only when the site blocks the previous tier.
+Always start cheapest. Escalate only when the site blocks the previous tier. The SDK hides the status code, so check the body; the last tier goes through `apiGet` because the SDK has no `ultra_premium`.
 
 ```java
-public static String scrapeWithEscalation(ScraperApiClient client, String url) throws Exception {
-    // Try each tier in order — stop at the first success
-    String[][] tiers = {
-        {},                                  // 1 credit — standard
-        {"render:true"},                     // 10 credits
-        {"premium:true"},                    // 10 credits
-        {"premium:true", "render:true"},     // 25 credits
-        {"ultraPremium:true"},               // 30 credits
-    };
+import com.scraperapi.ScraperApiClient;
+import com.scraperapi.ScraperApiRequest;
+import kong.unirest.UnirestException;
+import java.util.function.Supplier;
 
-    // Practical implementation — explicit tier cascade
-    String[] attempts = { "standard", "render", "premium", "premiumRender", "ultraPremium" };
-    for (String tier : attempts) {
+public static String scrapeWithEscalation(ScraperApiClient client, String url) throws Exception {
+    List<Supplier<ScraperApiRequest>> tiers = Arrays.asList(
+        () -> client.get(url),                              // 1 credit
+        () -> client.get(url).render(true),                 // 10 credits
+        () -> client.get(url).premium(true),                // 10 credits
+        () -> client.get(url).premium(true).render(true));  // 25 credits
+    for (Supplier<ScraperApiRequest> tier : tiers) {
         try {
-            var req = client.get(url);
-            switch (tier) {
-                case "render":       req = req.render(true); break;
-                case "premium":      req = req.premium(true); break;
-                case "premiumRender": req = req.premium(true).render(true); break;
-                case "ultraPremium": req = req.ultraPremium(true); break;
-            }
-            String html = req.result();
+            String html = tier.get().timeout(75_000).result();
             if (html != null && html.toLowerCase().contains("<html")) return html;
-        } catch (Exception e) {
-            // Log and try next tier
+        } catch (UnirestException e) {
+            // Timeout or connection error: try the next tier
         }
     }
-    return null;
+    HttpResponse<String> resp = apiGet("", Map.of("url", url, "ultra_premium", "true")); // 30 credits
+    return resp.statusCode() == 200 ? resp.body() : null;
 }
 ```
 
 ## Async Jobs (for Batches)
 
 `.result()` blocks the calling thread. For 20+ URLs, submit async jobs via the REST endpoint and
-collect results concurrently.
+collect results concurrently. These use `API_KEY` and `HTTP` from `apiGet` above, plus Jackson
+(`com.fasterxml.jackson.core:jackson-databind`).
 
 ```java
-import java.net.http.*;
-import java.net.URI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-private static final String API_KEY = System.getenv("SCRAPERAPI_API_KEY");
-private static final HttpClient HTTP = HttpClient.newHttpClient();
 private static final ObjectMapper JSON = new ObjectMapper();
 
 public static Map<String, Object> submitJob(String url) throws Exception {
-    String body = JSON.writeValueAsString(Map.of("apiKey", API_KEY, "url", url));
+    // without expectUnsuccessReport, a job that fails never reaches "failed"
+    String body = JSON.writeValueAsString(Map.of("apiKey", API_KEY, "url", url, "expectUnsuccessReport", true));
     HttpRequest req = HttpRequest.newBuilder()
         .uri(URI.create("https://async.scraperapi.com/jobs"))
         .POST(HttpRequest.BodyPublishers.ofString(body))
         .header("Content-Type", "application/json")
         .build();
     HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+    if (resp.statusCode() / 100 != 2)
+        throw new RuntimeException("Job submit failed: HTTP " + resp.statusCode() + " " + resp.body());
     return JSON.readValue(resp.body(), Map.class); // {id, statusUrl}
 }
 
@@ -238,13 +274,9 @@ For supported platforms, use structured endpoints instead of raw HTML scraping.
 
 ```java
 public static String structuredGet(String vertical, Map<String, String> params) throws Exception {
-    StringBuilder query = new StringBuilder("api_key=" + API_KEY);
-    params.forEach((k, v) -> query.append("&").append(k).append("=").append(v));
-    URI uri = URI.create("https://api.scraperapi.com/structured/" + vertical + "?" + query);
-    HttpRequest req = HttpRequest.newBuilder().uri(uri).GET().build();
-    HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> resp = apiGet("structured/" + vertical, params);
     if (resp.statusCode() != 200)
-        throw new RuntimeException("Error " + resp.statusCode());
+        throw new RuntimeException("Error " + resp.statusCode() + ": " + resp.body());
     return resp.body();
 }
 
@@ -260,21 +292,25 @@ String items = structuredGet("walmart/search", Map.of("query", "standing desk", 
 
 ## Error Handling
 
+`.result()` never tells you the status code, so an invalid key or exhausted credits come back as
+an ordinary `String`. When you need to react to errors, use `apiGet` and switch on the status:
+
 ```java
-public static String safeScrape(ScraperApiClient client, String url) {
-    try {
-        return client.get(url).retry(3).result();
-    } catch (Exception e) {
-        String msg = e.getMessage() != null ? e.getMessage() : "";
-        if (msg.contains("401")) throw new RuntimeException("Invalid API key — check SCRAPERAPI_API_KEY", e);
-        if (msg.contains("403")) throw new RuntimeException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)", e);
-        if (msg.contains("429")) throw new RuntimeException("Rate limit — reduce concurrency or use async", e);
-        if (msg.contains("500") || msg.contains("503"))
-            throw new RuntimeException("Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium/ultra_premium", e);
-        throw new RuntimeException("Scrape failed: " + url, e);
+public static String safeScrape(String url) throws Exception {
+    HttpResponse<String> resp = apiGet("", Map.of("url", url));
+    switch (resp.statusCode()) {
+        case 200: return resp.body();
+        case 401: throw new IllegalStateException("Invalid API key — check SCRAPERAPI_API_KEY");
+        case 403: throw new IllegalStateException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
+        case 429: throw new RuntimeException("Rate limit — reduce concurrency or use async");
+        case 500: case 503:
+            throw new RuntimeException("Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium/ultra_premium");
+        default: throw new RuntimeException("Scrape failed with HTTP " + resp.statusCode() + ": " + url);
     }
 }
 ```
+
+`HTTP.send` throws `java.net.http.HttpTimeoutException` if no response arrives within 75 seconds.
 
 Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404 target not found (charged),
 429 concurrency limit, 500 failed after 70s of retries (not charged — retry, then escalate to premium/ultra_premium on protected sites).
@@ -287,8 +323,8 @@ Status codes: 200 success, 401 bad key, 403 credits exhausted (don't retry), 404
 | `.render(true)` | 10 |
 | `.premium(true)` | 10 |
 | `.premium(true).render(true)` | 25 |
-| `.ultraPremium(true)` | 30 |
-| `.ultraPremium(true).render(true)` | 75 |
+| `ultra_premium=true` (`apiGet`) | 30 |
+| `ultra_premium=true&render=true` (`apiGet`) | 75 |
 
 Those are the costs on a normal site. Some sites cost more per request, before any parameters:
 
