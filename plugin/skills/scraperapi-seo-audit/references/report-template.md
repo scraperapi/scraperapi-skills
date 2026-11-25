@@ -38,7 +38,7 @@ For each target keyword:
 
 ### "[keyword]"
 - **Ranking position:** [N] (URL: [url]) — or "Not ranking in top 30"
-- **Featured snippet:** [Domain that owns it, or "None"]
+- **SERP features:** [Features in the response and the domains they cite (e.g. AI Overview citing x.com), or "not in SERP data"]
 - **People Also Ask:** [List top 3–4 questions]
 - **Top competitors:** [domain1], [domain2], [domain3]
 - **Note:** [anything notable — wrong page ranking, title mismatch, etc.]
