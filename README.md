@@ -5,9 +5,9 @@
 ScraperAPI's official Claude Code plugin — a growing library of agent skills that cover the full ScraperAPI surface: onboarding, product primitives, SDK best practices, command-line and workflow tooling, and end-to-end data pipelines.
 
 - **Onboarding & product routing** — `scraperapi-agent-onboarding` decides which ScraperAPI product fits the job.
-- **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/asynchronous-api), [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](skills/scraperapi-mcp/SKILL.md) tools.
+- **Product primitives** — first-class skills for the [Standard API](https://docs.scraperapi.com/), [Async Jobs](https://docs.scraperapi.com/asynchronous-api), [Crawler](https://docs.scraperapi.com/scraperapi-crawler-v2.0), [DataPipeline](https://docs.scraperapi.com/data-pipeline), and [MCP](plugin/skills/scraperapi-mcp/SKILL.md) tools.
 - **SDK best practices** — language-specific guides for Python, Node.js, Ruby, PHP, and Java.
-- **Tools** — official ScraperAPI [CLI](skills/scraperapi-cli/SKILL.md) and [n8n](https://n8n.io/integrations/scraperapi/) community node.
+- **Tools** — official ScraperAPI [CLI](plugin/skills/scraperapi-cli/SKILL.md) and [n8n](https://n8n.io/integrations/scraperapi/) community node.
 - **Workflows** — opinionated, ready-to-run recipes: scraper building, lead enrichment, autonomous research, market research, SEO audits, SERP intelligence, and price monitoring.
 
 [Learn more about agent skills](https://agentskills.io/).
@@ -61,26 +61,26 @@ Once installed, the skills load automatically — start an agent session and try
 
 | Skill | Description |
 |-------|-------------|
-| **[`scraperapi-agent-onboarding`](skills/scraperapi-agent-onboarding/SKILL.md)** | Entry point for agents and developers new to ScraperAPI. Read first when integrating ScraperAPI into an agent or app, picking the right product, or obtaining an API key. |
-| **[`scraperapi-mcp`](skills/scraperapi-mcp/SKILL.md)** | Teaches Claude how to optimally use the ScraperAPI MCP tools — tool selection, parameter tuning, credit minimization, large-output handling. Includes ready-to-use recipes. |
-| **[`scraperapi-async`](skills/scraperapi-async/SKILL.md)** | Async Jobs API: submit scraping jobs in the background, retrieve via polling or webhook, including batch jobs up to 50,000 URLs. |
-| **[`scraperapi-crawler`](skills/scraperapi-crawler/SKILL.md)** | Crawler product: crawl an entire site or section by following links automatically when target URLs aren't known up front. |
-| **[`scraperapi-datapipeline`](skills/scraperapi-datapipeline/SKILL.md)** | DataPipeline: managed, scheduled scraping projects that run automatically and deliver results via webhook or dashboard download. |
-| **[`scraperapi-python-sdk`](skills/scraperapi-python-sdk/SKILL.md)** | Best-practices reference for the Python SDK (`scraperapi-sdk`): client setup, the standard → render → premium → ultra_premium escalation ladder, async batches, structured data, error handling. |
-| **[`scraperapi-nodejs-sdk`](skills/scraperapi-nodejs-sdk/SKILL.md)** | Best-practices reference for the Node.js / TypeScript SDK (`scraperapi-sdk`): CommonJS and ESM, async/await, POST/PUT, account info, error handling. |
-| **[`scraperapi-ruby-sdk`](skills/scraperapi-ruby-sdk/SKILL.md)** | Best-practices reference for the Ruby SDK (`scraperapi` gem): gem setup, all parameters, escalation ladder, sessions, status-code error handling. |
-| **[`scraperapi-php-sdk`](skills/scraperapi-php-sdk/SKILL.md)** | Best-practices reference for the PHP SDK (`scraperapi/sdk` Composer package): setup, all parameters, POST requests, error handling. |
-| **[`scraperapi-java-sdk`](skills/scraperapi-java-sdk/SKILL.md)** | Best-practices reference for the Java SDK (`com.scraperapi:sdk`): fluent builder API, escalation ladder, async jobs, structured data. |
-| **[`scraperapi-cli`](skills/scraperapi-cli/SKILL.md)** | Use the official `sapi` command-line tool from shells, pipelines, cron, and CI. Covers install, auth, every command, JSON / piping behaviour, and common recipes. |
-| **[`scraperapi-n8n`](skills/scraperapi-n8n/SKILL.md)** | Generate n8n workflows that use the official ScraperAPI community node (`n8n-nodes-scraperapi-official`). Produces importable workflow JSON or step-by-step build guides. |
-| **[`scraperapi-zapier`](skills/scraperapi-zapier/SKILL.md)** | Guide users to build Zaps with the official ScraperAPI Zapier integration: add web scraping, SERP data, or e-commerce data to a Zapier workflow. |
-| **[`scraperapi-scraper-builder`](skills/scraperapi-scraper-builder/SKILL.md)** | Build a runnable scraper end-to-end: picks structured endpoint vs raw HTML, JS rendering, proxy tier, sync vs async, then generates a complete Python or Node.js script with retries, pagination, and credit estimation. |
-| **[`scraperapi-lead-enrichment`](skills/scraperapi-lead-enrichment/SKILL.md)** | Enrich a contact or company from any seed (name, domain, LinkedIn URL, email) and produce a structured contact card with person and company fields. |
-| **[`scraperapi-research-agent`](skills/scraperapi-research-agent/SKILL.md)** | Autonomous research agent: takes a question, uses ScraperAPI to search and scrape relevant pages, uploads content as file artifacts to the Anthropic Files API, then feeds everything to Claude for a cited markdown report. |
-| **[`scraperapi-market-research`](skills/scraperapi-market-research/SKILL.md)** | Market research from live web data: consumer sentiment, demand and trend signals, price and category structure, and competitive landscape — for product, pricing, positioning, or investment decisions. |
-| **[`scraperapi-seo-audit`](skills/scraperapi-seo-audit/SKILL.md)** | Comprehensive SEO audit using live SERPs and on-page scraping: keyword rankings, titles/meta/headings/schema, content gaps, indexation, and prioritized recommendations. Runs out of the box via the bundled MCP tools. |
-| **[`scraperapi-serp-intelligence`](skills/scraperapi-serp-intelligence/SKILL.md)** | SERP landscape analysis for SEO strategy: AI Overview presence and attribution, SERP feature composition, query intent, competitor visibility, and where rankings translate to traffic. |
-| **[`scraperapi-price-monitoring`](skills/scraperapi-price-monitoring/SKILL.md)** | Track Amazon, Walmart, and Google Shopping prices from ASINs, URLs, or product queries. Detects increases, decreases, restocks, and out-of-stock transitions against an optional baseline. |
+| **[`scraperapi-agent-onboarding`](plugin/skills/scraperapi-agent-onboarding/SKILL.md)** | Entry point for agents and developers new to ScraperAPI. Read first when integrating ScraperAPI into an agent or app, picking the right product, or obtaining an API key. |
+| **[`scraperapi-mcp`](plugin/skills/scraperapi-mcp/SKILL.md)** | Teaches Claude how to optimally use the ScraperAPI MCP tools — tool selection, parameter tuning, credit minimization, large-output handling. Includes ready-to-use recipes. |
+| **[`scraperapi-async`](plugin/skills/scraperapi-async/SKILL.md)** | Async Jobs API: submit scraping jobs in the background, retrieve via polling or webhook, including batch jobs up to 50,000 URLs. |
+| **[`scraperapi-crawler`](plugin/skills/scraperapi-crawler/SKILL.md)** | Crawler product: crawl an entire site or section by following links automatically when target URLs aren't known up front. |
+| **[`scraperapi-datapipeline`](plugin/skills/scraperapi-datapipeline/SKILL.md)** | DataPipeline: managed, scheduled scraping projects that run automatically and deliver results via webhook or dashboard download. |
+| **[`scraperapi-python-sdk`](plugin/skills/scraperapi-python-sdk/SKILL.md)** | Best-practices reference for the Python SDK (`scraperapi-sdk`): client setup, the standard → render → premium → ultra_premium escalation ladder, async batches, structured data, error handling. |
+| **[`scraperapi-nodejs-sdk`](plugin/skills/scraperapi-nodejs-sdk/SKILL.md)** | Best-practices reference for the Node.js / TypeScript SDK (`scraperapi-sdk`): CommonJS and ESM, async/await, POST/PUT, account info, error handling. |
+| **[`scraperapi-ruby-sdk`](plugin/skills/scraperapi-ruby-sdk/SKILL.md)** | Best-practices reference for the Ruby SDK (`scraperapi` gem): gem setup, all parameters, escalation ladder, sessions, status-code error handling. |
+| **[`scraperapi-php-sdk`](plugin/skills/scraperapi-php-sdk/SKILL.md)** | Best-practices reference for the PHP SDK (`scraperapi/sdk` Composer package): setup, all parameters, POST requests, error handling. |
+| **[`scraperapi-java-sdk`](plugin/skills/scraperapi-java-sdk/SKILL.md)** | Best-practices reference for the Java SDK (`com.scraperapi:sdk`): fluent builder API, escalation ladder, async jobs, structured data. |
+| **[`scraperapi-cli`](plugin/skills/scraperapi-cli/SKILL.md)** | Use the official `sapi` command-line tool from shells, pipelines, cron, and CI. Covers install, auth, every command, JSON / piping behaviour, and common recipes. |
+| **[`scraperapi-n8n`](plugin/skills/scraperapi-n8n/SKILL.md)** | Generate n8n workflows that use the official ScraperAPI community node (`n8n-nodes-scraperapi-official`). Produces importable workflow JSON or step-by-step build guides. |
+| **[`scraperapi-zapier`](plugin/skills/scraperapi-zapier/SKILL.md)** | Guide users to build Zaps with the official ScraperAPI Zapier integration: add web scraping, SERP data, or e-commerce data to a Zapier workflow. |
+| **[`scraperapi-scraper-builder`](plugin/skills/scraperapi-scraper-builder/SKILL.md)** | Build a runnable scraper end-to-end: picks structured endpoint vs raw HTML, JS rendering, proxy tier, sync vs async, then generates a complete Python or Node.js script with retries, pagination, and credit estimation. |
+| **[`scraperapi-lead-enrichment`](plugin/skills/scraperapi-lead-enrichment/SKILL.md)** | Enrich a contact or company from any seed (name, domain, LinkedIn URL, email) and produce a structured contact card with person and company fields. |
+| **[`scraperapi-research-agent`](plugin/skills/scraperapi-research-agent/SKILL.md)** | Autonomous research agent: takes a question, uses ScraperAPI to search and scrape relevant pages, uploads content as file artifacts to the Anthropic Files API, then feeds everything to Claude for a cited markdown report. |
+| **[`scraperapi-market-research`](plugin/skills/scraperapi-market-research/SKILL.md)** | Market research from live web data: consumer sentiment, demand and trend signals, price and category structure, and competitive landscape — for product, pricing, positioning, or investment decisions. |
+| **[`scraperapi-seo-audit`](plugin/skills/scraperapi-seo-audit/SKILL.md)** | Comprehensive SEO audit using live SERPs and on-page scraping: keyword rankings, titles/meta/headings/schema, content gaps, indexation, and prioritized recommendations. Runs out of the box via the bundled MCP tools. |
+| **[`scraperapi-serp-intelligence`](plugin/skills/scraperapi-serp-intelligence/SKILL.md)** | SERP landscape analysis for SEO strategy: AI Overview presence and attribution, SERP feature composition, query intent, competitor visibility, and where rankings translate to traffic. |
+| **[`scraperapi-price-monitoring`](plugin/skills/scraperapi-price-monitoring/SKILL.md)** | Track Amazon, Walmart, and Google Shopping prices from ASINs, URLs, or product queries. Detects increases, decreases, restocks, and out-of-stock transitions against an optional baseline. |
 
 
 ## Usage
@@ -119,42 +119,44 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 ```
 .
 ├── .claude-plugin/
-│   ├── plugin.json              # Claude Code plugin manifest
 │   └── marketplace.json         # Claude Code marketplace listing
 ├── openclaw.plugin.json         # OpenClaw / ClawHub plugin manifest
 ├── package.json                 # scoped package name for ClawHub publishing
-├── .mcp.json                    # hosted MCP server config (bundled for Claude Code)
-├── skills/
-│   ├── scraperapi-agent-onboarding/
-│   ├── scraperapi-async/
-│   ├── scraperapi-cli/
-│   ├── scraperapi-crawler/
-│   ├── scraperapi-datapipeline/
-│   ├── scraperapi-java-sdk/
-│   ├── scraperapi-lead-enrichment/
-│   ├── scraperapi-market-research/
-│   ├── scraperapi-mcp/
-│   │   ├── SKILL.md
-│   │   ├── references/          # per-tool deep dives
-│   │   └── recipes/             # end-to-end workflows
-│   ├── scraperapi-n8n/
-│   ├── scraperapi-nodejs-sdk/
-│   ├── scraperapi-php-sdk/
-│   ├── scraperapi-price-monitoring/
-│   ├── scraperapi-python-sdk/
-│   ├── scraperapi-research-agent/
-│   │   ├── SKILL.md
-│   │   ├── scripts/             # research_agent.py — runnable CLI
-│   │   └── assets/              # report_template.md
-│   ├── scraperapi-ruby-sdk/
-│   ├── scraperapi-scraper-builder/
-│   ├── scraperapi-seo-audit/
-│   ├── scraperapi-serp-intelligence/
-│   └── scraperapi-zapier/
+├── plugin/                      # the Claude Code plugin
+│   ├── .claude-plugin/plugin.json  # Claude Code plugin manifest
+│   ├── .mcp.json                # hosted MCP server config
+│   ├── assets/                  # plugin icon
+│   └── skills/
+│       ├── scraperapi-agent-onboarding/
+│       ├── scraperapi-async/
+│       ├── scraperapi-cli/
+│       ├── scraperapi-crawler/
+│       ├── scraperapi-datapipeline/
+│       ├── scraperapi-java-sdk/
+│       ├── scraperapi-lead-enrichment/
+│       ├── scraperapi-market-research/
+│       ├── scraperapi-mcp/
+│       │   ├── SKILL.md
+│       │   ├── references/          # per-tool deep dives
+│       │   └── recipes/             # end-to-end workflows
+│       ├── scraperapi-n8n/
+│       ├── scraperapi-nodejs-sdk/
+│       ├── scraperapi-php-sdk/
+│       ├── scraperapi-price-monitoring/
+│       ├── scraperapi-python-sdk/
+│       ├── scraperapi-research-agent/
+│       │   ├── SKILL.md
+│       │   ├── scripts/             # research_agent.py — runnable CLI
+│       │   └── assets/              # report_template.md
+│       ├── scraperapi-ruby-sdk/
+│       ├── scraperapi-scraper-builder/
+│       ├── scraperapi-seo-audit/
+│       ├── scraperapi-serp-intelligence/
+│       └── scraperapi-zapier/
 ├── LICENSE
 └── README.md
 ```
 
-Each `skills/<name>/SKILL.md` is self-contained — frontmatter declares trigger conditions and required environment, the body teaches Claude how to do the job.
+Each `plugin/skills/<name>/SKILL.md` is self-contained — frontmatter declares trigger conditions and required environment, the body teaches Claude how to do the job.
 
 ---
