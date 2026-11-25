@@ -113,6 +113,21 @@ Each skill triggers from natural-language prompts in Claude Code. A few starting
 
 Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 
+---
+
+## Data and external services
+
+The plugin sends data only to the services below, and only when you ask Claude to use a skill that needs them.
+
+| Service | Used by | What it receives |
+|---------|---------|------------------|
+| ScraperAPI hosted MCP server (`mcp.scraperapi.com`) | The bundled MCP server, and the skills that call its tools | Your API key (from the plugin's sensitive setting), plus the URLs, search queries and parameters you ask Claude to scrape |
+| ScraperAPI APIs (`api.`, `async.`, `crawler.`, `datapipeline.scraperapi.com`) | Code written with the SDK, CLI, async, crawler, DataPipeline and scraper-builder skills. That code runs in your own project. | The same: your API key, and the URLs, queries and parameters |
+| Anthropic Files API (via the `anthropic` Python SDK) | The `scraperapi-research-agent` script | Scraped page content, uploaded as documents that Claude cites in the report |
+| Webhook URLs you configure | Optional result delivery for async jobs, Crawler and DataPipeline | Scraping results |
+| n8n and Zapier | Workflows built with the `scraperapi-n8n` and `scraperapi-zapier` skills | Whatever your workflow sends, when you run it on that platform |
+
+---
 
 ## Project Structure
 
