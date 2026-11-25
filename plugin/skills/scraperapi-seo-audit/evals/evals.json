@@ -1,23 +1,40 @@
 {
-  "skill_name": "seo-audit",
+  "skill_name": "scraperapi-seo-audit",
   "evals": [
     {
       "id": 1,
-      "prompt": "Can you do an SEO audit on scraperapi.com? We're trying to rank for 'web scraping API' and 'scraping API for python'. Want to know where we stand vs competitors.",
-      "expected_output": "A full site-wide SEO audit with SERP ranking checks for both keywords, on-page analysis of key pages, competitor gap analysis against the top-ranking domains, and prioritized recommendations.",
-      "files": []
+      "prompt": "Can you do an SEO audit on northwindcoffee.com? We're a US coffee roaster trying to rank for 'single origin coffee beans' and 'coffee subscription'. Want to know where we stand vs competitors.",
+      "expected_output": "A site-wide audit (Mode B): SERP checks for both keywords geo-targeted to the US, on-page analysis of key pages, competitor gap analysis against the top-ranking domains, a health grade and prioritized recommendations.",
+      "files": [],
+      "expectations": [
+        "The audit runs in site-wide mode (Mode B) and stays within 30 tool calls",
+        "Every google_search and google_news call passes a US countryCode",
+        "A credit estimate is given to the user before data collection starts",
+        "SERP features other than organic results and People Also Ask are reported only when present in the response, otherwise as 'not in SERP data'",
+        "The report leads with an executive summary that includes a health grade"
+      ]
     },
     {
       "id": 2,
-      "prompt": "Our blog post at https://www.scraperapi.com/blog/python-web-scraping/ used to rank #3 for 'python web scraping tutorial' and now it's dropped to like page 3. Can you figure out what happened?",
-      "expected_output": "A single-page audit focused on that URL: SERP ranking check for the keyword, on-page analysis of the page itself, scrape of the current top-ranking competitor pages to identify what they have that this page lacks, and specific recommendations.",
-      "files": []
+      "prompt": "Our blog post at https://www.northwindcoffee.com/blog/pour-over-guide/ used to rank #3 for 'pour over coffee guide' and now it's dropped to like page 3. Can you figure out what happened?",
+      "expected_output": "A single-page audit (Mode A) on that URL: a SERP check for the keyword including pages 2–3, on-page analysis of the post, a comparison with the current top-ranking pages, and specific recommendations.",
+      "files": [],
+      "expectations": [
+        "The audit runs in single-page mode (Mode A) and stays within 12 tool calls",
+        "Page 2-3 searches use start: 10 / start: 20 and are counted in the call budget",
+        "Recommendations name the page and the exact change"
+      ]
     },
     {
       "id": 3,
-      "prompt": "I'm building a new SaaS product — proxiesapi.com. Can you do a quick SEO audit and tell me what keywords the site is going after and whether the on-page SEO is in good shape?",
-      "expected_output": "Infer target keywords from scraping the homepage, run SERP checks, do on-page analysis, and produce a prioritized recommendation list. Since no keywords were provided, the skill should infer them and confirm before proceeding (or proceed and present findings).",
-      "files": []
+      "prompt": "I'm building a new SaaS product, ledgerlite.io. Can you do a quick SEO audit and tell me what keywords the site is going after and whether the on-page SEO is in good shape?",
+      "expected_output": "Infers target keywords from the homepage and confirms them (or states them as assumptions), asks for or infers the target market, then runs SERP checks and on-page analysis and produces a prioritized recommendation list.",
+      "files": [],
+      "expectations": [
+        "Target keywords are inferred from the homepage and shown to the user before or alongside the results",
+        "The response asks for the target market, or states the US default as an assumption, before running searches",
+        "Page scrapes start without render and escalate to render only when content is empty"
+      ]
     }
   ]
 }

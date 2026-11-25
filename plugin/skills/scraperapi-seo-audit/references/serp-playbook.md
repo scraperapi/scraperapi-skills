@@ -25,23 +25,23 @@ required. Always caveat this in the report.
 
 Run `google_search` with `num: 10` (default) for each target keyword.
 
-**What to extract from organic results:**
+**What to extract from `organic_results`:**
 ```
-position        — rank of target site (search through all 10 results)
-url             — the exact URL ranking (note if it's the "right" page)
-title           — as shown in SERP (vs the page's actual <title>)
+position        — rank of the target site (search through all 10 results)
+link            — the exact URL ranking (note if it's the "right" page)
+title           — as shown in the SERP (vs the page's actual <title>)
 snippet         — the displayed meta description or auto-generated snippet
-domain          — for identifying top competitors
+domain of link  — for identifying top competitors
 ```
 
-**SERP feature signals to note:**
-- `featured_snippet` present → note the source domain; if it's not the target site, this is an
-  opportunity
-- `people_also_ask` → mine these for content gap opportunities; list the top 4 questions
-- `knowledge_panel` → present? owned by the target brand?
-- `shopping_results` → relevant if the site sells products
-- `local_pack` → relevant for local businesses
-- `image_pack` → relevant if the site has strong visual content
+**SERP features in the response:**
+- `related_questions` (People Also Ask) → mine these for content gaps; list the top 4 questions
+- `knowledge_graph` → present? owned by the target brand?
+- `videos` → relevant if competitors win with video content
+
+Other features (featured snippet, AI Overview, shopping, local or image results) aren't part of the
+documented response. If a response does include one, report it with the domains it cites; if not,
+write "not in SERP data" rather than "none".
 
 **When the site doesn't appear in top 10:**
 - Search pages 2–3 with `start: 10`, `start: 20` to find actual position
@@ -56,16 +56,16 @@ From the organic results for each target keyword, extract the top 3 non-target d
 
 ## Geo-targeting
 
-If the site serves a specific country, pass `countryCode` and `gl` to `google_search`:
-- UK: `countryCode: "gb"`, `gl: "gb"`
+Pass the target market's `countryCode` and `gl` to every `google_search` and `google_news` call:
+- US (default): `countryCode: "us"`, `gl: "us"`
+- UK: `countryCode: "uk"` (ScraperAPI's code for the UK), `gl: "uk"`
 - Australia: `countryCode: "au"`, `gl: "au"`
-- Default (US): no params needed
 
 ## News / brand signals
 
 Use `google_news` with:
 - Query: `"Brand Name"` or `"domain.com"`
-- `timePeriod: "3M"` for recent coverage
+- `timePeriod: "1Y"`, or `dateRangeStart`/`dateRangeEnd` (MM/DD/YYYY) for the last 3 months
 
 What to note:
 - Presence of news coverage (positive E-E-A-T signal)
