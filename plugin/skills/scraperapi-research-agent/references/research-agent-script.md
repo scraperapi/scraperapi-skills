@@ -191,7 +191,7 @@ and a research question. Write a structured research report that:
 1. Opens with a 2-3 sentence executive summary
 2. Organises findings into logical sections with clear headings
 3. Cites sources inline using [N] notation (where N matches the document number)
-4. Ends with a ## Sources section listing all cited sources
+4. Does not include a Sources section; the numbered source list is added after your report
 
 Be specific, factual, and concise. Do not pad the report. If sources conflict,
 note the disagreement. Always cite the source(s) for each factual claim."""
@@ -203,13 +203,12 @@ def synthesize_report(
     model: str = "claude-opus-4-8",
 ) -> str:
     """Feed source artifacts to Claude and get a cited research report."""
-    print(f"  Synthesising report from {len(sources)} source(s)...")
-
-    # Build document blocks from uploaded file artifacts
+    # Only uploaded sources become documents; number the bibliography from the
+    # same list so [N] in the report always matches source N.
+    uploaded = [s for s in sources if s.get("file_id")]
+    print(f"  Synthesising report from {len(uploaded)} source(s)...")
     document_blocks = []
-    for i, source in enumerate(sources, 1):
-        if not source.get("file_id"):
-            continue
+    for source in uploaded:
         document_blocks.append({
             "type": "document",
             "source": {"type": "file", "file_id": source["file_id"]},
@@ -220,10 +219,6 @@ def synthesize_report(
     if not document_blocks:
         return "No sources could be loaded for synthesis."
 
-    # Apply prompt caching on the documents block (large, stable context)
-    # Cache the last document block so all sources are cached together
-    document_blocks[-1]["cache_control"] = {"type": "ephemeral"}
-
     messages = [
         {
             "role": "user",
@@ -233,24 +228,21 @@ def synthesize_report(
                     "text": (
                         f"Research question: {question}\n\n"
                         "Write a comprehensive research report using the documents above. "
-                        "Use [N] inline citations. Include a numbered source list at the end."
+                        "Use [N] inline citations."
                     ),
                 }
             ],
         }
     ]
 
-    # Build the source bibliography for the report footer
     bibliography = "\n".join(
-        f"{i}. [{s['title']}]({s['url']})"
-        for i, s in enumerate(sources, 1)
-        if s.get("url")
+        f"{i}. [{s['title']}]({s['url']})" for i, s in enumerate(uploaded, 1)
     )
 
     full_response = []
     with client.messages.stream(
         model=model,
-        max_tokens=4096,
+        max_tokens=16000,  # room for adaptive thinking plus the report
         thinking={"type": "adaptive"},
         system=SYNTHESIS_SYSTEM,
         messages=messages,
@@ -263,9 +255,7 @@ def synthesize_report(
 
     report = "".join(full_response)
 
-    # Append sources section if Claude didn't include one
-    if "## Sources" not in report and bibliography:
-        report += f"\n\n## Sources\n\n{bibliography}"
+    report += f"\n\n## Sources\n\n{bibliography}"
 
     return report
 
