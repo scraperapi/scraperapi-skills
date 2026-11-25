@@ -1,4 +1,5 @@
 .claude-plugin/
+plugin/.claude-plugin/
 .claude/
 *.skill
 .git/

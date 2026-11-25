@@ -8,10 +8,7 @@
   "plugins": [
     {
       "name": "scraperapi",
-      "source": {
-        "source": "github",
-        "repo": "scraperapi/scraperapi-skills"
-      },
+      "source": "./plugin",
       "description": "ScraperAPI's official Claude Code plugin: a growing library of skills covering the full ScraperAPI surface.",
       "version": "1.2.0",
       "author": {
