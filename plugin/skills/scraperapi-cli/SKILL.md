@@ -2,13 +2,12 @@
 name: scraperapi-cli
 description: >
   Reference for the official ScraperAPI command-line tool (`sapi`, package `scraperapi-cli`). Use
-  this skill whenever the user wants to scrape, run async jobs, fetch structured data, manage
-  crawls, check credits, or drive DataPipeline from a terminal or shell script. Trigger on:
-  "scrape this URL from the terminal", "use sapi to fetch X", "ScraperAPI CLI", "ScraperAPI from
-  bash", "sapi scrape", "sapi jobs", "pipe ScraperAPI into jq", "scrape from a Makefile / cron /
-  CI", "check my ScraperAPI credits from the command line", "submit 10000 URLs as a batch from a
-  file". Covers install, auth, every command, JSON and piping behaviour, cost checks, and shell
-  recipes. Not for writing scraper code: for a new scraper script use scraperapi-scraper-builder,
+  this skill whenever the user wants to scrape, run async jobs, fetch structured data or check
+  credits from a terminal or shell script. Trigger on: "scrape this URL from the terminal", "use
+  sapi to fetch X", "ScraperAPI CLI", "ScraperAPI from bash", "sapi scrape", "sapi jobs", "pipe
+  ScraperAPI into jq", "scrape from a Makefile / cron / CI", "check my ScraperAPI credits from the
+  command line", "scrape 10000 URLs from a file". Covers install, auth, commands, JSON and piping
+  behaviour, cost checks and shell recipes. Not for writing scraper code: for a new scraper script use scraperapi-scraper-builder,
   and for code that calls ScraperAPI use the language's SDK skill.
 
   Note: Transmits user-supplied queries, URLs, and content to ScraperAPI.
@@ -82,7 +81,7 @@ The workhorse command. Returns the page body to stdout.
 sapi scrape https://example.com
 sapi scrape https://example.com --render                       # 10 credits, JS rendering
 sapi scrape https://example.com --render --wait-for "#main"    # wait for selector
-sapi scrape https://example.com --country gb                   # geotarget UK
+sapi scrape https://example.com --country uk                   # geotarget UK
 sapi scrape https://example.com --premium                      # 10 credits, residential proxies
 sapi scrape https://example.com --ultra-premium                # 30 credits, hardest sites
 sapi scrape https://example.com --autoparse --json             # structured JSON for supported sites
@@ -110,12 +109,12 @@ Combining flags costs more than either alone: `--render --premium` is 25 credits
 | `--ultra-premium` | Advanced anti-bot bypass | 30 (75 with `--render`) |
 | `--screenshot` | PNG screenshot (base64 in JSON mode) | 10 |
 | `--autoparse` | Auto-parsed JSON for supported sites | — |
-| `--country <cc>` | ISO 3166-1 (e.g. `us`, `gb`, `de`) | — |
+| `--country <cc>` | Country code (e.g. `us`, `uk`, `de`). The UK is `uk`, not `gb` | — |
 | `--device <type>` | `mobile` or `desktop` user-agent | — |
 | `--output <fmt>` | `html`, `markdown`, `text`, `json`, `csv` | — |
 | `--session <n>` | Sticky session number (reuse IP) | — |
 | `--wait-for <sel>` | CSS selector to wait for (needs `--render`) | — |
-| `--timeout <sec>` | Request timeout (default 70) | — |
+| `--timeout <sec>` | Request timeout (default 70). Only `scrape` has this flag | — |
 | `--async` | Submit as async job, print job ID, exit | — |
 | `--json` | Force JSON output mode | — |
 | `--api-key <key>` | Override the configured API key for one call | — |
@@ -125,13 +124,12 @@ There is no interactive confirmation step — `sapi scrape` runs the request imm
 ## `sapi cost <url>` — preview credit cost
 
 ```bash
-sapi cost https://example.com                   # base cost
-sapi cost https://example.com --render          # with JS rendering
-sapi cost https://example.com --render --premium
-sapi cost https://example.com --render --json   # machine-readable
+sapi cost https://example.com --json                      # {"credits":1}
+sapi cost https://example.com --render --premium --json   # {"credits":25}
+sapi cost https://example.com --render --json | jq .credits
 ```
 
-Accepts the same parameter flags as `sapi scrape` (everything except `--async` and `--timeout`) and prints something like `25 credits`. Useful as a pre-flight check before running an expensive batch — wire it into a script when you want to fail fast if a chosen flag combination is more expensive than expected.
+Use `--json` (or pipe the output) and read `.credits`. Accepts the same parameter flags as `sapi scrape` except `--async` and `--timeout`. Useful as a pre-flight check before running an expensive batch — wire it into a script when you want to fail fast if a chosen flag combination is more expensive than expected.
 
 ## `sapi jobs` — async scraping
 
@@ -140,25 +138,32 @@ Use async for batches, slow targets, or fire-and-forget work.
 ```bash
 sapi scrape https://example.com --async              # returns a jobId on stdout
 sapi jobs list                                        # list all jobs
-sapi jobs get <jobId>                                 # poll until done, print result
+sapi jobs get <jobId>                                 # poll every 2s until done, no time limit
 sapi jobs get <jobId> --no-poll                       # one-shot status check
 sapi jobs cancel <jobId>                              # cancel a running job
-sapi jobs batch urls.txt                              # submit up to 50,000 URLs from a file
 ```
 
-`urls.txt` is one URL per line. Batches are the right tool whenever there are more than ~100 URLs — sync `sapi scrape` calls in a loop will burn through your concurrent request budget and hit 429s.
+`sapi jobs get` without `--no-poll` waits until the job is `finished` or `failed`, with no timeout. A job that keeps retrying (async jobs can retry for up to 24 hours) makes a script hang. In scripts, poll with `--no-poll` in your own loop and give up after a deadline. Async jobs (the batch pipeline below) are the right tool whenever there are more than ~100 URLs — sync `sapi scrape` calls in a loop will burn through your concurrent request budget and hit 429s.
 
-### Idiomatic batch pipeline
+### Batch pipeline
 
-`sapi jobs batch` returns a JSON array — one entry per submitted job, each with its own `id`. Poll each child with `sapi jobs get`:
+Submit one async job per URL, then poll each one. Any `sapi scrape` flag works here (`--render`, `--premium`, `--autoparse`, …), and ScraperAPI handles the retries:
 
 ```bash
-# 1. Submit a batch, grab every child job id.
-sapi jobs batch urls.txt --json | jq -r '.[].id' > job-ids.txt
+# 1. Submit one async job per URL (urls.txt: one URL per line), keep the job ids.
+while read -r URL; do
+  sapi scrape "$URL" --async --json < /dev/null | jq -r .id
+done < urls.txt > job-ids.txt
 
-# 2. Wait for each one (`jobs get` polls automatically until finished).
+# 2. Poll each one with a deadline (plain `jobs get` would wait forever on a stuck job).
 while read -r ID; do
-  sapi jobs get "$ID" --json >> batch-results.ndjson
+  for _ in $(seq 1 60); do                       # ~10 minutes per job
+    JOB=$(sapi jobs get "$ID" --no-poll --json < /dev/null)
+    STATUS=$(echo "$JOB" | jq -r .status)
+    [ "$STATUS" = finished ] || [ "$STATUS" = failed ] && break
+    sleep 10
+  done
+  echo "$JOB" >> batch-results.ndjson
 done < job-ids.txt
 
 # 3. Extract bodies that succeeded.
@@ -167,84 +172,50 @@ jq -s '[.[] | select(.status=="finished") | .response.body]' batch-results.ndjso
 
 ## `sapi structured` — pre-parsed JSON for supported sites
 
-Whenever the target is Amazon, Google, Walmart, eBay, or Redfin, prefer `structured` over `scrape` + `--autoparse` + manual parsing. The endpoints return clean, schema-stable JSON.
+For Amazon and Google searches, prefer `structured` over scraping and parsing HTML. The endpoints return clean, schema-stable JSON.
 
 ```bash
-# Amazon
-sapi structured amazon product https://amazon.com/dp/B09XYZ
 sapi structured amazon search "wireless headphones"
-sapi structured amazon offers https://amazon.com/dp/B09XYZ
-sapi structured amazon reviews https://amazon.com/dp/B09XYZ
-
-# Google
 sapi structured google serp "best espresso machine"
 sapi structured google news "artificial intelligence"
 sapi structured google jobs "software engineer remote"
 sapi structured google shopping "standing desk"
-sapi structured google maps "coffee shops near me"
-
-# Walmart / eBay / Redfin
-sapi structured walmart product https://walmart.com/ip/123456
-sapi structured ebay product https://ebay.com/itm/123456
-sapi structured redfin listing https://redfin.com/home/12345
-sapi structured redfin search "Austin TX"
-sapi structured redfin agents "Portland OR"
 ```
 
 All structured commands accept `--json` for raw output (auto-on when piped). See [`docs.scraperapi.com`](https://docs.scraperapi.com/) for the schema of each vertical.
 
-## `sapi crawler` — whole-site crawl
+### Product pages, Google Maps and Redfin: `scrape --autoparse`
+
+For an Amazon, Walmart or eBay product, Google Maps, or Redfin, use `sapi scrape` with `--autoparse` and the page URL. ScraperAPI parses supported pages into JSON:
 
 ```bash
-sapi crawler start example.com           # kick off a crawl, prints jobId
-sapi crawler status <jobId>              # progress
-sapi crawler results <jobId>             # list discovered URLs (human table)
-sapi crawler results <jobId> --json      # JSON object: { jobId, urls: [...] }
+sapi scrape "https://www.amazon.com/dp/B07FTKQ97Q" --autoparse --json | jq '.body | fromjson'
+sapi scrape "https://www.walmart.com/ip/5253396052" --autoparse --json | jq '.body | fromjson'
+sapi scrape "https://www.ebay.com/itm/166619046796" --autoparse --json | jq '.body | fromjson'
 ```
 
-The crawler is for discovering URLs across a domain. To then scrape each one, feed the result into `sapi jobs batch`:
+In JSON mode, `sapi scrape` wraps the response as `{"body": "<string>", "statusCode": 200}`, so the parsed data is a JSON string inside `.body`, and `fromjson` turns it back into an object. Autoparse covers Amazon (product, search, offers, reviews), eBay (product, search), Walmart (product, category), Google (search, news, shopping, jobs, maps) and Redfin (for sale, for rent, search, agent pages). It costs the site's normal rate (5 credits for Amazon, Walmart and eBay).
+
+## `sapi account` — usage and credits
 
 ```bash
-sapi crawler results "$CRAWL" --json | jq -r '.urls[]' > urls.txt
-sapi jobs batch urls.txt
+sapi account --json                 # includes creditsLeft, requestCount, requestLimit, concurrencyLimit
+sapi account --json | jq .creditsLeft
 ```
 
-## `sapi pipeline` — DataPipeline projects
+Use `--json` whenever you need the credit balance: `creditsLeft` is in the JSON output.
 
-Projects are configured in the [ScraperAPI dashboard](https://dashboard.scraperapi.com/); the CLI drives runs and reads results.
+Run `sapi account --json` before anything large: it's the cheapest way to confirm the key works and that there are enough credits.
 
-```bash
-sapi pipeline list                  # list your projects
-sapi pipeline run <projectId>       # trigger a run, prints jobId
-sapi pipeline status <jobId>        # check run status
-sapi pipeline results <jobId>       # fetch results
-```
-
-If the user wants recurring scraping but has no project yet, point them at the dashboard — `sapi` does not create projects.
-
-## `sapi account` — credits and key management
-
-```bash
-sapi account                        # human summary: credits left, plan, period
-sapi account --json                 # machine-readable
-sapi account keys list              # list API keys on the account
-sapi account keys create            # create a new key (returns once — copy it)
-sapi account keys revoke <keyId>    # revoke a key
-```
-
-Always run `sapi account` before kicking off anything large — it's the cheapest way to confirm the key works and that there are enough credits.
-
-## `sapi config` — persistent defaults
+## `sapi config` — stored API key
 
 ```bash
 sapi config list
 sapi config get api_key
-sapi config set default_country gb
-sapi config set default_output_format markdown
-sapi config set default_timeout 90
+sapi config set api_key YOUR_API_KEY
 ```
 
-Settable keys: `api_key`, `default_country`, `default_output_format`, `default_timeout`. Use `SCRAPERAPI_API_KEY` env var instead of `config set api_key` when the machine is shared.
+Pass `--country`, `--output` and `--timeout` on each call. On a shared machine, use the `SCRAPERAPI_API_KEY` env var rather than storing the key in the config file.
 
 ## Shell recipes
 
@@ -260,8 +231,8 @@ echo "$URL,$TITLE" >> titles.csv
 
 ```bash
 # crontab: 7am every day
-0 7 * * * /usr/local/bin/sapi structured amazon product https://amazon.com/dp/B09XYZ --json \
-  | jq '{ts: now, price: .pricing}' >> ~/prices.ndjson
+0 7 * * * /usr/local/bin/sapi scrape "https://www.amazon.com/dp/B07FTKQ97Q" --autoparse --json \
+  | jq -c '.body | fromjson | {ts: now, price: .pricing}' >> ~/prices.ndjson
 ```
 
 ### Parallel scrape with `xargs`
@@ -271,15 +242,15 @@ echo "$URL,$TITLE" >> titles.csv
 cat urls.txt | xargs -n1 -P5 sapi scrape --render --json > out.ndjson
 ```
 
-Above ~100 URLs prefer `sapi jobs batch` over this — it sidesteps the concurrent request limit.
+Above ~100 URLs prefer the async [batch pipeline](#batch-pipeline) over this — it sidesteps the concurrent request limit.
 
 ### Fail-loud in CI
 
-`sapi` exits non-zero on any error, so `set -e` works as expected:
+`sapi` exits non-zero on any error (2 when credits are exhausted, 1 otherwise), so `set -e` works as expected:
 
 ```bash
 set -euo pipefail
-sapi account --json | jq -e '.credits > 1000'             # fails the build if low
+sapi account --json | jq -e '.creditsLeft > 1000'         # fails the build if low
 sapi scrape "$URL" --output markdown > page.md
 ```
 
@@ -296,8 +267,10 @@ Cheap → expensive, only paying for the next tier when the previous one fails. 
 ## When NOT to reach for `sapi`
 
 - **Inside application code** (Python, Node, PHP, Ruby, Java) — use the matching SDK skill; shelling out to a CLI is brittle.
-- **Tight loops over thousands of URLs in a shell script** — submit a batch with `sapi jobs batch` instead so ScraperAPI handles concurrency and retries.
-- **Long-running scheduled projects with webhook delivery** — DataPipeline (dashboard-configured) is the right product; the CLI drives runs but does not replace the project model.
+- **Tight loops over thousands of URLs in a shell script** — use async jobs (the [batch pipeline](#batch-pipeline), or the Async API's batch endpoint via the scraperapi-async skill) so ScraperAPI handles concurrency and retries.
+- **Long-running scheduled projects with webhook delivery** — DataPipeline, configured in the dashboard (scraperapi-datapipeline skill).
+- **Whole-site crawls** — the Crawler API (scraperapi-crawler skill), or build the URL list from a sitemap or a Google `site:` search and scrape it with the [batch pipeline](#batch-pipeline).
+- **Managing API keys** — the [ScraperAPI dashboard](https://dashboard.scraperapi.com/).
 
 ## Troubleshooting
 
@@ -306,9 +279,10 @@ Cheap → expensive, only paying for the next tier when the previous one fails. 
 | `command not found: sapi` | Not installed, or `npm` global bin not on `$PATH` | `npm install -g scraperapi-cli`; check `npm config get prefix` |
 | `401 Invalid API key` | Key missing or wrong | Run `sapi account` to confirm; re-run `sapi init` |
 | `500` on a public page | ScraperAPI retried for 70s and still got blocked (not charged) | Retry with `--premium`, then `--ultra-premium` |
-| `403` | Credits exhausted for this billing cycle | Check `sapi account`; upgrade or enable overages at https://dashboard.scraperapi.com/billing |
-| `429` from `sapi` | Hit concurrent request limit | Switch to `sapi jobs batch` or add `xargs -P` cap |
-| Hangs forever in a script | Default 70s timeout, target is slow | `--timeout 120`, or use `--async` |
+| `403`, exit code 2 | Credits exhausted for this billing cycle | Check `sapi account --json`; upgrade or enable overages at https://dashboard.scraperapi.com/billing |
+| `429` from `sapi` | Hit concurrent request limit | Switch to the async [batch pipeline](#batch-pipeline) or lower the `xargs -P` cap |
+| Script hangs forever | `sapi jobs get` polls with no time limit | Use `--no-poll` in a loop with a deadline (see the batch pipeline above) |
+| `sapi scrape` times out | Target is slow; default timeout is 70s | `--timeout 120`, or use `--async`. Other commands have no `--timeout` |
 | Output is JSON instead of HTML | stdout is piped → auto-JSON | Force with `--output html` if you want raw HTML in a pipe |
 
 See [`docs.scraperapi.com`](https://docs.scraperapi.com/) for the full parameter reference and [current credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs).
