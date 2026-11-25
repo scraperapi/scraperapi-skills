@@ -23,18 +23,17 @@ metadata:
 
 # ScraperAPI — Python SDK Best Practices
 
-**Requires:** Python 3.10+ (the SDK uses `list | tuple` annotations, so importing it fails on older versions), `pip install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Python 3.10+ (the SDK uses `list | tuple` annotations, so importing it fails on older versions), `pip install scraperapi-sdk`, a ScraperAPI API key.
 
 ## Setup
 
 ```python
-import os
 from scraperapi_sdk import ScraperAPIClient
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
+client = ScraperAPIClient("YOUR_API_KEY")
 ```
 
-Never hardcode the API key. Read it from the environment every time.
+Replace `YOUR_API_KEY` with your key from https://dashboard.scraperapi.com. Never commit a real key to source control.
 
 ## Decision Guide
 
@@ -192,7 +191,7 @@ The SDK's `ScraperAPIAsyncClient` covers single jobs:
 ```python
 from scraperapi_sdk import ScraperAPIAsyncClient
 
-async_client = ScraperAPIAsyncClient(os.environ["SCRAPERAPI_API_KEY"])
+async_client = ScraperAPIAsyncClient("YOUR_API_KEY")
 job = async_client.create("https://example.com/", api_params={"render": True})
 # wait() checks max_retries times, then returns the job as-is, even if it is still running
 data = async_client.wait(job["id"], cooldown=10, max_retries=60)
@@ -203,9 +202,9 @@ if data["status"] == "finished":
 For more control, or for `/batchjobs`, use `requests` directly:
 
 ```python
-import os, requests, time
+import requests, time
 
-API_KEY = os.environ["SCRAPERAPI_API_KEY"]
+API_KEY = "YOUR_API_KEY"
 
 def submit_job(url, extra_params=None):
     payload = {
@@ -251,9 +250,9 @@ For very large batches (up to 50,000 URLs), use `https://async.scraperapi.com/ba
 Use these instead of scraping raw HTML when the target platform is supported. They return clean JSON and require no parsing logic; they're billed at the target site's rate (5 credits for Amazon, 25 for Google).
 
 ```python
-import os, requests
+import requests
 
-API_KEY = os.environ["SCRAPERAPI_API_KEY"]
+API_KEY = "YOUR_API_KEY"
 
 def structured_get(vertical, params):
     """Call a structured data endpoint synchronously."""
@@ -286,10 +285,9 @@ See [structured data docs](https://docs.scraperapi.com/python/making-requests/st
 The SDK wraps every failure (HTTP errors, timeouts, connection errors) in `ScraperAPIException`. The original `requests` exception is on `e.original_exception`; for HTTP errors, its `.response` carries the status code.
 
 ```python
-import os
 from scraperapi_sdk import ScraperAPIClient, ScraperAPIException
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
+client = ScraperAPIClient("YOUR_API_KEY")
 
 def scrape(url, params=None):
     try:
@@ -301,7 +299,7 @@ def scrape(url, params=None):
             raise RuntimeError(f"Network error or timeout: {e.original_exception}") from e
         status = resp.status_code
         if status == 401:
-            raise ValueError("Invalid API key — check SCRAPERAPI_API_KEY") from e
+            raise ValueError("Invalid API key — check your API key") from e
         if status == 403:
             # Credits exhausted, or the request would cost more than max_cost. Retrying won't help
             raise RuntimeError("Out of credits or over max_cost — check https://dashboard.scraperapi.com/billing (don't retry)") from e

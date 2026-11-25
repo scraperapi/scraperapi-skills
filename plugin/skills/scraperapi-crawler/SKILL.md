@@ -48,9 +48,9 @@ Starting a job returns `{"status": "initiated", "jobId": "<jobId>"}`.
 ## Starting a Crawl
 
 ```python
-import os, requests
+import requests
 
-API_KEY = os.environ["SCRAPERAPI_API_KEY"]
+API_KEY = "YOUR_API_KEY"
 
 job = requests.post(
     "https://crawler.scraperapi.com/job",
@@ -215,7 +215,7 @@ If a single page would cost more than `crawl_budget`, the job fails to start.
 |------|---------|--------|
 | 200 | Job created | Continue |
 | 400 | Malformed request | Check required fields and regex syntax |
-| 401 | Invalid API key | Check `SCRAPERAPI_API_KEY` |
+| 401 | Invalid API key | Check your API key |
 | 403 | Free plan limit hit: `max_depth` above 1, or a `schedule` | Lower `max_depth` to 1, drop `schedule`, or upgrade |
 
 ## Documentation

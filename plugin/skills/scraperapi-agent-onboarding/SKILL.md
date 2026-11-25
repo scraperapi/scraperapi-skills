@@ -35,23 +35,12 @@ All paths require a ScraperAPI key. If you don't have one:
 
 1. Sign up at https://www.scraperapi.com/ — free trial includes 5,000 credits
 2. Copy your key from https://dashboard.scraperapi.com/
-3. Set it in your environment — never hardcode it in code or configs:
-
-```bash
-# macOS / Linux
-export SCRAPERAPI_API_KEY=<your-key>
-
-# Windows PowerShell
-$env:SCRAPERAPI_API_KEY = "<your-key>"
-
-# .env file
-SCRAPERAPI_API_KEY=...
-```
+3. Use it in place of `YOUR_API_KEY` in the examples below. Never commit a real key to source control.
 
 Verify the key works before doing real work:
 
 ```bash
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://httpbin.org/ip"
+curl "https://api.scraperapi.com/?api_key=YOUR_API_KEY&url=https://httpbin.org/ip"
 ```
 
 A JSON response with an `origin` IP confirms the key is valid. A `401` means the key is wrong or
@@ -143,11 +132,11 @@ Always run one real request before writing integration logic — catches auth, c
 issues before they hide inside your app's error paths:
 
 ```python
-import os, requests
+import requests
 
 r = requests.get(
     "https://api.scraperapi.com/",
-    params={"api_key": os.environ["SCRAPERAPI_API_KEY"], "url": "https://httpbin.org/ip"}
+    params={"api_key": "YOUR_API_KEY", "url": "https://httpbin.org/ip"}
 )
 print(r.status_code, r.text[:200])
 ```
@@ -172,10 +161,9 @@ pip install scraperapi-sdk
 ```
 
 ```python
-import os
 from scraperapi_sdk import ScraperAPIClient
 
-client = ScraperAPIClient(os.environ["SCRAPERAPI_API_KEY"])
+client = ScraperAPIClient("YOUR_API_KEY")
 result = client.get("https://example.com", render=True, country_code="us")
 print(result)
 ```
@@ -187,7 +175,7 @@ npm install scraperapi-sdk
 ```
 
 ```js
-const scraperapi = require('scraperapi-sdk')(process.env.SCRAPERAPI_API_KEY);
+const scraperapi = require('scraperapi-sdk')('YOUR_API_KEY');
 const result = await scraperapi.get('https://example.com', { render: true, country_code: 'us' });
 console.log(result);
 ```
@@ -208,24 +196,24 @@ Use this when the environment can't run `pip` or `npm`, or when you only need a 
 
 ```bash
 # Basic scrape
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://example.com"
+curl "https://api.scraperapi.com/?api_key=YOUR_API_KEY&url=https://example.com"
 
 # With JS rendering
-curl "https://api.scraperapi.com/?api_key=$SCRAPERAPI_API_KEY&url=https://example.com&render=true"
+curl "https://api.scraperapi.com/?api_key=YOUR_API_KEY&url=https://example.com&render=true"
 
 # Structured data — Google SERP
-curl "https://api.scraperapi.com/structured/google/search?api_key=$SCRAPERAPI_API_KEY&query=web+scraping"
+curl "https://api.scraperapi.com/structured/google/search?api_key=YOUR_API_KEY&query=web+scraping"
 
 # Structured data — Amazon product
-curl "https://api.scraperapi.com/structured/amazon/product?api_key=$SCRAPERAPI_API_KEY&asin=B09V3KXJPB"
+curl "https://api.scraperapi.com/structured/amazon/product?api_key=YOUR_API_KEY&asin=B09V3KXJPB"
 
 # Submit an async job
 curl -X POST "https://async.scraperapi.com/jobs" \
   -H "Content-Type: application/json" \
-  -d "{\"apiKey\": \"$SCRAPERAPI_API_KEY\", \"url\": \"https://example.com\"}"
+  -d "{\"apiKey\": \"YOUR_API_KEY\", \"url\": \"https://example.com\"}"
 
 # Poll async job status
-curl "https://async.scraperapi.com/jobs/<jobId>?apiKey=$SCRAPERAPI_API_KEY"
+curl "https://async.scraperapi.com/jobs/<jobId>?apiKey=YOUR_API_KEY"
 ```
 
 For the full parameter surface (premium proxies, country targeting, session stickiness, binary

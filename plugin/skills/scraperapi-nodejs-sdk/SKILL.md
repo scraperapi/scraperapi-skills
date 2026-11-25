@@ -23,22 +23,22 @@ metadata:
 
 # ScraperAPI — Node.js SDK Best Practices
 
-**Requires:** Node.js 18+ (the snippets use the global `fetch`), `npm install scraperapi-sdk`, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Node.js 18+ (the snippets use the global `fetch`), `npm install scraperapi-sdk`, a ScraperAPI API key.
 
 ## Setup
 
 ```js
 // CommonJS
-const scraperapiClient = require('scraperapi-sdk')(process.env.SCRAPERAPI_API_KEY);
+const scraperapiClient = require('scraperapi-sdk')('YOUR_API_KEY');
 
 // ES Modules / TypeScript — the default export is a factory function, not a class
 import scraperapi from 'scraperapi-sdk';
-const scraperapiClient = scraperapi(process.env.SCRAPERAPI_API_KEY);
+const scraperapiClient = scraperapi('YOUR_API_KEY');
 ```
 
 The package ships type definitions in `dist/` but doesn't declare them in `package.json`, so TypeScript reports a missing declaration file. Add `declare module 'scraperapi-sdk';` to a `.d.ts` file in your project, or set `noImplicitAny: false`.
 
-Never hardcode the API key. Read it from the environment every time.
+Replace `YOUR_API_KEY` with your key from https://dashboard.scraperapi.com. Never commit a real key to source control.
 
 ## Decision Guide
 
@@ -205,7 +205,7 @@ Credits above are for a normal site; Google, Amazon and bot-protected sites cost
 The sync SDK waits on each call and sets no timeout of its own. For 20+ URLs, use the async endpoint directly to fan out jobs.
 
 ```js
-const API_KEY = process.env.SCRAPERAPI_API_KEY;
+const API_KEY = 'YOUR_API_KEY';
 
 async function submitJob(url, apiParams = {}) {
   const res = await fetch('https://async.scraperapi.com/jobs', {
@@ -273,7 +273,7 @@ async function safeScrape(url, params = {}) {
   const res = await withTimeout(scraperapiClient.get(url, params)); // rejects on network error or timeout
   const { statusCode, body } = res;
   if (statusCode === 200 || statusCode === 404) return res; // 404 is the target's answer (charged)
-  if (statusCode === 401) throw new Error('Invalid API key — check SCRAPERAPI_API_KEY');
+  if (statusCode === 401) throw new Error('Invalid API key — check your API key');
   if (statusCode === 403) throw new Error("Out of credits or over max_cost — check https://dashboard.scraperapi.com/billing (don't retry)");
   if (statusCode === 429) throw new Error('Rate limit — reduce concurrency or switch to async');
   if (statusCode === 500) throw new Error('Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium or ultra_premium');

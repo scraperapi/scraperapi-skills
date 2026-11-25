@@ -11,12 +11,12 @@ The CLI and HTTP lines below are reference only, for mapping parameter names. Th
 ## amazon/product
 
 **MCP:** `amazon_product` — args: `asin` (10-char ID), `countryCode` (e.g., `"us"`), `tld` (optional)
-**CLI:** `sapi structured amazon product <asin-or-url> --api-key "$SCRAPERAPI_API_KEY" --json [--country us]`
+**CLI:** `sapi structured amazon product <asin-or-url> --api-key YOUR_API_KEY --json [--country us]`
 **HTTP:** `https://api.scraperapi.com/structured/amazon/product`
 
 | Parameter | Required | Notes |
 |-----------|----------|-------|
-| `api_key` | yes | From `$SCRAPERAPI_API_KEY`. MCP reads it from the server's configured env. |
+| `api_key` | yes | Your ScraperAPI key (`YOUR_API_KEY` in samples). The MCP server already has it from the plugin config. |
 | `asin` / MCP `asin` | one of `asin` or `url` | 10-char Amazon product ID. Faster + cheaper than passing `url`. CLI takes it as the positional argument. |
 | `url` | one of `asin` or `url` (HTTP/CLI only) | Use only if you cannot recover the ASIN from the URL. MCP does not accept a URL — extract the ASIN first. |
 | `country` / MCP `countryCode` | recommended | ISO code (`us`, `gb`, `de`, `ca`, `fr`, `es`, `it`, `jp`, `in`, `au`, `mx`, `br`). Determines which Amazon marketplace. Default is `us`. CLI flag: `--country`. |
@@ -39,7 +39,7 @@ For Amazon products with multiple offers (used, refurbished, third-party), switc
 ## walmart/product
 
 **MCP:** `walmart_product` — args: `productId` (the digits from `/ip/<id>`), `tld` (optional)
-**CLI:** `sapi structured walmart product <url> --api-key "$SCRAPERAPI_API_KEY" --json`
+**CLI:** `sapi structured walmart product <url> --api-key YOUR_API_KEY --json`
 **HTTP:** `https://api.scraperapi.com/structured/walmart/product`
 
 Note: the MCP tool takes a **product ID** (`5021188053`), while the CLI and HTTP take a **full URL** (`https://www.walmart.com/ip/5021188053`). Extract the ID from the URL when using MCP.
@@ -65,7 +65,7 @@ Walmart URLs sometimes redirect or change item IDs after refresh — if you get 
 ## google/shopping
 
 **MCP:** `google_shopping` — args: `query`, `countryCode` (optional, e.g., `"us"`)
-**CLI:** `sapi structured google shopping "<query>" --api-key "$SCRAPERAPI_API_KEY" --json [--country us]`
+**CLI:** `sapi structured google shopping "<query>" --api-key YOUR_API_KEY --json [--country us]`
 **HTTP:** `https://api.scraperapi.com/structured/google/shopping`
 
 | Parameter | Required | Notes |

@@ -21,7 +21,7 @@ metadata:
 
 # ScraperAPI — Java SDK Best Practices
 
-**Requires:** Java 8+ for the SDK, Maven or Gradle, `SCRAPERAPI_API_KEY` environment variable. The samples that call the API directly use `java.net.http` (Java 11+).
+**Requires:** Java 8+ for the SDK, Maven or Gradle, a ScraperAPI API key. The samples that call the API directly use `java.net.http` (Java 11+).
 
 ## Setup
 
@@ -46,10 +46,10 @@ implementation 'com.scraperapi:sdk:1.2'
 ```java
 import com.scraperapi.ScraperApiClient;
 
-ScraperApiClient client = new ScraperApiClient(System.getenv("SCRAPERAPI_API_KEY"));
+ScraperApiClient client = new ScraperApiClient("YOUR_API_KEY");
 ```
 
-Never hardcode the API key. Read it from the environment every time.
+Replace `YOUR_API_KEY` with your key from https://dashboard.scraperapi.com. Never commit a real key to source control.
 
 ## How the SDK Behaves
 
@@ -167,7 +167,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
-private static final String API_KEY = System.getenv("SCRAPERAPI_API_KEY");
+private static final String API_KEY = "YOUR_API_KEY";
 private static final HttpClient HTTP = HttpClient.newHttpClient();
 
 // GET https://api.scraperapi.com/<path>?api_key=...&<params>
@@ -300,7 +300,7 @@ public static String safeScrape(String url) throws Exception {
     HttpResponse<String> resp = apiGet("", Map.of("url", url));
     switch (resp.statusCode()) {
         case 200: return resp.body();
-        case 401: throw new IllegalStateException("Invalid API key — check SCRAPERAPI_API_KEY");
+        case 401: throw new IllegalStateException("Invalid API key — check your API key");
         case 403: throw new IllegalStateException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
         case 429: throw new RuntimeException("Rate limit — reduce concurrency or use async");
         case 500: case 503:

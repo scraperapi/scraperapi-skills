@@ -8,9 +8,8 @@ Base templates for the `scraperapi-scraper-builder` skill. Copy and adapt — do
 
 ```python
 # Requirements: pip install requests beautifulsoup4
-# Usage: SCRAPERAPI_API_KEY=your_key python scraper.py --url "https://example.com/products" --pages 10
+# Usage: python scraper.py --url "https://example.com/products" --pages 10
 
-import os
 import sys
 import time
 import json
@@ -18,9 +17,9 @@ import argparse
 import requests
 from typing import Optional
 
-API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
-if not API_KEY:
-    sys.exit("Error: SCRAPERAPI_API_KEY environment variable not set")
+API_KEY = "YOUR_API_KEY"
+if API_KEY == "YOUR_API_KEY":
+    sys.exit("Error: replace YOUR_API_KEY with your ScraperAPI key")
 
 BASE_URL = "https://api.scraperapi.com/"
 
@@ -151,18 +150,17 @@ Use when scraping a large list of known URLs. Submits all jobs at once, then pol
 
 ```python
 # Requirements: pip install requests
-# Usage: SCRAPERAPI_API_KEY=your_key python scraper_async.py --input urls.txt --output results.json
+# Usage: python scraper_async.py --input urls.txt --output results.json
 
-import os
 import sys
 import time
 import json
 import argparse
 import requests
 
-API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
-if not API_KEY:
-    sys.exit("Error: SCRAPERAPI_API_KEY environment variable not set")
+API_KEY = "YOUR_API_KEY"
+if API_KEY == "YOUR_API_KEY":
+    sys.exit("Error: replace YOUR_API_KEY with your ScraperAPI key")
 
 SUBMIT_URL = "https://async.scraperapi.com/batchjobs"
 STATUS_URL = "https://async.scraperapi.com/jobs/{job_id}"
@@ -257,14 +255,14 @@ if __name__ == "__main__":
 
 ```javascript
 // Requirements: npm install node-fetch@2 commander
-// Usage: SCRAPERAPI_API_KEY=your_key node scraper.js --url "https://example.com" --pages 10
+// Usage: node scraper.js --url "https://example.com" --pages 10
 
 const fetch = require('node-fetch');
 const { program } = require('commander');
 const fs = require('fs');
 
-const API_KEY = process.env.SCRAPERAPI_API_KEY;
-if (!API_KEY) { console.error('Error: SCRAPERAPI_API_KEY not set'); process.exit(1); }
+const API_KEY = 'YOUR_API_KEY';
+if (API_KEY === 'YOUR_API_KEY') { console.error('Error: replace YOUR_API_KEY with your ScraperAPI key'); process.exit(1); }
 
 const BASE_URL = 'https://api.scraperapi.com/';
 
@@ -369,18 +367,17 @@ Use instead of the sync/async templates when a structured vertical is available 
 
 ```python
 # Requirements: pip install requests
-# Usage: SCRAPERAPI_API_KEY=your_key python structured.py --query "laptop" --pages 3
+# Usage: python structured.py --query "laptop" --pages 3
 
-import os
 import sys
 import json
 import time
 import argparse
 import requests
 
-API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
-if not API_KEY:
-    sys.exit("Error: SCRAPERAPI_API_KEY environment variable not set")
+API_KEY = "YOUR_API_KEY"
+if API_KEY == "YOUR_API_KEY":
+    sys.exit("Error: replace YOUR_API_KEY with your ScraperAPI key")
 
 # TODO: Set the correct path from the Decision 1 table, e.g. "amazon/search", "google/search", "walmart/product"
 VERTICAL = "google/search"

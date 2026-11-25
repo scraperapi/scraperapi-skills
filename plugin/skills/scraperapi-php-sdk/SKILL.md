@@ -20,7 +20,7 @@ metadata:
 
 # ScraperAPI — PHP SDK Best Practices
 
-**Requires:** PHP 7.0+, Composer, `composer require scraperapi/sdk`, `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** PHP 7.0+, Composer, `composer require scraperapi/sdk`, a ScraperAPI API key.
 
 ## Setup
 
@@ -29,10 +29,10 @@ metadata:
 require __DIR__ . '/vendor/autoload.php';
 use ScraperAPI\Client;
 
-$client = new Client(getenv('SCRAPERAPI_API_KEY'));
+$client = new Client('YOUR_API_KEY');
 ```
 
-Never hardcode the API key. Read it from the environment every time.
+Replace `YOUR_API_KEY` with your key from https://dashboard.scraperapi.com. Never commit a real key to source control.
 
 ## Basic Usage
 
@@ -185,7 +185,7 @@ function scrapeWithEscalation(Client $client, string $url): ?string
 The SDK is synchronous — each `->get()` call blocks until the response (up to 70 seconds). For 20+ URLs, use the async REST endpoint.
 
 ```php
-$apiKey = getenv('SCRAPERAPI_API_KEY');
+$apiKey = 'YOUR_API_KEY';
 
 function submitJob(string $url, array $apiParams = []): array
 {
@@ -254,7 +254,7 @@ function safeScrape(Client $client, string $url, array $params = []): ?string
     } catch (\Exception $e) {
         $status = method_exists($e, 'getCode') ? (int) $e->getCode() : 0;
         switch ($status) {
-            case 401: throw new \RuntimeException('Invalid API key — check SCRAPERAPI_API_KEY');
+            case 401: throw new \RuntimeException('Invalid API key — check your API key');
             case 403: throw new \RuntimeException("Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)");
             case 429: throw new \RuntimeException('Rate limit — reduce concurrency or switch to async');
             case 500:

@@ -7,7 +7,7 @@ description: >
   wants a standalone, repeatable research pipeline outside the chat. Trigger on: "run the
   scraperapi research agent on X", "use the research agent script to investigate Y", "give me a
   script that researches a question and writes a cited report". Requires Python 3.9+, `pip install
-  requests anthropic`, SCRAPERAPI_API_KEY and ANTHROPIC_API_KEY. For research done directly in the
+  requests anthropic`, a ScraperAPI key and an Anthropic API key. For research done directly in the
   conversation, use the ScraperAPI MCP tools (scraperapi-mcp); for a whole market or category, use
   scraperapi-market-research; for one person or company, use scraperapi-lead-enrichment.
 
@@ -35,9 +35,7 @@ as `research_agent.py` in the user's project, then:
 # Install dependencies
 pip install requests anthropic
 
-# Set env vars
-export SCRAPERAPI_API_KEY=your-key
-export ANTHROPIC_API_KEY=your-key
+# Replace YOUR_API_KEY and YOUR_ANTHROPIC_API_KEY at the top of research_agent.py
 
 # Run
 python research_agent.py \
@@ -155,4 +153,4 @@ See [ScraperAPI docs](https://docs.scraperapi.com/) for rate limits and credit c
 - **Files API** — uploads scraped pages as document artifacts
 - **Messages API** — Claude synthesizes the report with citations
 
-Requires `ANTHROPIC_API_KEY` with access to `claude-opus-4-8` and the Files API.
+Requires an Anthropic API key with access to `claude-opus-4-8` and the Files API.
