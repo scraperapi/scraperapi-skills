@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+# Research agent script
+
+Save this as `research_agent.py` in the user's project, then run it as shown in [SKILL.md](../SKILL.md).
+It runs in the user's own environment and reads `SCRAPERAPI_API_KEY` and `ANTHROPIC_API_KEY` from there.
+
+```python
 """
 ScraperAPI Research Agent
 
@@ -373,3 +378,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+```
