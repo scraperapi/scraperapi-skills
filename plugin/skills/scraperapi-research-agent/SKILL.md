@@ -6,8 +6,8 @@ description: >
   markdown report with a numbered source list. Use only when the user wants this script run, or
   wants a standalone, repeatable research pipeline outside the chat. Trigger on: "run the
   scraperapi research agent on X", "use the research agent script to investigate Y", "give me a
-  script that researches a question and writes a cited report". Requires Python 3.9+, `pip install
-  requests anthropic`, a ScraperAPI key and an Anthropic API key. For research done directly in the
+  script that researches a question and writes a cited report". Requires Python 3.10+, `pip install
+  -U requests anthropic`, a ScraperAPI key and an Anthropic API key. For research done directly in the
   conversation, use the ScraperAPI MCP tools (scraperapi-mcp); for a whole market or category, use
   scraperapi-market-research; for one person or company, use scraperapi-lead-enrichment.
 
@@ -32,8 +32,8 @@ ingests them as cited documents → Claude synthesizes a report.
 as `research_agent.py` in the user's project, then:
 
 ```bash
-# Install dependencies
-pip install requests anthropic
+# Install dependencies (a recent anthropic SDK: the script uses the Files API)
+pip install -U requests anthropic
 
 # Replace YOUR_API_KEY and YOUR_ANTHROPIC_API_KEY at the top of research_agent.py
 
@@ -52,8 +52,8 @@ Before starting a research run, establish:
 
 - [ ] **Question clarity** — Is the question specific enough to produce useful search queries? Vague questions like "tell me about AI" produce noise. Better: "What are the tradeoffs between RAG and fine-tuning for domain-specific LLMs?"
 - [ ] **Source count** — How many sources are needed? 3–5 is usually sufficient for a factual summary; 8–10 for a comparative analysis. More sources = more ScraperAPI credits.
-- [ ] **Recency** — Does the answer depend on recent events? Search queries will use recent date filters.
-- [ ] **Credit budget** — Each Google search costs 25 credits and the script runs up to 3. Each source then costs ~1 credit to scrape on a normal site (more on protected sites). 5 sources ≈ 55–80 credits total.
+- [ ] **Recency** — The script doesn't filter search results by date. If the answer depends on recent events, put the year or "latest" in the question so the planned searches carry it.
+- [ ] **Credit budget** — Each Google search costs 25 credits and the script runs 1–3. Each scraped page costs 1 credit on a normal site and 10 on a bot-protected one. 5 sources on normal sites ≈ 30–85 credits; see [Credit cost estimate](#credit-cost-estimate).
 - [ ] **Stop condition** — Define when to stop. The default stop is `--max-sources` (5). Do not loop indefinitely.
 
 ---
@@ -95,11 +95,10 @@ STOP when: max_sources reached, or all queries exhausted (whichever comes first)
 
 The agent stops when any of the following is true:
 
-1. **`--max-sources` reached** (default: 5) — limits credit spend
-2. **All search queries exhausted** — no more URLs to explore
-3. **`--max-credits` exceeded** — hard cap on ScraperAPI credit use (optional)
+1. **`--max-sources` reached** (default: 5): that many pages scraped successfully.
+2. **Candidates exhausted**: the script tries at most `2 × --max-sources` URLs from the searches, then stops even if fewer pages succeeded.
 
-Without stop conditions, a research loop will keep fetching until credits are gone.
+Together these bound a run: at most 3 searches and `2 × --max-sources` page fetches, so `--max-sources` is the credit cap.
 
 ---
 
@@ -129,15 +128,15 @@ The report is a markdown document with:
 
 ## Credit Cost Estimate
 
-| Sources | Scraping credits | Anthropic tokens | Total estimate |
-|---------|-----------------|-----------------|----------------|
-| 3 | ~28–78 | ~15K in / ~2K out | Low |
-| 5 | ~30–80 | ~25K in / ~3K out | Medium |
-| 10 | ~35–85 | ~50K in / ~5K out | Higher |
+ScraperAPI credits per run, from the [public credit costs](https://docs.scraperapi.com/getting-started/quick-start/credits-and-requests-costs):
 
-Search dominates: 1–3 Google searches at 25 credits each, then ~1 credit per source on a normal site.
+| Sources | Searches (1–3 × 25) | Page fetches, normal sites (1 each) | ScraperAPI total | Anthropic tokens |
+|---------|--------------------|-------------------------------------|------------------|------------------|
+| 3 | 25–75 | 3–6 | ~28–81 | ~15K in / ~2K out |
+| 5 | 25–75 | 5–10 | ~30–85 | ~25K in / ~3K out |
+| 10 | 25–75 | 10–20 | ~35–95 | ~50K in / ~5K out |
 
-Prompt caching applies to the scraped content on repeated runs for the same question.
+Page fetches range up to `2 × --max-sources` because the script tries extra candidates when a page fails. Pages behind bot protection cost 10 credits each, so a run on protected sites can reach 75 + 20 × `--max-sources`. Only successful (200) and not-found (404) responses are charged.
 
 ---
 
