@@ -185,15 +185,14 @@ function scrapeWithEscalation(Client $client, string $url): ?string
 The SDK is synchronous — each `->get()` call blocks until the response (up to 70 seconds). For 20+ URLs, use the async REST endpoint.
 
 ```php
-$apiKey = 'YOUR_API_KEY';
+const API_KEY = 'YOUR_API_KEY';
 
 function submitJob(string $url, array $apiParams = []): array
 {
-    global $apiKey;
     $context = stream_context_create(['http' => [
         'method'  => 'POST',
         'header'  => 'Content-Type: application/json',
-        'content' => json_encode(['apiKey' => $apiKey, 'url' => $url, 'apiParams' => $apiParams]),
+        'content' => json_encode(['apiKey' => API_KEY, 'url' => $url, 'apiParams' => $apiParams]),
     ]]);
     $response = file_get_contents('https://async.scraperapi.com/jobs', false, $context);
     return json_decode($response, true); // ["id" => "...", "statusUrl" => "..."]
@@ -224,8 +223,7 @@ For supported platforms, use structured endpoints instead of raw HTML — they r
 ```php
 function structuredGet(string $vertical, array $params = []): array
 {
-    global $apiKey;
-    $query = http_build_query(array_merge(['api_key' => $apiKey], $params));
+    $query = http_build_query(array_merge(['api_key' => API_KEY], $params));
     $url   = "https://api.scraperapi.com/structured/{$vertical}?{$query}";
     $body  = file_get_contents($url);
     if ($body === false) throw new \RuntimeException("Request failed for {$vertical}");
