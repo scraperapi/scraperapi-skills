@@ -1,6 +1,6 @@
 {
   "name": "@scraperapitech/scraperapi-skills",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "ScraperAPI's official Claude/OpenClaw plugin: a growing library of skills covering the full ScraperAPI surface.",
   "license": "MIT",
   "author": {
