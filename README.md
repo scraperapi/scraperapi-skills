@@ -146,7 +146,7 @@ Each skill's `SKILL.md` documents its full set of trigger phrases and behaviour.
 │       ├── scraperapi-python-sdk/
 │       ├── scraperapi-research-agent/
 │       │   ├── SKILL.md
-│       │   ├── scripts/             # research_agent.py — runnable CLI
+│       │   ├── references/          # research-agent-script.md — the script to save and run
 │       │   └── assets/              # report_template.md
 │       ├── scraperapi-ruby-sdk/
 │       ├── scraperapi-scraper-builder/

@@ -1,7 +1,7 @@
 ---
 name: scraperapi-research-agent
 description: >
-  Runs the bundled Python research script: it plans Google searches, scrapes the top sources
+  Sets up and runs a Python research script in the user's project: it plans Google searches, scrapes the top sources
   through ScraperAPI, uploads them to the Anthropic Files API, and has Claude write a cited
   markdown report with a numbered source list. Use only when the user wants this script run, or
   wants a standalone, repeatable research pipeline outside the chat. Trigger on: "run the
@@ -28,7 +28,8 @@ metadata:
 End-to-end autonomous research: ScraperAPI finds and fetches sources → Anthropic Files API
 ingests them as cited documents → Claude synthesizes a report.
 
-**Run it:**
+**Run it:** save the script from [references/research-agent-script.md](references/research-agent-script.md)
+as `research_agent.py` in the user's project, then:
 
 ```bash
 # Install dependencies
@@ -39,13 +40,11 @@ export SCRAPERAPI_API_KEY=your-key
 export ANTHROPIC_API_KEY=your-key
 
 # Run
-python skills/scraperapi-research-agent/scripts/research_agent.py \
+python research_agent.py \
   --question "What are the best practices for rate limiting in web APIs?" \
   --max-sources 5 \
   --output report.md
 ```
-
-See [scripts/research_agent.py](scripts/research_agent.py) for the full implementation.
 
 ---
 
