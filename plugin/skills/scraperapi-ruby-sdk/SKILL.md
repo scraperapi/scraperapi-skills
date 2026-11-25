@@ -20,17 +20,17 @@ metadata:
 
 # ScraperAPI — Ruby SDK Best Practices
 
-**Requires:** Ruby >= 2.0, `gem install scraperapi` (or `gem 'scraperapi'` in Gemfile), `SCRAPERAPI_API_KEY` environment variable.
+**Requires:** Ruby >= 2.0, `gem install scraperapi` (or `gem 'scraperapi'` in Gemfile), a ScraperAPI API key.
 
 ## Setup
 
 ```ruby
 require "scraper_api"
 
-client = ScraperAPI::Client.new(ENV["SCRAPERAPI_API_KEY"])
+client = ScraperAPI::Client.new("YOUR_API_KEY")
 ```
 
-Never hardcode the API key. Read it from the environment every time.
+Replace `YOUR_API_KEY` with your key from https://dashboard.scraperapi.com. Never commit a real key to source control.
 
 ## Basic Usage
 
@@ -167,7 +167,7 @@ For 20+ URLs, submit async jobs via the REST endpoint.
 require "net/http"
 require "json"
 
-API_KEY = ENV["SCRAPERAPI_API_KEY"]
+API_KEY = "YOUR_API_KEY"
 
 def submit_job(url, api_params = {})
   uri = URI("https://async.scraperapi.com/jobs")
@@ -230,7 +230,7 @@ def safe_scrape(client, url, params = {})
 rescue => e
   status = e.respond_to?(:response) ? e.response&.code&.to_i : nil
   case status
-  when 401 then raise "Invalid API key — check SCRAPERAPI_API_KEY"
+  when 401 then raise "Invalid API key — check your API key"
   when 403 then raise "Out of API credits for this billing cycle — upgrade or enable overages at https://dashboard.scraperapi.com/billing (don't retry)"
   when 429 then raise "Rate limit hit — reduce concurrency or switch to async"
   when 500, 503 then raise "Failed after ScraperAPI retried for 70s (not charged) — retry; on protected sites add premium: true"

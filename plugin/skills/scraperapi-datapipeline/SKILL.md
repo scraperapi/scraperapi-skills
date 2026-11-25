@@ -71,9 +71,9 @@ rather than guessing. An unknown type fails with a 400:
 ## Creating a Project
 
 ```python
-import os, requests
+import requests
 
-API_KEY = os.environ["SCRAPERAPI_API_KEY"]
+API_KEY = "YOUR_API_KEY"
 BASE    = "https://datapipeline.scraperapi.com/api"
 
 resp = requests.post(

@@ -57,7 +57,7 @@ Fetch at most two pages:
 Always start with a **standard request** (no `render`, no `premium`) — the cheapest probe:
 
 ```
-GET https://api.scraperapi.com/?api_key=<SCRAPERAPI_API_KEY>&url=<target_url>
+GET https://api.scraperapi.com/?api_key=YOUR_API_KEY&url=<target_url>
 ```
 
 ### What to observe
@@ -222,7 +222,7 @@ Use the Site Profile from Phase 2 to pre-fill the parsing logic: if a data conta
 ### Python script structure
 
 1. `argparse` CLI with `--url`, `--pages`, `--output`, `--max-credits`, plus flags for all ScraperAPI params decided in Phase 3
-2. API key from `os.environ["SCRAPERAPI_API_KEY"]` — never hardcoded
+2. API key as the `YOUR_API_KEY` placeholder, with a guard that exits if it was not replaced (see the templates)
 3. `scrape()` function with exponential backoff retry (5 attempts)
 4. Status code handling per the error table below
 5. Credit estimate printed to stderr before any requests
@@ -239,7 +239,7 @@ Same flags and behavior as above. Use `node-fetch@2` + `commander`. Match the us
 ```python
 # Requirements: pip install requests  (Python)
 # Requirements: npm install node-fetch@2 commander  (Node.js)
-# Usage: SCRAPERAPI_API_KEY=your_key python scraper.py --url "https://example.com" --pages 5
+# Usage: python scraper.py --url "https://example.com" --pages 5
 ```
 
 ---
@@ -293,7 +293,7 @@ The generated script must include a `--max-credits` flag that aborts if the esti
 Before presenting the script:
 
 - [ ] Site Profile was produced in Phase 2 and each architecture decision cites it
-- [ ] API key is read from `$SCRAPERAPI_API_KEY` env var — not hardcoded
+- [ ] API key is the `YOUR_API_KEY` placeholder, never a real key
 - [ ] Retry logic covers 429, 500, 503 with exponential backoff
 - [ ] Sync request timeout is at least 70s, so the client doesn't cancel (and pay for) a request ScraperAPI is still retrying
 - [ ] `--max-credits` guard is present and enforced before the first request

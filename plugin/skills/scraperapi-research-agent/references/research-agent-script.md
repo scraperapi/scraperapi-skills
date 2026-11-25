@@ -1,7 +1,7 @@
 # Research agent script
 
 Save this as `research_agent.py` in the user's project, then run it as shown in [SKILL.md](../SKILL.md).
-It runs in the user's own environment and reads `SCRAPERAPI_API_KEY` and `ANTHROPIC_API_KEY` from there.
+Before running it, replace the two placeholder keys at the top of the script (`YOUR_API_KEY`, `YOUR_ANTHROPIC_API_KEY`). Never commit a real key.
 
 ```python
 """
@@ -11,14 +11,11 @@ Autonomous web research: ScraperAPI discovers and scrapes sources,
 Anthropic Files API ingests them as cited document artifacts,
 Claude synthesizes a structured report with inline citations.
 
-Usage:
-    export SCRAPERAPI_API_KEY=your-key
-    export ANTHROPIC_API_KEY=your-key
+Usage (after replacing the placeholder keys below):
     python research_agent.py --question "..." --max-sources 5 --output report.md
 """
 
 import argparse
-import os
 import sys
 import time
 import json
@@ -28,8 +25,8 @@ from typing import Optional
 import requests
 import anthropic
 
-SCRAPERAPI_API_KEY = os.environ.get("SCRAPERAPI_API_KEY")
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY")
+SCRAPERAPI_API_KEY = "YOUR_API_KEY"
+ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY"
 
 
 # ---------------------------------------------------------------------------
@@ -292,10 +289,9 @@ def main() -> None:
                         help="Anthropic model for synthesis (default: claude-opus-4-8)")
     args = parser.parse_args()
 
-    # Validate env vars
-    missing = [k for k in ("SCRAPERAPI_API_KEY", "ANTHROPIC_API_KEY") if not os.environ.get(k)]
-    if missing:
-        print(f"Error: missing environment variables: {', '.join(missing)}", file=sys.stderr)
+    # Refuse to run with the placeholder keys
+    if SCRAPERAPI_API_KEY == "YOUR_API_KEY" or ANTHROPIC_KEY == "YOUR_ANTHROPIC_API_KEY":
+        print("Error: replace YOUR_API_KEY and YOUR_ANTHROPIC_API_KEY at the top of the script", file=sys.stderr)
         sys.exit(1)
 
     anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)

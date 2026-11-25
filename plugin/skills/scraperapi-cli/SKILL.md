@@ -42,7 +42,7 @@ sapi init                        # interactive: prompts for the key and validate
 Non-interactive setup (for CI / Dockerfiles):
 
 ```bash
-sapi init --api-key "$SCRAPERAPI_API_KEY"
+sapi init --api-key YOUR_API_KEY
 ```
 
 ### Key resolution order
